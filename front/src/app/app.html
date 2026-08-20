@@ -388,6 +388,60 @@
 <!-- - <router-outlet /> no final é o local onde as rotas filhas   -->
 <!--   do Angular Router são renderizadas                          -->
 <!-- ============================================================ -->
+
+<!-- ============================================================ -->
+<!-- PAINEL TEMPORÁRIO DE MONITORAMENTO E REGISTRO DE CHAMADOS    -->
+<!-- ============================================================ -->
+<section class="preview-container" style="width: 100%; max-width: 650px; margin-top: 2rem; padding: 1.5rem; border: 1px dashed var(--gray-400); border-radius: 12px; background: rgba(0,0,0,0.02);">
+  
+  <div class="panel-header" style="margin-bottom: 1rem;">
+    <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--electric-violet); font-weight: bold;">Módulo de Testes</span>
+    <h2 style="font-size: 1.25rem; color: var(--gray-900); margin-top: 0.25rem;">Histórico Recente de Manutenções</h2>
+    <p style="font-size: 0.85rem; color: var(--gray-700);">Demonstração de estados e registros simulados para conferência visual.</p>
+  </div>
+
+  <div class="tickets-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
+    
+    <div class="ticket-item" style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--gray-400); background: #ffffff;">
+      <div>
+        <strong style="font-size: 0.9rem; color: var(--gray-900); display: block;">Notebook Dell Vostro</strong>
+        <span style="font-size: 0.75rem; color: var(--gray-700);">Abertura: 20/08/2026 14:30 | Cliente: João</span>
+      </div>
+      <span style="font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 20px; background: #e2e8f0; color: #475569; font-weight: bold;">ABERTA</span>
+    </div>
+
+    <div class="ticket-item" style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--gray-400); background: #ffffff;">
+      <div>
+        <strong style="font-size: 0.9rem; color: var(--gray-900); display: block;">Impressora Epson L3150</strong>
+        <span style="font-size: 0.75rem; color: var(--gray-700);">Abertura: 19/08/2026 10:15 | Resp: Mário</span>
+      </div>
+      <span style="font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 20px; background: #fef08a; color: #854d0e; font-weight: bold;">ORÇADA</span>
+    </div>
+
+    <div class="ticket-item" style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--gray-400); background: #ffffff;">
+      <div>
+        <strong style="font-size: 0.9rem; color: var(--gray-900); display: block;">Teclado Mecânico Redragon</strong>
+        <span style="font-size: 0.75rem; color: var(--gray-700);">Abertura: 18/08/2026 16:40 | Resp: Maria</span>
+      </div>
+      <span style="font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 20px; background: #bbf7d0; color: #166534; font-weight: bold;">ARRUMADA</span>
+    </div>
+
+  </div>
+
+  <div class="panel-footer" style="margin-top: 1.25rem; display: flex; justify-content: space-between; align-items: center;">
+    <span style="font-size: 0.75rem; color: var(--gray-700);">Ambiente: Localhost / Angular Standalone</span>
+    <div style="display: flex; gap: 0.5rem;">
+      <button type="button" class="pill" style="cursor: pointer; font-size: 0.75rem;">Recarregar</button>
+      <button type="button" class="pill" style="cursor: pointer; font-size: 0.75rem;">Exportar Logs</button>
+    </div>
+  </div>
+
+</section>
+<!-- ============================================================ -->
+<!-- FIM DO PAINEL TEMPORÁRIO                                     -->
+<!-- ============================================================ -->
+
+
 </main>
 
 <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
