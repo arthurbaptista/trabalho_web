@@ -330,6 +330,64 @@
       </div>
     </div>
   </div>
+  <!-- ============================================================ -->
+<!-- Seção: Formulário de Contato                                 -->
+<!-- ============================================================ -->
+<!-- Este bloco adiciona um campo para o usuário inserir o número -->
+<!-- de telefone. A ideia é permitir que, futuramente, esse dado  -->
+<!-- possa ser capturado e enviado para um serviço (ex: WhatsApp, -->
+<!-- API de contato, backend próprio, etc).                       -->
+<!--                                                                -->
+<!-- Estrutura:                                                    -->
+<!--   - <label> associada ao input via atributo "for"             -->
+<!--   - <input type="tel"> para telefone, com placeholder          -->
+<!--   - pattern opcional para validar formato (xx) xxxxx-xxxx      -->
+<!--   - required indica que o campo é obrigatório                 -->
+<!-- ============================================================ -->
+
+<section class="contact-form">
+  <h2>Entre em contato</h2>
+  <p>Deixe seu telefone para retornarmos o contato.</p>
+
+  <!--
+    Grupo do campo de telefone:
+    - "for" no label deve bater com o "id" do input
+    - type="tel" ativa teclado numérico em dispositivos móveis
+    - pattern valida um formato comum de telefone brasileiro
+    - o placeholder ajuda o usuário a entender o formato esperado
+  -->
+  <div class="form-group">
+    <label for="phone">Telefone</label>
+    <input
+      id="phone"
+      name="phone"
+      type="tel"
+      placeholder="(00) 00000-0000"
+      pattern="\(\d{2}\)\s\d{4,5}-\d{4}"
+      required
+    />
+  </div>
+
+  <!--
+    Botão de envio.
+    Por enquanto sem lógica de submit conectada;
+    isso pode ser implementado depois com um método
+    no componente TypeScript (ex: onSubmit()).
+  -->
+  <button type="submit">Enviar</button>
+</section>
+
+<!-- ============================================================ -->
+<!-- Fim da seção de contato                                       -->
+<!--                                                                -->
+<!-- Observações gerais sobre este arquivo:                        -->
+<!-- - Este template segue a sintaxe do Angular 17+ (control flow  -->
+<!--   nativo com @for, sem precisar de *ngFor)                    -->
+<!-- - O restante do arquivo contém o placeholder padrão gerado    -->
+<!--   pelo Angular CLI ao criar o projeto                         -->
+<!-- - <router-outlet /> no final é o local onde as rotas filhas   -->
+<!--   do Angular Router são renderizadas                          -->
+<!-- ============================================================ -->
 </main>
 
 <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
