@@ -35,7 +35,7 @@ public class HistoricoSolicitacao {
     public HistoricoSolicitacao() {
     }
 
-    // --- Getters e Setters ---
+    //Getters e Setters
 
     public Long getId() {
         return id;
