@@ -35,5 +35,53 @@ public class HistoricoSolicitacao {
     public HistoricoSolicitacao() {
     }
 
-    // Getters e Setters
+    // --- Getters e Setters ---
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public LocalDateTime getDataHora() {
+        return dataHora;
+    }
+
+    public void setDataHora(LocalDateTime dataHora) {
+        this.dataHora = dataHora;
+    }
+
+    public EstadoSolicitacao getEstadoAlcancado() {
+        return estadoAlcancado;
+    }
+
+    public void setEstadoAlcancado(EstadoSolicitacao estadoAlcancado) {
+        this.estadoAlcancado = estadoAlcancado;
+    }
+
+    public Solicitacao getSolicitacao() {
+        return solicitacao;
+    }
+
+    public void setSolicitacao(Solicitacao solicitacao) {
+        this.solicitacao = solicitacao;
+    }
+
+    public Funcionario getFuncionarioOrigem() {
+        return funcionarioOrigem;
+    }
+
+    public void setFuncionarioOrigem(Funcionario funcionarioOrigem) {
+        this.funcionarioOrigem = funcionarioOrigem;
+    }
+
+    public Funcionario getFuncionarioDestino() {
+        return funcionarioDestino;
+    }
+
+    public void setFuncionarioDestino(Funcionario funcionarioDestino) {
+        this.funcionarioDestino = funcionarioDestino;
+    }
 }

@@ -55,7 +55,101 @@ public class Solicitacao extends StatusBase {
     public Solicitacao() {
     }
 
-    // Getters e Setters    (vou fazer no decorrer do trabalho)
+    // --- Getters e Setters ---
 
+    public Long getId() {
+        return id;
+    }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public LocalDateTime getDataHoraAbertura() {
+        return dataHoraAbertura;
+    }
+
+    public void setDataHoraAbertura(LocalDateTime dataHoraAbertura) {
+        this.dataHoraAbertura = dataHoraAbertura;
+    }
+
+    public String getDescricaoEquipamento() {
+        return descricaoEquipamento;
+    }
+
+    public void setDescricaoEquipamento(String descricaoEquipamento) {
+        this.descricaoEquipamento = descricaoEquipamento;
+    }
+
+    public String getDescricaoDefeito() {
+        return descricaoDefeito;
+    }
+
+    public void setDescricaoDefeito(String descricaoDefeito) {
+        this.descricaoDefeito = descricaoDefeito;
+    }
+
+    public EstadoSolicitacao getEstadoAtual() {
+        return estadoAtual;
+    }
+
+    public void setEstadoAtual(EstadoSolicitacao estadoAtual) {
+        this.estadoAtual = estadoAtual;
+    }
+
+    public BigDecimal getValorOrcamento() {
+        return valorOrcamento;
+    }
+
+    public void setValorOrcamento(BigDecimal valorOrcamento) {
+        this.valorOrcamento = valorOrcamento;
+    }
+
+    public String getMotivoRejeicao() {
+        return motivoRejeicao;
+    }
+
+    public void setMotivoRejeicao(String motivoRejeicao) {
+        this.motivoRejeicao = motivoRejeicao;
+    }
+
+    public String getDescricaoManutencao() {
+        return descricaoManutencao;
+    }
+
+    public void setDescricaoManutencao(String descricaoManutencao) {
+        this.descricaoManutencao = descricaoManutencao;
+    }
+
+    public String getOrientacoesCliente() {
+        return orientacoesCliente;
+    }
+
+    public void setOrientacoesCliente(String orientacoesCliente) {
+        this.orientacoesCliente = orientacoesCliente;
+    }
+
+    public Cliente getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
+    }
+
+    public Categoria getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(Categoria categoria) {
+        this.categoria = categoria;
+    }
+
+    public Funcionario getFuncionarioResponsavel() {
+        return funcionarioResponsavel;
+    }
+
+    public void setFuncionarioResponsavel(Funcionario funcionarioResponsavel) {
+        this.funcionarioResponsavel = funcionarioResponsavel;
+    }
 }
