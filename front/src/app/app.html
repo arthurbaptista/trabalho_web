@@ -388,7 +388,139 @@
 <!-- - <router-outlet /> no final é o local onde as rotas filhas   -->
 <!--   do Angular Router são renderizadas                          -->
 <!-- ============================================================ -->
+<!-- ============================================================ -->
+<!-- Seção: Cadastro de Equipamento                              -->
+<!-- ============================================================ -->
+<!-- Este formulário permite registrar temporariamente as         -->
+<!-- informações básicas de um equipamento para manutenção.       -->
+<!-- Os campos estão preparados para futura integração com        -->
+<!-- serviços, banco de dados ou API.                             -->
+<!-- ============================================================ -->
 
+<section class="equipment-registration">
+
+  <div class="registration-header">
+    <span class="registration-label">Cadastro de equipamento</span>
+
+    <h2>Registrar equipamento</h2>
+
+    <p>
+      Informe os dados do equipamento para iniciar um novo registro
+      de manutenção.
+    </p>
+  </div>
+
+  <!-- Campo destinado à identificação do equipamento -->
+  <div class="form-group">
+
+    <label for="equipment-name">
+      Nome do equipamento
+    </label>
+
+    <input
+      id="equipment-name"
+      name="equipmentName"
+      type="text"
+      placeholder="Ex: Notebook Dell Vostro"
+      autocomplete="off"
+      required
+    />
+
+  </div>
+
+  <!-- Campo destinado à identificação do cliente -->
+  <div class="form-group">
+
+    <label for="equipment-client">
+      Cliente
+    </label>
+
+    <input
+      id="equipment-client"
+      name="equipmentClient"
+      type="text"
+      placeholder="Nome do cliente"
+      autocomplete="off"
+      required
+    />
+
+  </div>
+
+  <!-- Campo destinado à descrição do problema -->
+  <div class="form-group">
+
+    <label for="equipment-problem">
+      Descrição do problema
+    </label>
+
+    <textarea
+      id="equipment-problem"
+      name="equipmentProblem"
+      rows="4"
+      placeholder="Descreva o problema apresentado pelo equipamento"
+      required
+    ></textarea>
+
+  </div>
+
+  <!-- Seleção do tipo de equipamento -->
+  <div class="form-group">
+
+    <label for="equipment-type">
+      Tipo de equipamento
+    </label>
+
+    <select
+      id="equipment-type"
+      name="equipmentType"
+      required
+    >
+      <option value="">Selecione uma opção</option>
+      <option value="notebook">Notebook</option>
+      <option value="desktop">Computador</option>
+      <option value="printer">Impressora</option>
+      <option value="monitor">Monitor</option>
+      <option value="other">Outro</option>
+    </select>
+
+  </div>
+
+  <!-- Botão preparado para futura integração com o formulário -->
+  <div class="registration-actions">
+
+    <button
+      type="button"
+      class="pill"
+      title="Salvar registro do equipamento"
+    >
+      Registrar equipamento
+    </button>
+
+    <button
+      type="button"
+      class="pill"
+      title="Limpar informações preenchidas"
+    >
+      Limpar formulário
+    </button>
+
+  </div>
+
+  <!-- Área reservada para mensagens futuras do sistema -->
+  <div
+    class="registration-status"
+    aria-live="polite"
+  >
+    <span>
+      Aguardando preenchimento das informações.
+    </span>
+  </div>
+
+</section>
+
+<!-- ============================================================ -->
+<!-- Fim da seção de cadastro de equipamento                      -->
+<!-- ============================================================ -->
 <!-- ============================================================ -->
 <!-- PAINEL TEMPORÁRIO DE MONITORAMENTO E REGISTRO DE CHAMADOS    -->
 <!-- ============================================================ -->
