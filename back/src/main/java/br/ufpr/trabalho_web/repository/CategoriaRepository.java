@@ -11,6 +11,7 @@ public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
 
     boolean existsByNome(String nome);
 
-    // Apenas categorias ativas (status = true)
+    boolean existsByNomeIgnoreCase(String nome);
     List<Categoria> findByStatusTrue();
+
 }
