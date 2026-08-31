@@ -1,0 +1,47 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+  color: #ffffff;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  font-size: var(--logo-size, 42px);
+}
+
+svg {
+  display: block;
+  width: 1em;
+  height: 1em;
+  flex: none;
+}
+
+.logo-gear {
+  fill: currentColor;
+}
+
+.logo-wordmark {
+  display: flex;
+  align-items: center;
+  gap: 0.28em;
+  font-size: 0.32em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.logo-name,
+.logo-sub {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 1em;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: currentColor;
+}
+
+.logo-sub {
+  font-weight: 500;
+  opacity: 0.55;
+}
