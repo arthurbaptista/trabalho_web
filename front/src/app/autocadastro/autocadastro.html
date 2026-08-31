@@ -1,0 +1,230 @@
+<main class="cadastro-page">
+    <!-- Lado do formulário -->
+    <section class="cadastro-panel">
+      <div class="cadastro-content">
+        <div class="cadastro-logo">
+          <app-logo />
+        </div>
+  
+        <h1>Crie sua conta<span class="cadastro-dot">.</span></h1>
+  
+        <form (ngSubmit)="onSubmit()" novalidate>
+          <div class="field">
+            <label for="nome">Nome completo<span class="required" aria-hidden="true">*</span></label>
+            <div class="control">
+              <input
+                id="nome"
+                name="nome"
+                type="text"
+                [(ngModel)]="nome"
+                autocomplete="name"
+                required
+              />
+            </div>
+          </div>
+  
+          <div class="field-row">
+            <div class="field">
+              <label for="cpf">CPF<span class="required" aria-hidden="true">*</span></label>
+              <div class="control">
+                <input
+                  id="cpf"
+                  name="cpf"
+                  type="text"
+                  inputmode="numeric"
+                  maxlength="14"
+                  placeholder="000.000.000-00"
+                  [ngModel]="cpf"
+                  (ngModelChange)="onCpfChange($event)"
+                  autocomplete="off"
+                  required
+                />
+              </div>
+            </div>
+  
+            <div class="field">
+              <label for="telefone">Telefone<span class="required" aria-hidden="true">*</span></label>
+              <div class="control">
+                <input
+                  id="telefone"
+                  name="telefone"
+                  type="text"
+                  inputmode="numeric"
+                  maxlength="15"
+                  placeholder="(00) 00000-0000"
+                  [ngModel]="telefone"
+                  (ngModelChange)="onTelefoneChange($event)"
+                  autocomplete="tel"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+  
+          <div class="field">
+            <label for="email">E-mail<span class="required" aria-hidden="true">*</span></label>
+            <div class="control">
+              <input
+                id="email"
+                name="email"
+                type="email"
+                [(ngModel)]="email"
+                autocomplete="email"
+                required
+              />
+            </div>
+          </div>
+  
+          <div class="field-row field-row--cep">
+            <div class="field">
+              <label for="cep">CEP<span class="required" aria-hidden="true">*</span></label>
+              <div class="control">
+                <input
+                  id="cep"
+                  name="cep"
+                  type="text"
+                  inputmode="numeric"
+                  maxlength="9"
+                  placeholder="00000-000"
+                  [ngModel]="cep"
+                  (ngModelChange)="onCepChange($event)"
+                  (blur)="buscarCep()"
+                  autocomplete="off"
+                  required
+                />
+                @if (buscandoCep()) {
+                  <span class="control-spinner" aria-hidden="true"></span>
+                }
+              </div>
+            </div>
+  
+            <div class="field">
+              <label for="numero">Número<span class="required" aria-hidden="true">*</span></label>
+              <div class="control">
+                <input
+                  id="numero"
+                  name="numero"
+                  type="text"
+                  [(ngModel)]="numero"
+                  autocomplete="off"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+  
+          <div class="field">
+            <label for="logradouro">Endereço<span class="required" aria-hidden="true">*</span></label>
+            <div class="control">
+              <input
+                id="logradouro"
+                name="logradouro"
+                type="text"
+                [(ngModel)]="logradouro"
+                autocomplete="address-line1"
+                required
+              />
+            </div>
+          </div>
+  
+          <div class="field-row">
+            <div class="field">
+              <label for="complemento">Complemento</label>
+              <div class="control">
+                <input
+                  id="complemento"
+                  name="complemento"
+                  type="text"
+                  [(ngModel)]="complemento"
+                  autocomplete="address-line2"
+                />
+              </div>
+            </div>
+  
+            <div class="field">
+              <label for="bairro">Bairro<span class="required" aria-hidden="true">*</span></label>
+              <div class="control">
+                <input
+                  id="bairro"
+                  name="bairro"
+                  type="text"
+                  [(ngModel)]="bairro"
+                  autocomplete="off"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+  
+          <div class="field-row field-row--cidade">
+            <div class="field">
+              <label for="cidade">Cidade<span class="required" aria-hidden="true">*</span></label>
+              <div class="control">
+                <input
+                  id="cidade"
+                  name="cidade"
+                  type="text"
+                  [(ngModel)]="cidade"
+                  autocomplete="address-level2"
+                  required
+                />
+              </div>
+            </div>
+  
+            <div class="field">
+              <label for="estado">UF<span class="required" aria-hidden="true">*</span></label>
+              <div class="control control--select">
+                <select
+                  id="estado"
+                  name="estado"
+                  [(ngModel)]="estado"
+                  autocomplete="address-level1"
+                  required
+                >
+                  <option value="" disabled selected>--</option>
+                  @for (uf of estados; track uf) {
+                    <option [value]="uf">{{ uf }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+          </div>
+  
+          @if (erro()) {
+            <p class="cadastro-error" role="alert">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="9"/>
+                <path d="M12 7.5v5M12 16h.01"/>
+              </svg>
+              {{ erro() }}
+            </p>
+          }
+  
+          @if (sucesso()) {
+            <p class="cadastro-success" role="status">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m5 13 4 4L19 7"/>
+              </svg>
+              {{ sucesso() }}
+            </p>
+          }
+  
+          <button type="submit" class="cadastro-submit" [disabled]="carregando()">
+            @if (carregando()) {
+              <span class="spinner" aria-hidden="true"></span>
+              Criando conta...
+            } @else {
+              Criar conta
+            }
+          </button>
+        </form>
+  
+        <a routerLink="/login" class="cadastro-register">Já tenho uma conta</a>
+      </div>
+    </section>
+  
+    <!-- Lado da imagem -->
+    <aside class="cadastro-visual" aria-hidden="true">
+      <img src="login-side.jpg" alt="" />
+    </aside>
+  </main>
