@@ -2,7 +2,7 @@ package br.ufpr.trabalho_web.model;
 
 public enum EstadoSolicitacao {
     ABERTA,
-    ORCADA,
+    ORÇADA,
     APROVADA,
     REJEITADA,
     REDIRECIONADA,
