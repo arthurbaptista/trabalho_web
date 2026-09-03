@@ -14,11 +14,11 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
 
     List<Solicitacao> findByClienteOrderByDataHoraAberturaAsc(Cliente cliente);
 
-    List<Solicitacao> findByEstado(EstadoSolicitacao estado);
+    List<Solicitacao> findByEstadoAtual(EstadoSolicitacao estadoAtual);
 
     List<Solicitacao> findByCliente(Cliente cliente);
 
-    boolean existsByEstado(EstadoSolicitacao estado);
+    boolean existsByEstadoAtual(EstadoSolicitacao estadoAtual);
 }
 
 //package br.ufpr.trabalho_web.repository;

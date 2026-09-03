@@ -55,7 +55,7 @@ public class SolicitacaoService {
         // }
 
     public List<Solicitacao> getSolicitacoesAbertas() {
-        return solicitacaoRepository.findByEstado(EstadoSolicitacao.ABERTA);
+        return solicitacaoRepository.findByEstadoAtual(EstadoSolicitacao.ABERTA);
     }
 
     public Solicitacao efetuarOrcamento(Long solicitacaoId, BigDecimal valor) {
@@ -67,7 +67,7 @@ public class SolicitacaoService {
         //  Funcionario funcionario = (Funcionario) usuario;
 
         solicitacao.setValorOrcamento(valor);
-        solicitacao.setEstadoAtual(EstadoSolicitacao.ORÇADA);
+        solicitacao.setEstadoAtual(EstadoSolicitacao.ORCADA);
 
         Solicitacao salva = solicitacaoRepository.save(solicitacao);
         return salva;
