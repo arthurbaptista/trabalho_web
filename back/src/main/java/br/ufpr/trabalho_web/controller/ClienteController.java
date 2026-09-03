@@ -1,29 +1,28 @@
 package br.ufpr.trabalho_web.controller;
 
+import br.ufpr.trabalho_web.dto.CadastroResponse;
 import br.ufpr.trabalho_web.dto.ClienteCadastroDTO;
-import br.ufpr.trabalho_web.model.Cliente;
 import br.ufpr.trabalho_web.service.ClienteService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/clientes")
-@CrossOrigin(origins = "") public class ClienteController {
+public class ClienteController {
 
-    @Autowired
-    private ClienteService clienteService;
+    private final ClienteService clienteService;
 
-    // POST http://localhost:8080/clientes/cadastro
+    public ClienteController(ClienteService clienteService) {
+        this.clienteService = clienteService;
+    }
+
     @PostMapping("/cadastro")
-    public ResponseEntity<?> cadastrar(@RequestBody ClienteCadastroDTO dto) {
-        try {
-            Cliente novoCliente = clienteService.cadastrar(dto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(novoCliente);
-        } catch (RuntimeException e) {
-            // Se cair nas validações de CPF/Email, devolve erro 400 com a mensagem
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<CadastroResponse> cadastrar(@Valid @RequestBody ClienteCadastroDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(clienteService.cadastrar(dto));
     }
 }

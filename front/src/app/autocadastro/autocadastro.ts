@@ -1,7 +1,9 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
+import { mensagemHttpErro } from '../core/api';
+import { Auth } from '../core/auth';
 import { Logo } from '../shared/logo/logo';
 
 @Component({
@@ -11,6 +13,8 @@ import { Logo } from '../shared/logo/logo';
   styleUrl: './autocadastro.css',
 })
 export class Autocadastro {
+  private readonly auth = inject(Auth);
+
   nome = '';
   cpf = '';
   email = '';
@@ -107,8 +111,10 @@ export class Autocadastro {
     const telefoneValido = this.soDigitos(this.telefone).length >= 10;
     const cepValido = this.soDigitos(this.cep).length === 8;
 
+    const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email.trim());
+
     if (
-      !this.nome || !cpfValido || !this.email || !telefoneValido || !cepValido ||
+      !this.nome || !cpfValido || !emailValido || !telefoneValido || !cepValido ||
       !this.logradouro || !this.numero || !this.bairro || !this.cidade || !this.estado
     ) {
       this.sucesso.set('');
@@ -120,26 +126,27 @@ export class Autocadastro {
     this.sucesso.set('');
     this.carregando.set(true);
 
-    const payload = {
-      nome: this.nome,
+    this.auth.cadastrar({
+      nome: this.nome.trim(),
       cpf: this.soDigitos(this.cpf),
-      email: this.email,
+      email: this.email.trim(),
       telefone: this.soDigitos(this.telefone),
       cep: this.soDigitos(this.cep),
-      logradouro: this.logradouro,
-      numero: this.numero,
-      complemento: this.complemento,
-      bairro: this.bairro,
-      cidade: this.cidade,
-      estado: this.estado,
-    };
-
-    // TODO: trocar pelo HttpClient chamando POST /clientes/cadastro
-    console.log('Cadastro enviado:', payload);
-
-    setTimeout(() => {
-      this.carregando.set(false);
-      this.sucesso.set('Cadastro enviado! Em breve você poderá fazer login.');
-    }, 800);
+      logradouro: this.logradouro.trim(),
+      numero: this.numero.trim(),
+      complemento: this.complemento.trim(),
+      bairro: this.bairro.trim(),
+      cidade: this.cidade.trim(),
+      estado: this.estado.trim(),
+    }).subscribe({
+      next: (resposta) => {
+        this.carregando.set(false);
+        this.sucesso.set(resposta.mensagem);
+      },
+      error: (erro) => {
+        this.carregando.set(false);
+        this.erro.set(mensagemHttpErro(erro, 'Nao foi possivel concluir o cadastro.'));
+      },
+    });
   }
 }

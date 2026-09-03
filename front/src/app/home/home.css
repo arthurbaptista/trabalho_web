@@ -1,0 +1,51 @@
+:host {
+  display: block;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: #f2f2f4;
+}
+
+.home-page {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  background: #08080a;
+}
+
+.home-card {
+  width: min(100%, 380px);
+  display: grid;
+  gap: 0.75rem;
+}
+
+h1 {
+  margin: 1.5rem 0 0;
+  font-size: 2rem;
+  letter-spacing: -0.03em;
+}
+
+.home-dot {
+  color: #6b6b74;
+}
+
+.home-nome {
+  margin: 0.5rem 0 0;
+  font-size: 1.15rem;
+}
+
+.home-perfil,
+.home-hint {
+  margin: 0;
+  color: #9a9aa3;
+}
+
+.home-sair {
+  margin-top: 1.25rem;
+  height: 48px;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  color: #0b0b0d;
+  font-weight: 600;
+  cursor: pointer;
+}

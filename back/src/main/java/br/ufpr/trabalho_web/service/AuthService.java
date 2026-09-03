@@ -1,90 +1,42 @@
 package br.ufpr.trabalho_web.service;
 
 import br.ufpr.trabalho_web.dto.LoginResponse;
-import br.ufpr.trabalho_web.model.Cliente;
-import br.ufpr.trabalho_web.model.Endereco;
+import br.ufpr.trabalho_web.exception.RegraNegocioException;
 import br.ufpr.trabalho_web.model.Usuario;
-import br.ufpr.trabalho_web.repository.ClienteRepository;
 import br.ufpr.trabalho_web.repository.UsuarioRepository;
 import br.ufpr.trabalho_web.security.JwtUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Random;
 
 @Service
 public class AuthService {
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
-    @Autowired
-    private ClienteRepository clienteRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private JwtUtil jwtUtil;
-
-    public void cadastrarCliente(
-            String nome,
-            String email,
-            String cpf,
-            String telefone,
-            Endereco endereco) {
-
-        if (usuarioRepository.findByEmail(email) != null) {
-            throw new RuntimeException("Email já cadastrado");
-        }
-
-        if (clienteRepository.findByCpf(cpf) != null) {
-            throw new RuntimeException("CPF já cadastrado");
-        }
-
-        String senha = gerarSenhaAleatoria();
-
-        Cliente cliente = new Cliente();
-        cliente.setNome(nome);
-        cliente.setEmail(email);
-        cliente.setSenha(passwordEncoder.encode(senha));
-        cliente.setStatus(true);
-        cliente.setCpf(cpf);
-        cliente.setTelefone(telefone);
-        cliente.setEndereco(endereco);
-
-        clienteRepository.save(cliente);
+    public AuthService(
+            UsuarioRepository usuarioRepository,
+            PasswordEncoder passwordEncoder,
+            JwtUtil jwtUtil
+    ) {
+        this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     public LoginResponse login(String email, String senha) {
+        String emailNorm = email == null ? "" : email.trim().toLowerCase();
+        Usuario usuario = usuarioRepository.findByEmail(emailNorm);
 
-        Usuario usuario = usuarioRepository.findByEmail(email);
-
-        if (usuario != null
-                && passwordEncoder.matches(senha, usuario.getSenha())
-                && usuario.getStatus()) {
-
-            String token = jwtUtil.generateToken(
-                    usuario.getEmail(),
-                    usuario.getPerfil().name(),
-                    usuario.getNome()
-            );
-
-            return new LoginResponse(
-                    token,
-                    usuario.getPerfil().name(),
-                    usuario.getNome()
-            );
+        if (usuario == null
+                || !Boolean.TRUE.equals(usuario.getStatus())
+                || !passwordEncoder.matches(senha, usuario.getSenha())) {
+            throw new RegraNegocioException("Email ou senha invalidos");
         }
 
-        throw new RuntimeException("Email ou senha inválidos");
-    }
-
-    private String gerarSenhaAleatoria() {
-        Random random = new Random();
-        int senhaNum = 1000 + random.nextInt(9000);
-
-        return String.valueOf(senhaNum);
+        String perfil = usuario.getPerfil().name();
+        String token = jwtUtil.generateToken(usuario.getEmail(), perfil, usuario.getNome());
+        return new LoginResponse(token, perfil, usuario.getNome());
     }
 }
