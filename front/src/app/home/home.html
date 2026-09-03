@@ -1,0 +1,10 @@
+<main class="home-page">
+  <section class="home-card">
+    <app-logo />
+    <h1>Voce entrou<span class="home-dot">.</span></h1>
+    <p class="home-nome">{{ sessao?.nome }}</p>
+    <p class="home-perfil">Perfil: {{ sessao?.perfil }}</p>
+    <p class="home-hint">O sistema identificou automaticamente o seu perfil no login.</p>
+    <button type="button" class="home-sair" (click)="sair()">Sair</button>
+  </section>
+</main>
