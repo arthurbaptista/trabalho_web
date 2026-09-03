@@ -4,8 +4,11 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "usuario")
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE) // classes filhas (Cliente e Funcionario) na mesma tabela de usuario
-@DiscriminatorColumn(name = "tipo_usuario", discriminatorType = DiscriminatorType.STRING) // coluna para diferenciar o perfil do usuario
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(
+        name = "tipo_usuario",
+        discriminatorType = DiscriminatorType.STRING
+)
 public abstract class Usuario extends StatusBase {
 
     @Id
@@ -15,8 +18,7 @@ public abstract class Usuario extends StatusBase {
     @Column(nullable = false, length = 100)
     private String nome;
 
-    // O e-mail
-    @Column(nullable = false, unique = true, length = 100)     // O e-mail é unico!
+    @Column(nullable = false, unique = true, length = 100)
     private String email;
 
     @Column(nullable = false)
@@ -25,11 +27,10 @@ public abstract class Usuario extends StatusBase {
     public Usuario() {
     }
 
-    // getters e Setters
-
     public Long getId() {
         return id;
     }
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -37,6 +38,7 @@ public abstract class Usuario extends StatusBase {
     public String getNome() {
         return nome;
     }
+
     public void setNome(String nome) {
         this.nome = nome;
     }
@@ -44,6 +46,7 @@ public abstract class Usuario extends StatusBase {
     public String getEmail() {
         return email;
     }
+
     public void setEmail(String email) {
         this.email = email;
     }
@@ -51,7 +54,20 @@ public abstract class Usuario extends StatusBase {
     public String getSenha() {
         return senha;
     }
+
     public void setSenha(String senha) {
         this.senha = senha;
+    }
+
+    public Perfil getPerfil() {
+        if (this instanceof Cliente) {
+            return Perfil.CLIENTE;
+        }
+
+        if (this instanceof Funcionario) {
+            return Perfil.FUNCIONARIO;
+        }
+
+        return null;
     }
 }

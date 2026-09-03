@@ -37,7 +37,7 @@ public class SolicitacaoService {
         solicitacao.setDescricaoEquipamento(request.getDescricaoEquipamento());
         solicitacao.setCategoria(categoria);
         solicitacao.setDescricaoDefeito(request.getDescricaoDefeito());
-        solicitacao.setEstado(EstadoSolicitacao.ABERTA);
+        solicitacao.setEstadoAtual(EstadoSolicitacao.ABERTA);
 
         Solicitacao salva = solicitacaoRepository.save(solicitacao);
         adicionarHistorico(salva, null, EstadoSolicitacao.ABERTA, "Solicitação criada");
@@ -67,7 +67,7 @@ public class SolicitacaoService {
         //  Funcionario funcionario = (Funcionario) usuario;
 
         solicitacao.setValorOrcamento(valor);
-        solicitacao.setEstado(EstadoSolicitacao.ORÇADA);
+        solicitacao.setEstadoAtual(EstadoSolicitacao.ORÇADA);
 
         Solicitacao salva = solicitacaoRepository.save(solicitacao);
         return salva;
