@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Cadastro - Web II</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { background-color: #f4f6f9; color: #333; padding: 25px; display: flex; justify-content: center; }
+        .container { background: #ffffff; width: 100%; max-width: 600px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); overflow: hidden; }
+        .header { background: #1e293b; color: #ffffff; padding: 20px; text-align: center; }
+        .header h1 { font-size: 1.4rem; margin-bottom: 4px; }
+        .header p { font-size: 0.85rem; color: #94a3b8; }
+        .content { padding: 24px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.9rem; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #2563eb; }
+        .btn-group { display: flex; gap: 12px; margin-top: 20px; }
+        .btn { flex: 1; padding: 10px 16px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        .btn-primary { background: #2563eb; color: #ffffff; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-secondary { background: #e2e8f0; color: #334155; }
+        .btn-secondary:hover { background: #cbd5e1; }
+        .section-title { font-size: 1rem; font-weight: 600; margin: 24px 0 12px; color: #1e293b; border-top: 1px solid #e2e8f0; padding-top: 16px; }
+        .card-item { background: #f8fafc; border-left: 4px solid #2563eb; padding: 10px 14px; border-radius: 4px; font-size: 0.85rem; margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Sistema de Gerenciamento</h1>
+            <p>Projeto Web II - Estrutura de Componentes</p>
+        </div>
+        <div class="content">
+            <form onsubmit="event.preventDefault(); alert('Registro cadastrado com sucesso!');">
+                <div class="form-group">
+                    <label for="nome">Nome Completo</label>
+                    <input type="text" id="nome" name="nome" placeholder="Ex: Razer Montaño" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">E-mail Institucional</label>
+                    <input type="email" id="email" name="email" placeholder="usuario@ufpr.br" required>
+                </div>
+                <div class="form-group">
+                    <label for="cargo">Perfil / Cargo</label>
+                    <select id="cargo" name="cargo">
+                        <option value="estudante">Estudante</option>
+                        <option value="docente">Professor / Docente</option>
+                        <option value="coord">Coordenação</option>
+                    </select>
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">Cadastrar</button>
+                    <button type="reset" class="btn btn-secondary">Limpar</button>
+                </div>
+            </form>
+            <div class="section-title">Últimos Cadastros</div>
+            <div class="card-item"><strong>João Silva</strong> &bull; Estudante (joao@ufpr.br)</div>
+            <div class="card-item"><strong>Maria Santos</strong> &bull; Docente (maria@ufpr.br)</div>
+        </div>
+    </div>
+</body>
+</html>
