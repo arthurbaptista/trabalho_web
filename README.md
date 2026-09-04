@@ -38,12 +38,11 @@ O **Sistema de Controle de Manutenção de Equipamentos** tem como objetivo gere
 
 ## Tecnologias Utilizadas
 
-- Angular 17.0.0
-- Bootstrap v5.3.3
-- NG Bootstrap v16.0.0
-- Nodejs v22.14.0
-- FortAwesome - FontAwesome Free v6.7.2
-
+- Angular 22.0.0
+- Bootstrap v5.3.8
+- Java 21.0.12
+- Nodejs v22.22.3
+  
 Funcionalidades do Sistema
 
 O sistema foi desenvolvido para atender dois tipos principais de usuários: Clientes e Funcionários.
