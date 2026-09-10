@@ -1,64 +1,72 @@
 package br.ufpr.trabalho_web.service;
 
+import br.ufpr.trabalho_web.dto.CategoriaRequest;
+import br.ufpr.trabalho_web.exception.RegraNegocioException;
 import br.ufpr.trabalho_web.model.Categoria;
 import br.ufpr.trabalho_web.repository.CategoriaRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CategoriaService {
 
-    @Autowired
-    private CategoriaRepository categoriaRepository;
+    private final CategoriaRepository categoriaRepository;
 
-    // Cadastrar nova categoria (RF017)
-    public Categoria cadastrar(Categoria categoria) {
+    public CategoriaService(CategoriaRepository categoriaRepository) {
+        this.categoriaRepository = categoriaRepository;
+    }
 
-        // Validação de dados únicos
-        if (categoriaRepository.existsByNome(categoria.getNome())) {
-            throw new RuntimeException("Erro: A categoria informada já está cadastrada.");
+    public Categoria cadastrar(CategoriaRequest request) {
+        String nome = request.nome().trim();
+        Optional<Categoria> existente = categoriaRepository.findByNomeIgnoreCase(nome);
+
+        if (existente.isPresent()) {
+            Categoria categoria = existente.get();
+            if (Boolean.TRUE.equals(categoria.getStatus())) {
+                throw new RegraNegocioException("Erro: A categoria informada ja esta cadastrada.");
+            }
+            categoria.setNome(nome);
+            categoria.setStatus(true);
+            return categoriaRepository.save(categoria);
         }
 
-        if (categoria.getNome() == null || categoria.getNome().trim().isEmpty()){
-            throw new RuntimeException("Erro: O nome da categoria não pode estar vazio.");
-        }
-
-        // Define a categoria como ativa por padrão
+        Categoria categoria = new Categoria();
+        categoria.setNome(nome);
         categoria.setStatus(true);
-
-        // Salva no banco de dados e retorna a categoria salva
         return categoriaRepository.save(categoria);
-}
+    }
 
-    // Listar todas as categorias ativas
     public List<Categoria> listarAtivas() {
         return categoriaRepository.findByStatusTrue();
     }
 
-    // Buscar categoria por ID
     public Categoria buscarPorId(Long id) {
         return categoriaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Erro: Categoria não encontrada."));
+                .orElseThrow(() -> new RegraNegocioException("Erro: Categoria nao encontrada."));
     }
 
-    // Atualizar categoria existente
-    public Categoria atualizar(Long id, Categoria categoriaAtualizada) {
+    public Categoria atualizar(Long id, CategoriaRequest request) {
         Categoria categoria = buscarPorId(id);
-
-        if (categoriaAtualizada.getNome() == null || categoriaAtualizada.getNome().trim().isEmpty()) {
-            throw new RuntimeException("Erro: O nome da categoria não pode estar vazio.");
+        if (!Boolean.TRUE.equals(categoria.getStatus())) {
+            throw new RegraNegocioException("Erro: Categoria inativa nao pode ser atualizada.");
         }
 
-        categoria.setNome(categoriaAtualizada.getNome());
+        String nome = request.nome().trim();
+        if (categoriaRepository.existsByNomeIgnoreCaseAndIdNot(nome, id)) {
+            throw new RegraNegocioException("Erro: A categoria informada ja esta cadastrada.");
+        }
 
+        categoria.setNome(nome);
         return categoriaRepository.save(categoria);
     }
 
-    // Remover categoria (Desativação lógica)
     public void remover(Long id) {
         Categoria categoria = buscarPorId(id);
+        if (!Boolean.TRUE.equals(categoria.getStatus())) {
+            throw new RegraNegocioException("Erro: Categoria ja esta desativada.");
+        }
         categoria.setStatus(false);
         categoriaRepository.save(categoria);
     }
