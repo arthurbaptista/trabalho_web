@@ -8,7 +8,5 @@ import java.util.List;
 
 @Repository
 public interface HistoricoSolicitacaoRepository extends JpaRepository<HistoricoSolicitacao, Long> {
-
-    // RF008 - historico completo de uma solicitacao ordenado por data
     List<HistoricoSolicitacao> findBySolicitacaoIdOrderByDataHoraAsc(Long solicitacaoId);
 }

@@ -5,23 +5,38 @@ import br.ufpr.trabalho_web.dto.LoginResponse;
 import br.ufpr.trabalho_web.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
-    private final AuthService authService;
+    @Autowired
+    private AuthService authService;
 
-    public AuthController(AuthService authService) {
-        this.authService = authService;
+    @PostMapping("/cadastro")
+    public ResponseEntity<?> cadastrarCliente(@RequestBody CadastroClienteRequest request) {
+        try {
+            authService.cadastrarCliente(
+                    request.getNome(),
+                    request.getEmail(),
+                    request.getCpf(),
+                    request.getTelefone(),
+                    request.getEndereco()
+            );
+            return ResponseEntity.ok().body("Cliente cadastrado com sucesso. Verifique seu e-mail para a senha.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
-        return ResponseEntity.ok(authService.login(request.getEmail(), request.getSenha()));
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        try {
+            return ResponseEntity.ok(authService.login(request.getEmail(), request.getSenha()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }
