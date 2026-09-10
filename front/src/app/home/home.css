@@ -39,6 +39,13 @@ h1 {
   color: #9a9aa3;
 }
 
+.home-link {
+  margin-top: 1rem;
+  color: #f2f2f4;
+  text-decoration: none;
+  font-weight: 600;
+}
+
 .home-sair {
   margin-top: 1.25rem;
   height: 48px;
