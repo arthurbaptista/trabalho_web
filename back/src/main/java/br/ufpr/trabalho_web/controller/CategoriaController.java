@@ -1,69 +1,58 @@
 package br.ufpr.trabalho_web.controller;
 
+import br.ufpr.trabalho_web.dto.CategoriaRequest;
 import br.ufpr.trabalho_web.model.Categoria;
 import br.ufpr.trabalho_web.service.CategoriaService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/categorias")
-@CrossOrigin(origins = "")
 public class CategoriaController {
 
-    @Autowired
-    private CategoriaService categoriaService;
+    private final CategoriaService categoriaService;
 
-    // POST http://localhost:8080/categorias
-    @PostMapping
-    public ResponseEntity<?> cadastrar(@RequestBody Categoria categoria) {
-        try {
-            Categoria novaCategoria = categoriaService.cadastrar(categoria);
-            return ResponseEntity.status(HttpStatus.CREATED).body(novaCategoria);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public CategoriaController(CategoriaService categoriaService) {
+        this.categoriaService = categoriaService;
     }
 
-    // GET http://localhost:8080/categorias
+    @PostMapping
+    public ResponseEntity<Categoria> cadastrar(@Valid @RequestBody CategoriaRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(categoriaService.cadastrar(request));
+    }
+
     @GetMapping
     public ResponseEntity<List<Categoria>> listarAtivas() {
         return ResponseEntity.ok(categoriaService.listarAtivas());
     }
 
-    // GET http://localhost:8080/categorias/{id}
     @GetMapping("/{id}")
-    public ResponseEntity<?> buscarPorId(@PathVariable Long id) {
-        try {
-            Categoria categoria = categoriaService.buscarPorId(id);
-            return ResponseEntity.ok(categoria);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<Categoria> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(categoriaService.buscarPorId(id));
     }
 
-    // PUT http://localhost:8080/categorias/{id}
     @PutMapping("/{id}")
-    public ResponseEntity<?> atualizar(@PathVariable Long id, @RequestBody Categoria categoria) {
-        try {
-            Categoria atualizada = categoriaService.atualizar(id, categoria);
-            return ResponseEntity.ok(atualizada);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<Categoria> atualizar(
+            @PathVariable Long id,
+            @Valid @RequestBody CategoriaRequest request
+    ) {
+        return ResponseEntity.ok(categoriaService.atualizar(id, request));
     }
 
-    // DELETE http://localhost:8080/categorias/{id}
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> remover(@PathVariable Long id) {
-        try {
-            categoriaService.remover(id);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<Void> remover(@PathVariable Long id) {
+        categoriaService.remover(id);
+        return ResponseEntity.noContent().build();
     }
 }
