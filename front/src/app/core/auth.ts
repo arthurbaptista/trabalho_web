@@ -1,9 +1,10 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { tap } from 'rxjs';
+import { TimeoutError, catchError, of, tap, throwError, timeout } from 'rxjs';
 
-import { API_URL } from './api';
+import { API_URL, backendForaDoAr } from './api';
+import { USUARIOS_DEMO, buscarUsuarioDemo } from './usuarios.mock';
 
 export interface LoginResponse {
   token: string;
@@ -63,16 +64,37 @@ export class Auth {
     if (this.sessaoSignal()) {
       return;
     }
+    const joao = USUARIOS_DEMO.find((usuario) => usuario.email === 'joao@manutencao.com');
     this.sessaoSignal.set({
       token: '',
-      perfil: 'CLIENTE',
-      nome: 'Joao',
+      perfil: joao?.perfil ?? 'CLIENTE',
+      nome: joao?.nome ?? 'Joao',
     });
   }
 
   login(email: string, senha: string, persistente: boolean) {
     return this.http.post<LoginResponse>(`${API_URL}/auth/login`, { email, senha }).pipe(
+      timeout(2000),
       tap((resposta) => this.salvarSessao(resposta, persistente)),
+      catchError((erro) => {
+        if (!this.backendIndisponivel(erro)) {
+          return throwError(() => erro);
+        }
+
+        const demo = buscarUsuarioDemo(email, senha);
+        if (!demo) {
+          return throwError(() => ({ error: 'E-mail ou senha invalidos.' }));
+        }
+
+        const resposta: LoginResponse = {
+          token: '',
+          tipo: 'Bearer',
+          perfil: demo.perfil,
+          nome: demo.nome,
+        };
+        this.salvarSessao(resposta, persistente);
+        return of(resposta);
+      }),
     );
   }
 
@@ -109,6 +131,10 @@ export class Auth {
     outro.removeItem(CHAVE_SESSAO);
     destino.setItem(CHAVE_SESSAO, JSON.stringify(sessao));
     this.sessaoSignal.set(sessao);
+  }
+
+  private backendIndisponivel(erro: unknown): boolean {
+    return backendForaDoAr(erro) || erro instanceof TimeoutError;
   }
 
   private lerSessao(): Sessao | null {
