@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
-import { mensagemHttpErro, backendForaDoAr } from '../../core/api';
+import { mensagemHttpErro } from '../../core/api';
 import { Auth } from '../../core/auth';
 import { Logo } from '../../shared/logo/logo';
 
@@ -50,11 +50,6 @@ export class Login {
       },
       error: (erro) => {
         this.carregando.set(false);
-        if (backendForaDoAr(erro)) {
-          this.auth.ativarSessaoDemo();
-          this.router.navigateByUrl('/cliente');
-          return;
-        }
         this.erro.set(mensagemHttpErro(erro, 'Nao foi possivel entrar. Tente novamente.'));
       },
     });
