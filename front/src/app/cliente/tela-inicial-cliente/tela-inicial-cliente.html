@@ -1,0 +1,128 @@
+<main class="cliente-page">
+  <aside class="sidebar" aria-label="Navegação do cliente">
+    <a class="sidebar-logo" routerLink="/cliente" aria-label="Início">
+      <app-logo [compact]="true" />
+    </a>
+
+    <nav class="sidebar-nav">
+      <a routerLink="/cliente" routerLinkActive="active" title="Início" aria-current="page">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4.5 11.2 12 4.8l7.5 6.4"/>
+          <path d="M6.5 10.5V19h11v-8.5"/>
+        </svg>
+      </a>
+      <button type="button" title="Nova solicitação" aria-label="Nova solicitação" (click)="abrirModal()">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+      </button>
+    </nav>
+
+    <button type="button" class="sidebar-sair" title="Sair" (click)="sair()">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M9 7V5.8A1.8 1.8 0 0 1 10.8 4h7.4A1.8 1.8 0 0 1 20 5.8v12.4A1.8 1.8 0 0 1 18.2 20h-7.4A1.8 1.8 0 0 1 9 18.2V17"/>
+        <path d="M13 12H4M7 9l-3 3 3 3"/>
+      </svg>
+    </button>
+  </aside>
+
+  <section class="cliente-main">
+    <header class="cliente-top">
+      <div class="user">
+        <div class="avatar" aria-hidden="true">{{ iniciais() }}</div>
+        <div class="user-meta">
+          <strong>Olá {{ primeiroNome() }}!</strong>
+          <span>Cliente</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="cliente-content">
+      <div class="titulo-row">
+        <h1>Minhas Solicitações<span class="dot">.</span></h1>
+        <button type="button" class="nova" (click)="abrirModal()">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          Nova Solicitação
+        </button>
+      </div>
+
+      @if (erro()) {
+        <p class="cliente-error" role="alert">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M12 7.5v5M12 16h.01"/>
+          </svg>
+          {{ erro() }}
+        </p>
+      }
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Desc. Equip.</th>
+              <th></th>
+              <th>Data/Hora</th>
+              <th>Categoria</th>
+              <th>Status</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (carregando()) {
+              <tr>
+                <td colspan="6" class="vazio">Carregando solicitações...</td>
+              </tr>
+            } @else {
+              @for (solicitacao of solicitacoes(); track solicitacao.id) {
+                <tr [class]="classeEstado(solicitacao.estado)">
+                  <td class="desc">{{ descricao(solicitacao.descricaoEquipamento) }}</td>
+                  <td>
+                    <button type="button" class="visualizar">
+                      Visualizar
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M7 17 17 7M9 7h8v8"/>
+                      </svg>
+                    </button>
+                  </td>
+                  <td class="muted">{{ formatarDataHora(solicitacao.dataHoraAbertura) }}</td>
+                  <td>
+                    <span class="badge">{{ solicitacao.categoria }}</span>
+                  </td>
+                  <td>{{ rotuloEstado(solicitacao.estado) }}</td>
+                  <td class="acoes">
+                    @switch (solicitacao.estado) {
+                      @case ('ORCADA') {
+                        <span class="orcamento">Orçado {{ formatarMoeda(solicitacao.valorOrcamento) }}</span>
+                        <button type="button" class="acao acao--ghost">Rejeitar</button>
+                        <button type="button" class="acao acao--solid">Aprovar</button>
+                      }
+                      @case ('REJEITADA') {
+                        <button type="button" class="acao acao--danger">Resgatar Serviço</button>
+                      }
+                      @case ('ARRUMADA') {
+                        <button type="button" class="acao acao--pay">Pagar Serviço</button>
+                      }
+                    }
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6" class="vazio">Nenhuma solicitação encontrada.</td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <app-nova-solicitacao-cliente
+    [aberto]="modalAberto()"
+    (fechou)="fecharModal()"
+    (criou)="onCriou($event)"
+  />
+</main>

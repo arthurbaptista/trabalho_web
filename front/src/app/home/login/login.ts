@@ -2,9 +2,9 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
-import { mensagemHttpErro } from '../core/api';
-import { Auth } from '../core/auth';
-import { Logo } from '../shared/logo/logo';
+import { mensagemHttpErro, backendForaDoAr } from '../../core/api';
+import { Auth } from '../../core/auth';
+import { Logo } from '../../shared/logo/logo';
 
 @Component({
   selector: 'app-login',
@@ -26,7 +26,7 @@ export class Login {
 
   constructor() {
     if (this.auth.estaLogado()) {
-      this.router.navigateByUrl('/home');
+      this.router.navigateByUrl(this.auth.rotaInicial());
     }
   }
 
@@ -46,10 +46,15 @@ export class Login {
     this.auth.login(this.email.trim(), this.senha, this.lembrar).subscribe({
       next: () => {
         this.carregando.set(false);
-        this.router.navigateByUrl('/home');
+        this.router.navigateByUrl(this.auth.rotaInicial());
       },
       error: (erro) => {
         this.carregando.set(false);
+        if (backendForaDoAr(erro)) {
+          this.auth.ativarSessaoDemo();
+          this.router.navigateByUrl('/cliente');
+          return;
+        }
         this.erro.set(mensagemHttpErro(erro, 'Nao foi possivel entrar. Tente novamente.'));
       },
     });

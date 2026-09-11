@@ -45,3 +45,7 @@ svg {
   font-weight: 500;
   opacity: 0.55;
 }
+
+.logo--compact .logo-wordmark {
+  display: none;
+}
