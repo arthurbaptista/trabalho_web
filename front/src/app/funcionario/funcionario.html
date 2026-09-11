@@ -1,0 +1,76 @@
+<main class="funcionario-page">
+  <section class="funcionario-card">
+    <div class="funcionario-top">
+      <app-logo />
+      <div class="funcionario-nav">
+        <a routerLink="/home">Inicio</a>
+        <a routerLink="/categorias">Categorias</a>
+        <button type="button" (click)="sair()">Sair</button>
+      </div>
+    </div>
+
+    <h1>Painel do Funcionario<span class="dot">.</span></h1>
+    <p class="hint">Solicitacoes de manutencao recebidas dos clientes. Informe um valor para orcar as que estao abertas.</p>
+
+    @if (erro()) {
+      <p class="msg erro" role="alert">{{ erro() }}</p>
+    }
+    @if (sucesso()) {
+      <p class="msg ok" role="status">{{ sucesso() }}</p>
+    }
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Cliente</th>
+            <th>Equipamento</th>
+            <th>Defeito</th>
+            <th>Categoria</th>
+            <th>Estado</th>
+            <th>Valor</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (s of solicitacoes(); track s.id) {
+            <tr>
+              <td>{{ s.dataHoraAbertura | date: 'dd/MM/yy HH:mm' }}</td>
+              <td>{{ s.cliente?.nome }}</td>
+              <td>{{ s.descricaoEquipamento }}</td>
+              <td class="defeito">{{ s.descricaoDefeito }}</td>
+              <td>{{ s.categoria?.nome }}</td>
+              <td>
+                <span class="badge badge-{{ s.estadoAtual }}">{{ rotulo(s.estadoAtual) }}</span>
+              </td>
+              <td>
+                @if (s.valorOrcamento) {
+                  {{ s.valorOrcamento | currency: 'BRL' }}
+                }
+              </td>
+              <td class="acoes">
+                @if (s.estadoAtual === 'ABERTA') {
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    class="valor-input"
+                    placeholder="Valor"
+                    [(ngModel)]="valores[s.id]"
+                    [name]="'valor-' + s.id"
+                  />
+                  <button type="button" [disabled]="carregando()" (click)="efetuarOrcamento(s)">Orcar</button>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="8" class="vazio">Nenhuma solicitacao registrada.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>

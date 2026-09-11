@@ -81,7 +81,7 @@ export class Auth {
   }
 
   rotaInicial(): string {
-    return this.sessaoSignal()?.perfil === 'FUNCIONARIO' ? '/categorias' : '/cliente';
+    return this.sessaoSignal()?.perfil === 'FUNCIONARIO' ? '/funcionario' : '/cliente';
   }
 
   headers() {

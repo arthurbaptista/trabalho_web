@@ -1,0 +1,160 @@
+:host {
+  display: block;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: #f2f2f4;
+}
+
+.funcionario-page {
+  min-height: 100dvh;
+  padding: 2rem 1.25rem;
+  background: #08080a;
+}
+
+.funcionario-card {
+  width: min(100%, 1100px);
+  margin: 0 auto;
+}
+
+.funcionario-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.funcionario-nav {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.funcionario-nav a,
+.funcionario-nav button {
+  border: 0;
+  background: transparent;
+  color: #9a9aa3;
+  text-decoration: none;
+  cursor: pointer;
+  font: inherit;
+}
+
+h1 {
+  margin: 0 0 0.35rem;
+  font-size: 2rem;
+  letter-spacing: -0.03em;
+}
+
+.dot {
+  color: #6b6b74;
+}
+
+.hint {
+  margin: 0 0 1.5rem;
+  color: #9a9aa3;
+}
+
+.msg {
+  margin: 0 0 1rem;
+}
+
+.erro {
+  color: #ffb4b4;
+}
+
+.ok {
+  color: #b6f0c3;
+}
+
+.table-wrap {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 16px;
+  overflow: auto;
+  background: #101014;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+th,
+td {
+  padding: 0.85rem 1rem;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.defeito {
+  white-space: normal;
+  max-width: 220px;
+}
+
+th {
+  color: #9a9aa3;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+tr:last-child td {
+  border-bottom: 0;
+}
+
+.badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.badge-ABERTA { background: rgba(154, 154, 163, 0.2); color: #ccc; }
+.badge-ORCADA { background: rgba(165, 42, 42, 0.2); color: #f8a5a5; }
+.badge-REJEITADA { background: rgba(255, 0, 0, 0.2); color: #ff8080; }
+.badge-APROVADA { background: rgba(255, 255, 0, 0.2); color: #ffff80; }
+.badge-REDIRECIONADA { background: rgba(128, 0, 128, 0.2); color: #e080e0; }
+.badge-ARRUMADA { background: rgba(0, 0, 255, 0.2); color: #8080ff; }
+.badge-PAGA { background: rgba(255, 165, 0, 0.2); color: #ffca80; }
+.badge-FINALIZADA { background: rgba(0, 128, 0, 0.2); color: #80ff80; }
+
+.acoes {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.valor-input {
+  width: 90px;
+  height: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  background: #08080a;
+  color: #fff;
+  padding: 0 0.6rem;
+}
+
+.acoes button {
+  height: 36px;
+  padding: 0 0.9rem;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  color: #0b0b0d;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.acoes button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.vazio {
+  color: #9a9aa3;
+  white-space: normal;
+}
