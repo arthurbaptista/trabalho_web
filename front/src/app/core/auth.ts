@@ -59,6 +59,17 @@ export class Auth {
     return this.sessaoSignal() !== null;
   }
 
+  ativarSessaoDemo() {
+    if (this.sessaoSignal()) {
+      return;
+    }
+    this.sessaoSignal.set({
+      token: '',
+      perfil: 'CLIENTE',
+      nome: 'Joao',
+    });
+  }
+
   login(email: string, senha: string, persistente: boolean) {
     return this.http.post<LoginResponse>(`${API_URL}/auth/login`, { email, senha }).pipe(
       tap((resposta) => this.salvarSessao(resposta, persistente)),
@@ -67,6 +78,17 @@ export class Auth {
 
   cadastrar(payload: CadastroPayload) {
     return this.http.post<CadastroResponse>(`${API_URL}/clientes/cadastro`, payload);
+  }
+
+  rotaInicial(): string {
+    return this.sessaoSignal()?.perfil === 'FUNCIONARIO' ? '/funcionario' : '/cliente';
+  }
+
+  headers() {
+    const token = this.sessaoSignal()?.token;
+    return token
+      ? { headers: { Authorization: `Bearer ${token}` } }
+      : {};
   }
 
   logout() {
@@ -90,11 +112,12 @@ export class Auth {
   }
 
   private lerSessao(): Sessao | null {
-    const raw = localStorage.getItem(CHAVE_SESSAO) ?? sessionStorage.getItem(CHAVE_SESSAO);
-    if (!raw) {
-      return null;
-    }
     try {
+      const raw = globalThis.localStorage?.getItem(CHAVE_SESSAO)
+        ?? globalThis.sessionStorage?.getItem(CHAVE_SESSAO);
+      if (!raw) {
+        return null;
+      }
       return JSON.parse(raw) as Sessao;
     } catch {
       return null;

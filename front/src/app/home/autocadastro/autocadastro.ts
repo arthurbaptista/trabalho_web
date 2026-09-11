@@ -2,9 +2,9 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
-import { mensagemHttpErro } from '../core/api';
-import { Auth } from '../core/auth';
-import { Logo } from '../shared/logo/logo';
+import { mensagemHttpErro } from '../../core/api';
+import { Auth } from '../../core/auth';
+import { Logo } from '../../shared/logo/logo';
 
 @Component({
   selector: 'app-autocadastro',

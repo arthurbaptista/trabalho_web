@@ -1,0 +1,87 @@
+@if (aberto()) {
+  <div
+    class="overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="nova-solicitacao-titulo"
+    (click)="closeModal()"
+  >
+    <div class="modal" (click)="$event.stopPropagation()">
+      <button
+        type="button"
+        class="fechar"
+        aria-label="Fechar"
+        [disabled]="creating"
+        (click)="closeModal()"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 18 18 6M6 6l12 12"/>
+        </svg>
+      </button>
+
+      <header class="modal-topo">
+        <div class="titulo-bloco">
+          <input
+            id="nova-solicitacao-titulo"
+            type="text"
+            [(ngModel)]="creationDevice"
+            name="equipamento"
+            maxlength="30"
+            placeholder="Nome do equipamento"
+            [class.invalido]="attemptedSubmit && deviceVazio"
+          />
+          @if (attemptedSubmit && deviceVazio) {
+            <p class="alerta" role="alert">Informe o nome do equipamento.</p>
+          }
+          <p class="data-hora">{{ dataHora }}</p>
+        </div>
+      </header>
+
+      <div class="campo-categoria">
+        <div class="select-wrap">
+          <select
+            name="categoria"
+            [(ngModel)]="creationCategoryId"
+            [class.invalido]="attemptedSubmit && categoriaVazia"
+          >
+            <option [ngValue]="null" disabled>Categoria do equipamento</option>
+            @for (cat of categorias(); track cat.id) {
+              <option [ngValue]="cat.id">{{ cat.nome }}</option>
+            }
+          </select>
+        </div>
+        @if (attemptedSubmit && categoriaVazia) {
+          <p class="alerta" role="alert">Selecione uma categoria.</p>
+        }
+      </div>
+
+      <div class="divisor"></div>
+
+      <div class="campo-defeito">
+        <textarea
+          name="defeito"
+          [(ngModel)]="creationDescription"
+          placeholder="Descrição do defeito..."
+          rows="4"
+          [class.invalido]="attemptedSubmit && descricaoVazia"
+        ></textarea>
+        @if (attemptedSubmit && descricaoVazia) {
+          <p class="alerta" role="alert">Descreva o defeito do equipamento.</p>
+        }
+      </div>
+
+      <footer class="modal-acoes">
+        <button type="button" class="btn-ghost" [disabled]="creating" (click)="closeModal()">
+          Cancelar
+        </button>
+        <button type="button" class="btn-solid" [disabled]="creating" (click)="confirmar()">
+          @if (creating) {
+            Enviando...
+          } @else {
+            Confirmar
+          }
+        </button>
+      </footer>
+    </div>
+  </div>
+}
