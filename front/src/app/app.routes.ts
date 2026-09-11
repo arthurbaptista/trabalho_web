@@ -5,6 +5,7 @@ import { CategoriaPage } from './categoria/categoria';
 import { Cliente } from './cliente/cliente';
 import { authGuard } from './core/auth.guard';
 import { funcionarioGuard } from './core/funcionario.guard';
+import { FuncionarioPage } from './funcionario/funcionario';
 import { Home } from './home/home';
 import { Login } from './login/login';
 
@@ -14,5 +15,6 @@ export const routes: Routes = [
   { path: 'home', component: Home, canActivate: [authGuard] },
   { path: 'cliente', component: Cliente, canActivate: [authGuard] },
   { path: 'categorias', component: CategoriaPage, canActivate: [funcionarioGuard] },
+  { path: 'funcionario', component: FuncionarioPage, canActivate: [funcionarioGuard] },
   { path: '', redirectTo: 'login', pathMatch: 'full' },
 ];
