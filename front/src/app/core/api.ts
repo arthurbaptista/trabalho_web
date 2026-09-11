@@ -14,6 +14,12 @@ export function mensagemHttpErro(erro: unknown, fallback: string): string {
     if (typeof corpo === 'string' && corpo.trim()) {
       return corpo;
     }
+    if (corpo && typeof corpo === 'object') {
+      const mensagem = (corpo as { message?: unknown }).message;
+      if (typeof mensagem === 'string' && mensagem.trim()) {
+        return mensagem;
+      }
+    }
   }
   return fallback;
 }
