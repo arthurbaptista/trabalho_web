@@ -1,154 +1,120 @@
 <main class="funcionario-page">
-  <section class="funcionario-card">
-    <div class="funcionario-top">
-      <app-logo />
-      <div class="funcionario-nav">
-        <a routerLink="/home">Inicio</a>
-        <a routerLink="/categorias">Categorias</a>
-        <button type="button" (click)="sair()">Sair</button>
+  <aside class="sidebar" aria-label="Navegação do funcionário">
+    <a class="sidebar-logo" routerLink="/home" aria-label="Início">
+      <app-logo [compact]="true" />
+    </a>
+
+    <nav class="sidebar-nav">
+      <a routerLink="/home" routerLinkActive="active" title="Início" aria-current="page">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4.5 11.2 12 4.8l7.5 6.4"/>
+          <path d="M6.5 10.5V19h11v-8.5"/>
+        </svg>
+      </a>
+      <a routerLink="/categorias" routerLinkActive="active" title="Categorias">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </a>
+    </nav>
+
+    <button type="button" class="sidebar-sair" title="Sair" (click)="sair()">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M9 7V5.8A1.8 1.8 0 0 1 10.8 4h7.4A1.8 1.8 0 0 1 20 5.8v12.4A1.8 1.8 0 0 1 18.2 20h-7.4A1.8 1.8 0 0 1 9 18.2V17"/>
+        <path d="M13 12H4M7 9l-3 3 3 3"/>
+      </svg>
+    </button>
+  </aside>
+
+  <section class="funcionario-main">
+    <header class="funcionario-top">
+      <div class="user-meta">
+        <strong>Painel do Funcionário<span class="dot">.</span></strong>
+        <span>Solicitações de manutenção recebidas dos clientes</span>
       </div>
-    </div>
+    </header>
 
-    <h1>Painel do Funcionario<span class="dot">.</span></h1>
-    <p class="hint">Solicitacoes de manutencao recebidas dos clientes. Informe um valor para orcar as que estao abertas.</p>
+    <div class="funcionario-content">
+      <div class="titulo-row">
+        <h1>Solicitações<span class="dot">.</span></h1>
+      </div>
 
-    @if (erro()) {
-      <p class="msg erro" role="alert">{{ erro() }}</p>
-    }
-    @if (sucesso()) {
-      <p class="msg ok" role="status">{{ sucesso() }}</p>
-    }
+      @if (erro()) {
+        <p class="funcionario-error" role="alert">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M12 7.5v5M12 16h.01"/>
+          </svg>
+          {{ erro() }}
+        </p>
+      }
+      @if (sucesso()) {
+        <p class="funcionario-success" role="status">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="m8.5 12.5 2.5 2.5 5-5.5"/>
+          </svg>
+          {{ sucesso() }}
+        </p>
+      }
 
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Data</th>
-            <th>Cliente</th>
-            <th>Equipamento</th>
-            <th>Defeito</th>
-            <th>Categoria</th>
-            <th>Estado</th>
-            <th>Valor</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (s of solicitacoes(); track s.id) {
+      <div class="table-wrap">
+        <table>
+          <thead>
             <tr>
-              <td>{{ s.dataHoraAbertura | date: 'dd/MM/yy HH:mm' }}</td>
-              <td>{{ s.cliente?.nome }}</td>
-              <td>{{ s.descricaoEquipamento }}</td>
-              <td class="defeito">{{ s.descricaoDefeito }}</td>
-              <td>{{ s.categoria?.nome }}</td>
-              <td>
-                <span class="badge badge-{{ s.estadoAtual }}">{{ rotulo(s.estadoAtual) }}</span>
-              </td>
-              <td>
-                @if (s.valorOrcamento) {
-                  {{ s.valorOrcamento | currency: 'BRL' }}
-                }
-              </td>
-              <td class="acoes">
-                @if (s.estadoAtual === 'ABERTA') {
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    class="valor-input"
-                    placeholder="Valor"
-                    [(ngModel)]="valores[s.id]"
-                    [name]="'valor-' + s.id"
-                  />
-                  <button type="button" [disabled]="carregando()" (click)="efetuarOrcamento(s)">Orcar</button>
-                }
-              </td>
+              <th>Data</th>
+              <th>Cliente</th>
+              <th>Equipamento</th>
+              <th>Defeito</th>
+              <th>Categoria</th>
+              <th>Estado</th>
+              <th>Valor</th>
+              <th></th>
             </tr>
-          } @empty {
-            <tr>
-              <td colspan="8" class="vazio">Nenhuma solicitacao registrada.</td>
-            </tr>
-          }
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            @for (s of solicitacoes(); track s.id) {
+              <tr>
+                <td class="muted">{{ s.dataHoraAbertura | date: 'dd/MM/yy HH:mm' }}</td>
+                <td>{{ s.cliente?.nome }}</td>
+                <td class="desc">{{ s.descricaoEquipamento }}</td>
+                <td class="defeito">{{ s.descricaoDefeito }}</td>
+                <td>
+                  <span class="badge">{{ s.categoria?.nome }}</span>
+                </td>
+                <td>
+                  <span class="badge badge-{{ s.estadoAtual }}">{{ rotulo(s.estadoAtual) }}</span>
+                </td>
+                <td>
+                  @if (s.valorOrcamento) {
+                    {{ s.valorOrcamento | currency: 'BRL' }}
+                  }
+                </td>
+                <td class="acoes">
+                  @if (s.estadoAtual === 'ABERTA') {
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      class="valor-input"
+                      placeholder="Valor"
+                      [(ngModel)]="valores[s.id]"
+                      [name]="'valor-' + s.id"
+                    />
+                    <button type="button" class="acao acao--solid" [disabled]="carregando()" (click)="efetuarOrcamento(s)">
+                      Orçar
+                    </button>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="8" class="vazio">Nenhuma solicitação registrada.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     </div>
   </section>
 </main>
-
-<!--<div class="funcionario-container">-->
-<!--  <header class="funcionario-header">-->
-<!--    <app-logo />-->
-<!--    <div class="nav-actions">-->
-<!--      <a routerLink="/home" class="btn-secondary">Início</a>-->
-<!--      <a routerLink="/categorias" class="btn-secondary">Categorias</a>-->
-<!--      <button type="button" class="btn-secondary" (click)="sair()">Sair</button>-->
-<!--    </div>-->
-<!--  </header>-->
-
-<!--  <main>-->
-<!--    <div class="actions-bar">-->
-<!--      <h2>Painel do Funcionário<span class="dot">.</span></h2>-->
-<!--    </div>-->
-
-<!--    @if (erro()) {-->
-<!--      <p class="msg erro" role="alert">{{ erro() }}</p>-->
-<!--    }-->
-<!--    @if (sucesso()) {-->
-<!--      <p class="msg ok" role="status">{{ sucesso() }}</p>-->
-<!--    }-->
-
-<!--    <div class="table-wrapper">-->
-<!--      <table>-->
-<!--        <thead>-->
-<!--        <tr>-->
-<!--          <th>Data/Hora</th>-->
-<!--          <th>Cliente</th>-->
-<!--          <th>Equipamento</th>-->
-<!--          <th>Defeito</th>-->
-<!--          <th>Categoria</th>-->
-<!--          <th>Estado</th>-->
-<!--          <th>Valor</th>-->
-<!--          <th>Ações</th>-->
-<!--        </tr>-->
-<!--        </thead>-->
-<!--        <tbody>-->
-<!--          @for (s of solicitacoes(); track s.id) {-->
-<!--            <tr>-->
-<!--              <td>{{ s.dataHoraAbertura | date:'dd/MM/yyyy HH:mm' }}</td>-->
-<!--              <td>{{ s.cliente?.nome }}</td>-->
-<!--              <td>{{ s.descricaoEquipamento | slice:0:30 }}</td>-->
-<!--              <td>{{ s.descricaoDefeito | slice:0:30 }}</td>-->
-<!--              <td>{{ s.categoria?.nome }}</td>-->
-<!--              <td>-->
-<!--                <span class="badge badge-{{ s.estadoAtual }}">{{ rotulo(s.estadoAtual) }}</span>-->
-<!--              </td>-->
-<!--              <td>-->
-<!--                @if (s.valorOrcamento) {-->
-<!--                  {{ s.valorOrcamento | currency:'BRL' }}-->
-<!--                }-->
-<!--              </td>-->
-<!--              <td>-->
-<!--                @if (s.estadoAtual === 'ABERTA') {-->
-<!--                  <input-->
-<!--                    type="number"-->
-<!--                    min="0"-->
-<!--                    step="0.01"-->
-<!--                    class="valor-input"-->
-<!--                    placeholder="Valor"-->
-<!--                    [(ngModel)]="valores[s.id]"-->
-<!--                    [name]="'valor-' + s.id"-->
-<!--                  />-->
-<!--                  <button type="button" class="btn-primary" [disabled]="carregando()" (click)="efetuarOrcamento(s)">Orçar</button>-->
-<!--                }-->
-<!--              </td>-->
-<!--            </tr>-->
-<!--          } @empty {-->
-<!--            <tr>-->
-<!--              <td colspan="8" style="text-align: center; color: var(&#45;&#45;muted);">Nenhuma solicitação registrada.</td>-->
-<!--            </tr>-->
-<!--          }-->
-<!--        </tbody>-->
-<!--      </table>-->
-<!--    </div>-->
-<!--  </main>-->
-<!--</div>-->
