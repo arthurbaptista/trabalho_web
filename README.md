@@ -29,11 +29,17 @@ O **Sistema de Controle de Manutenção de Equipamentos** tem como objetivo gere
 ## Instruções de Execução
 
 **Para Logar Como Funcionário** 
-- Login: func@func
+- Login: maria@manutencao.com
 - Senha: 1234
 
 **Para Logar Como Cliente** 
-- Login: cli@cli
+- Login: joao@manutencao.com
+- Senha: 1234
+- Login: jose@manutencao.com
+- Senha: 1234
+- Login: joana@manutencao.com
+- Senha: 1234
+- Login: joaquina@manutencao.com
 - Senha: 1234
 
 ## Tecnologias Utilizadas
@@ -42,6 +48,7 @@ O **Sistema de Controle de Manutenção de Equipamentos** tem como objetivo gere
 - Bootstrap v5.3.8
 - Java 21.0.12
 - Nodejs v22.22.3
+
   
 Funcionalidades do Sistema
 
