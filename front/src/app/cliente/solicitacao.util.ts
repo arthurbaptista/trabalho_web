@@ -31,17 +31,6 @@ const FLUXO_ESTADO: Record<string, string[]> = {
   FINALIZADA: ['ABERTA', 'ORCADA', 'APROVADA', 'ARRUMADA', 'PAGA', 'FINALIZADA'],
 };
 
-const AUTOR_ESTADO: Record<string, string> = {
-  ABERTA: 'Cliente',
-  ORCADA: 'Maria',
-  APROVADA: 'Cliente',
-  REJEITADA: 'Cliente',
-  REDIRECIONADA: 'Maria',
-  ARRUMADA: 'Mario',
-  PAGA: 'Cliente',
-  FINALIZADA: 'Maria',
-};
-
 export interface HistoricoPasso {
   estado: string;
   dataHora: string;
@@ -50,6 +39,20 @@ export interface HistoricoPasso {
 
 export function rotuloEstado(estado: string): string {
   return ROTULOS_ESTADO[estado] ?? estado;
+}
+
+export function normalizarTexto(valor: string): string {
+  return valor
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
+export function nomesIguais(a: string | null | undefined, b: string | null | undefined): boolean {
+  const esquerda = normalizarTexto(a ?? '');
+  const direita = normalizarTexto(b ?? '');
+  return Boolean(esquerda) && esquerda === direita;
 }
 
 export function temaEstado(estado: string) {
@@ -86,13 +89,54 @@ export function agoraIso(): string {
   return formatarIsoLocal(agora);
 }
 
-export function historicoPara(estado: string, abertura: string): HistoricoPasso[] {
+export function rotuloAutor(autor: string, nomeCliente?: string | null): string {
+  const nome = nomeCliente?.trim() ?? '';
+  const autorNorm = autor.trim() || 'Cliente';
+  if (!nome) {
+    return autorNorm;
+  }
+
+  const semPrefixo = autorNorm.replace(/^cliente\s+/i, '').trim();
+  const ehCliente =
+    autorNorm.toLowerCase() === 'cliente'
+    || nomesIguais(autorNorm, nome)
+    || nomesIguais(semPrefixo, nome);
+
+  return ehCliente ? `Cliente ${nome}` : autorNorm;
+}
+
+export function historicoPara(
+  estado: string,
+  abertura: string,
+  nomeCliente?: string,
+  opcoes?: { funcionario?: string; funcionarioDestino?: string | null },
+): HistoricoPasso[] {
+  const funcionario = opcoes?.funcionario?.trim() || 'Maria';
+  const destino = opcoes?.funcionarioDestino?.trim() || '';
   const passos = FLUXO_ESTADO[estado] ?? ['ABERTA'];
   return passos.map((item, indice) => ({
     estado: item,
     dataHora: somarHoras(abertura, indice * 8),
-    autor: AUTOR_ESTADO[item] ?? 'Sistema',
+    autor: autorDoEstado(item, nomeCliente, funcionario, destino),
   }));
+}
+
+function autorDoEstado(
+  estado: string,
+  nomeCliente: string | undefined,
+  funcionario: string,
+  destino: string,
+): string {
+  if (estado === 'ABERTA' || estado === 'APROVADA' || estado === 'REJEITADA' || estado === 'PAGA') {
+    return rotuloAutor('Cliente', nomeCliente);
+  }
+  if (estado === 'REDIRECIONADA') {
+    return destino ? `${funcionario} → ${destino}` : funcionario;
+  }
+  if ((estado === 'ARRUMADA' || estado === 'FINALIZADA') && destino) {
+    return destino;
+  }
+  return funcionario;
 }
 
 function somarHoras(iso: string, horas: number): string {

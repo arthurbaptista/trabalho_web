@@ -105,23 +105,28 @@ export class TelaInicialCliente {
   }
 
   onAtualizou(atualizada: SolicitacaoResumo) {
-    this.solicitacoes.update((lista) =>
-      lista.map((item) => (item.id === atualizada.id ? { ...item, ...atualizada } : item)),
-    );
     this.solicitacaoAtual.set(atualizada);
+    this.recarregarLista();
   }
 
-  onCriou(nova: SolicitacaoResumo) {
-    this.solicitacoes.update((lista) =>
-      [...lista, nova].sort(
-        (a, b) => new Date(a.dataHoraAbertura).getTime() - new Date(b.dataHoraAbertura).getTime(),
-      ),
-    );
+  onCriou(_nova?: SolicitacaoResumo) {
     this.modalAberto.set(false);
+    this.recarregarLista();
   }
 
   sair() {
     this.auth.logout();
+  }
+
+  private recarregarLista() {
+    this.solicitacaoService.listarDoCliente().subscribe({
+      next: (lista) => {
+        const ordenada = [...lista].sort(
+          (a, b) => new Date(a.dataHoraAbertura).getTime() - new Date(b.dataHoraAbertura).getTime(),
+        );
+        this.solicitacoes.set(ordenada);
+      },
+    });
   }
 
   private abrirDetalhe(solicitacao: SolicitacaoResumo, rejeitar: boolean) {

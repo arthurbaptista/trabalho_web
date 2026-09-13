@@ -1,11 +1,10 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { catchError, map, of, throwError, timeout } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 
-import { API_URL } from '../core/api';
 import { Auth } from '../core/auth';
-import { SOLICITACOES_DEMO } from './solicitacao.mock';
-import { HistoricoPasso, agoraIso, historicoPara } from './solicitacao.util';
+import { SolicitacaoStore } from '../core/solicitacao.store';
+import { agoraIso, HistoricoPasso, historicoPara, rotuloAutor } from './solicitacao.util';
+import type { SolicitacaoFuncionario } from '../funcionario/funcionario.models';
 
 export interface SolicitacaoResumo {
   id: number;
@@ -21,6 +20,7 @@ export interface SolicitacaoDetalhe extends SolicitacaoResumo {
   motivoRejeicao?: string | null;
   descricaoManutencao?: string | null;
   orientacoesCliente?: string | null;
+  nomeCliente?: string;
   historico: HistoricoPasso[];
 }
 
@@ -33,157 +33,75 @@ export interface NovaSolicitacaoPayload {
 
 @Injectable({ providedIn: 'root' })
 export class SolicitacaoService {
-  private readonly http = inject(HttpClient);
   private readonly auth = inject(Auth);
-  private readonly criadas: SolicitacaoDetalhe[] = [];
-  private readonly mutacoes = new Map<number, SolicitacaoDetalhe>();
-  private readonly vistas = new Map<number, SolicitacaoDetalhe>();
+  private readonly store = inject(SolicitacaoStore);
 
   listarDoCliente() {
-    return this.http.get<SolicitacaoResumo[]>(`${API_URL}/solicitacoes`, this.auth.headers()).pipe(
-      timeout(2000),
-      map((lista) => this.mesclar(lista)),
-      catchError(() => of(this.mesclar(SOLICITACOES_DEMO))),
-    );
+    return of(this.store.listarDoCliente(this.nomeCliente(), this.emailCliente()).map((item) => this.paraCliente(item)));
   }
 
   detalhar(id: number) {
-    return this.http.get<SolicitacaoDetalhe>(`${API_URL}/solicitacoes/${id}`, this.auth.headers()).pipe(
-      timeout(2000),
-      map((detalhe) => this.completar(this.mutacoes.get(id) ?? detalhe)),
-      catchError(() => {
-        const local = this.obterLocal(id);
-        return local
-          ? of(local)
-          : throwError(() => ({ error: 'Solicitacao nao encontrada.' }));
-      }),
-    );
+    const local = this.store.obter(id);
+    return local
+      ? of(this.paraCliente(local))
+      : throwError(() => ({ error: 'Solicitacao nao encontrada.' }));
   }
 
   criar(payload: NovaSolicitacaoPayload) {
-    const corpo = {
-      descricaoEquipamento: payload.descricaoEquipamento,
-      categoriaId: payload.categoriaId,
-      descricaoDefeito: payload.descricaoDefeito,
-    };
-
-    return this.http.post<SolicitacaoResumo>(`${API_URL}/solicitacoes`, corpo, this.auth.headers()).pipe(
-      timeout(2000),
-      map((resumo) => {
-        const detalhe = this.completar({
-          ...resumo,
-          descricaoDefeito: payload.descricaoDefeito,
-          historico: historicoPara('ABERTA', resumo.dataHoraAbertura),
-        });
-        this.guardarCriada(detalhe);
-        return detalhe;
-      }),
-      catchError(() => of(this.criarLocal(payload))),
-    );
-  }
-
-  aprovar(id: number) {
-    return this.postAcao(id, 'aprovar', {}, () =>
-      this.aplicarEstado(id, 'APROVADA'),
-    );
-  }
-
-  rejeitar(id: number, motivoRejeicao: string) {
-    return this.postAcao(id, 'rejeitar', { motivoRejeicao }, () =>
-      this.aplicarEstado(id, 'REJEITADA', { motivoRejeicao }),
-    );
-  }
-
-  resgatar(id: number) {
-    return this.postAcao(id, 'resgatar', {}, () =>
-      this.aplicarEstado(id, 'APROVADA'),
-    );
-  }
-
-  pagar(id: number) {
-    return this.postAcao(id, 'pagar', {}, () =>
-      this.aplicarEstado(id, 'PAGA'),
-    );
-  }
-
-  private postAcao(
-    id: number,
-    caminho: string,
-    corpo: object,
-    local: () => SolicitacaoDetalhe,
-  ) {
-    return this.http
-      .post<SolicitacaoDetalhe>(`${API_URL}/solicitacoes/${id}/${caminho}`, corpo, this.auth.headers())
-      .pipe(
-        timeout(2000),
-        map((detalhe) => {
-          const completo = this.completar(detalhe);
-          this.guardar(completo);
-          return completo;
-        }),
-        catchError(() => of(local())),
-      );
-  }
-
-  private mesclar(lista: SolicitacaoResumo[]) {
-    const enriquecidas = lista.map((item) => {
-      const atual = this.mutacoes.get(item.id) ?? this.completar(item);
-      this.vistas.set(item.id, atual);
-      return atual;
-    });
-    const ids = new Set(enriquecidas.map((item) => item.id));
-    return [...enriquecidas, ...this.criadas.filter((item) => !ids.has(item.id))];
-  }
-
-  private criarLocal(payload: NovaSolicitacaoPayload): SolicitacaoDetalhe {
-    const iso = agoraIso();
-    const nova: SolicitacaoDetalhe = {
+    const dataHoraAbertura = agoraIso();
+    const criada = this.store.guardar({
       id: Date.now(),
-      dataHoraAbertura: iso,
+      dataHoraAbertura,
       descricaoEquipamento: payload.descricaoEquipamento.slice(0, 30),
+      descricaoDefeito: payload.descricaoDefeito,
       categoria: payload.categoriaNome,
       estado: 'ABERTA',
       valorOrcamento: null,
-      descricaoDefeito: payload.descricaoDefeito,
-      historico: historicoPara('ABERTA', iso),
-    };
-    this.guardarCriada(nova);
-    return nova;
+      cliente: this.store.clienteDaSessao(this.nomeCliente(), this.emailCliente()),
+      funcionarioDestino: null,
+      historico: historicoPara('ABERTA', dataHoraAbertura, this.nomeCliente()),
+    });
+    return of(this.paraCliente(criada));
+  }
+
+  aprovar(id: number) {
+    return this.aplicarEstado(id, 'APROVADA');
+  }
+
+  rejeitar(id: number, motivoRejeicao: string) {
+    return this.aplicarEstado(id, 'REJEITADA', { motivoRejeicao });
+  }
+
+  resgatar(id: number) {
+    return this.aplicarEstado(id, 'APROVADA');
+  }
+
+  pagar(id: number) {
+    return this.aplicarEstado(id, 'PAGA');
   }
 
   private aplicarEstado(
     id: number,
     estado: string,
-    extra: Partial<SolicitacaoDetalhe> = {},
-  ): SolicitacaoDetalhe {
-    const atual = this.obterLocal(id);
+    extra: Partial<SolicitacaoFuncionario> = {},
+  ): Observable<SolicitacaoDetalhe> {
+    const atual = this.store.obter(id);
     if (!atual) {
-      throw new Error('Solicitacao nao encontrada.');
+      return throwError(() => ({ error: 'Solicitacao nao encontrada.' }));
     }
 
-    const atualizada: SolicitacaoDetalhe = {
+    return of(this.paraCliente(this.store.guardar({
       ...atual,
       ...extra,
       estado,
       historico: [
         ...atual.historico,
-        { estado, dataHora: agoraIso(), autor: 'Cliente' },
+        { estado, dataHora: agoraIso(), autor: rotuloAutor('Cliente', this.nomeCliente()) },
       ],
-    };
-    this.guardar(atualizada);
-    return atualizada;
+    })));
   }
 
-  private obterLocal(id: number): SolicitacaoDetalhe | null {
-    const item = this.mutacoes.get(id)
-      ?? this.criadas.find((criada) => criada.id === id)
-      ?? this.vistas.get(id)
-      ?? SOLICITACOES_DEMO.find((demo) => demo.id === id);
-    return item ? this.completar(item) : null;
-  }
-
-  private completar(item: SolicitacaoResumo & Partial<SolicitacaoDetalhe>): SolicitacaoDetalhe {
-    const mock = SOLICITACOES_DEMO.find((demo) => demo.id === item.id);
+  private paraCliente(item: SolicitacaoFuncionario): SolicitacaoDetalhe {
     return {
       id: item.id,
       dataHoraAbertura: item.dataHoraAbertura,
@@ -191,25 +109,20 @@ export class SolicitacaoService {
       categoria: item.categoria,
       estado: item.estado,
       valorOrcamento: item.valorOrcamento,
-      descricaoDefeito: item.descricaoDefeito ?? mock?.descricaoDefeito ?? 'Defeito nao informado.',
-      motivoRejeicao: item.motivoRejeicao ?? mock?.motivoRejeicao ?? null,
-      descricaoManutencao: item.descricaoManutencao ?? mock?.descricaoManutencao ?? null,
-      orientacoesCliente: item.orientacoesCliente ?? mock?.orientacoesCliente ?? null,
-      historico: item.historico ?? mock?.historico ?? historicoPara(item.estado, item.dataHoraAbertura),
+      descricaoDefeito: item.descricaoDefeito,
+      motivoRejeicao: item.motivoRejeicao ?? null,
+      descricaoManutencao: item.descricaoManutencao ?? null,
+      orientacoesCliente: item.orientacoesCliente ?? null,
+      nomeCliente: item.cliente.nome,
+      historico: item.historico,
     };
   }
 
-  private guardar(detalhe: SolicitacaoDetalhe) {
-    this.mutacoes.set(detalhe.id, detalhe);
-    this.vistas.set(detalhe.id, detalhe);
-    const indice = this.criadas.findIndex((item) => item.id === detalhe.id);
-    if (indice >= 0) {
-      this.criadas[indice] = detalhe;
-    }
+  private nomeCliente() {
+    return this.auth.sessao()?.nome ?? '';
   }
 
-  private guardarCriada(detalhe: SolicitacaoDetalhe) {
-    this.criadas.push(detalhe);
-    this.vistas.set(detalhe.id, detalhe);
+  private emailCliente() {
+    return this.auth.sessao()?.email ?? '';
   }
 }

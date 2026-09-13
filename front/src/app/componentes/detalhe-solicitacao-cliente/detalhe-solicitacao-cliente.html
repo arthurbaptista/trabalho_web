@@ -145,7 +145,7 @@
           <article [style.background]="temaEstado(passo.estado).fundo">
             <strong [style.color]="temaEstado(passo.estado).texto">{{ rotuloEstado(passo.estado) }}</strong>
             <span [style.color]="temaEstado(passo.estado).sub">{{ formatarDataHora(passo.dataHora) }}</span>
-            <span [style.color]="temaEstado(passo.estado).sub">{{ passo.autor }}</span>
+            <span [style.color]="temaEstado(passo.estado).sub">{{ autorDoPasso(passo.autor) }}</span>
           </article>
         } @empty {
           <p class="historico-vazio">Carregando histórico...</p>

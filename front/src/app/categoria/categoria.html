@@ -1,69 +1,76 @@
 <main class="categoria-page">
-  <section class="categoria-card">
-    <div class="categoria-top">
-      <app-logo />
-      <div class="categoria-nav">
-        <a routerLink="/home">Inicio</a>
-        <button type="button" (click)="sair()">Sair</button>
+  <app-sidebar-funcionario pagina="categorias" (sair)="sair()" />
+
+  <section class="categoria-main">
+    <header class="categoria-top">
+      <div class="user">
+        <div class="avatar" aria-hidden="true">{{ iniciais() }}</div>
+        <div class="user-meta">
+          <strong>Olá {{ primeiroNome() }}!</strong>
+          <span>Funcionário</span>
+        </div>
       </div>
-    </div>
+    </header>
 
-    <h1>Categorias<span class="dot">.</span></h1>
-    <p class="hint">CRUD de categoria de equipamento (RF017). A remocao apenas desativa o registro.</p>
-
-    <form (ngSubmit)="salvar()" novalidate>
-      <label for="nome">Nome da categoria</label>
-      <div class="form-row">
-        <input
-          id="nome"
-          name="nome"
-          type="text"
-          maxlength="100"
-          [(ngModel)]="nome"
-          [placeholder]="editandoId === null ? 'Ex.: Notebook' : 'Novo nome'"
-        />
-        <button type="submit" [disabled]="carregando()">
-          {{ editandoId === null ? 'Cadastrar' : 'Salvar' }}
-        </button>
-        @if (editandoId !== null) {
-          <button type="button" class="ghost" (click)="cancelarEdicao()">Cancelar</button>
-        }
+    <div class="categoria-content">
+      <div class="titulo-row">
+        <h1>Categorias<span class="dot">.</span></h1>
       </div>
-    </form>
 
-    @if (erro()) {
-      <p class="msg erro" role="alert">{{ erro() }}</p>
-    }
-    @if (sucesso()) {
-      <p class="msg ok" role="status">{{ sucesso() }}</p>
-    }
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nome</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (categoria of categorias(); track categoria.id) {
-            <tr>
-              <td>{{ categoria.id }}</td>
-              <td>{{ categoria.nome }}</td>
-              <td class="acoes">
-                <button type="button" class="ghost" (click)="editar(categoria)">Editar</button>
-                <button type="button" class="danger" (click)="remover(categoria)">Desativar</button>
-              </td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="3" class="vazio">Nenhuma categoria ativa.</td>
-            </tr>
+      <form (ngSubmit)="salvar()" novalidate>
+        <label for="nome">Nome da categoria</label>
+        <div class="form-row">
+          <input
+            id="nome"
+            name="nome"
+            type="text"
+            maxlength="100"
+            [(ngModel)]="nome"
+            [placeholder]="editandoId === null ? 'Ex.: Notebook' : 'Novo nome'"
+          />
+          <button type="submit" [disabled]="carregando()">
+            {{ editandoId === null ? 'Cadastrar' : 'Salvar' }}
+          </button>
+          @if (editandoId !== null) {
+            <button type="button" class="ghost" (click)="cancelarEdicao()">Cancelar</button>
           }
-        </tbody>
-      </table>
+        </div>
+      </form>
+
+      @if (erro()) {
+        <p class="msg erro" role="alert">{{ erro() }}</p>
+      }
+      @if (sucesso()) {
+        <p class="msg ok" role="status">{{ sucesso() }}</p>
+      }
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nome</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (categoria of categorias(); track categoria.id) {
+              <tr>
+                <td class="id">{{ categoria.id }}</td>
+                <td class="desc">{{ categoria.nome }}</td>
+                <td class="acoes">
+                  <button type="button" class="acao acao--ghost" (click)="editar(categoria)">Editar</button>
+                  <button type="button" class="acao acao--danger" (click)="remover(categoria)">Desativar</button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="3" class="vazio">Nenhuma categoria ativa.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     </div>
   </section>
 </main>

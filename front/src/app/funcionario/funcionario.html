@@ -1,43 +1,69 @@
 <main class="funcionario-page">
-  <aside class="sidebar" aria-label="Navegação do funcionário">
-    <a class="sidebar-logo" routerLink="/home" aria-label="Início">
-      <app-logo [compact]="true" />
-    </a>
-
-    <nav class="sidebar-nav">
-      <a routerLink="/home" routerLinkActive="active" title="Início" aria-current="page">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M4.5 11.2 12 4.8l7.5 6.4"/>
-          <path d="M6.5 10.5V19h11v-8.5"/>
-        </svg>
-      </a>
-      <a routerLink="/categorias" routerLinkActive="active" title="Categorias">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M4 6h16M4 12h16M4 18h16"/>
-        </svg>
-      </a>
-    </nav>
-
-    <button type="button" class="sidebar-sair" title="Sair" (click)="sair()">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M9 7V5.8A1.8 1.8 0 0 1 10.8 4h7.4A1.8 1.8 0 0 1 20 5.8v12.4A1.8 1.8 0 0 1 18.2 20h-7.4A1.8 1.8 0 0 1 9 18.2V17"/>
-        <path d="M13 12H4M7 9l-3 3 3 3"/>
-      </svg>
-    </button>
-  </aside>
+  <app-sidebar-funcionario
+    pagina="funcionario"
+    [vista]="vista()"
+    (abertas)="mostrarAbertas()"
+    (todas)="mostrarTodas()"
+    (sair)="sair()"
+  />
 
   <section class="funcionario-main">
     <header class="funcionario-top">
-      <div class="user-meta">
-        <strong>Painel do Funcionário<span class="dot">.</span></strong>
-        <span>Solicitações de manutenção recebidas dos clientes</span>
+      <div class="user">
+        <div class="avatar" aria-hidden="true">{{ iniciais() }}</div>
+        <div class="user-meta">
+          <strong>Olá {{ primeiroNome() }}!</strong>
+          <span>Funcionário</span>
+        </div>
       </div>
     </header>
 
     <div class="funcionario-content">
       <div class="titulo-row">
-        <h1>Solicitações<span class="dot">.</span></h1>
+        <h1>{{ titulo() }}<span class="dot">.</span></h1>
+
+        @if (vista() === 'todas') {
+          <div class="filtros" role="group" aria-label="Filtro de período">
+            <button type="button" [class.active]="filtro() === 'TODAS'" (click)="escolherFiltro('TODAS')">
+              Todas
+            </button>
+            <button type="button" [class.active]="filtro() === 'HOJE'" (click)="escolherFiltro('HOJE')">
+              Hoje
+            </button>
+            <button type="button" [class.active]="filtro() === 'PERIODO'" (click)="escolherFiltro('PERIODO')">
+              Período
+            </button>
+          </div>
+        }
       </div>
+
+      @if (vista() === 'todas' && filtro() === 'PERIODO') {
+        <div class="periodo">
+          <label>
+            Data inicial
+            <input
+              type="date"
+              name="dataInicio"
+              [value]="dataInicio()"
+              (input)="escolherInicio($any($event.target).value)"
+              (change)="escolherInicio($any($event.target).value)"
+            />
+          </label>
+          <label>
+            Data final
+            <input
+              type="date"
+              name="dataFim"
+              [value]="dataFim()"
+              (input)="escolherFim($any($event.target).value)"
+              (change)="escolherFim($any($event.target).value)"
+            />
+          </label>
+          @if (!dataInicio() && !dataFim()) {
+            <p class="periodo-dica">Informe a data inicial e/ou a data final da abertura.</p>
+          }
+        </div>
+      }
 
       @if (erro()) {
         <p class="funcionario-error" role="alert">
@@ -48,73 +74,99 @@
           {{ erro() }}
         </p>
       }
-      @if (sucesso()) {
-        <p class="funcionario-success" role="status">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="12" cy="12" r="9"/>
-            <path d="m8.5 12.5 2.5 2.5 5-5.5"/>
-          </svg>
-          {{ sucesso() }}
-        </p>
-      }
 
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th>Data</th>
-              <th>Cliente</th>
-              <th>Equipamento</th>
-              <th>Defeito</th>
-              <th>Categoria</th>
-              <th>Estado</th>
-              <th>Valor</th>
+              <th>Desc. Equip.</th>
               <th></th>
+              <th>Data/Hora</th>
+              <th>Cliente</th>
+              @if (vista() === 'todas') {
+                <th>Status</th>
+              }
+              <th>Ação</th>
             </tr>
           </thead>
           <tbody>
-            @for (s of solicitacoes(); track s.id) {
+            @if (carregando()) {
               <tr>
-                <td class="muted">{{ s.dataHoraAbertura | date: 'dd/MM/yy HH:mm' }}</td>
-                <td>{{ s.cliente?.nome }}</td>
-                <td class="desc">{{ s.descricaoEquipamento }}</td>
-                <td class="defeito">{{ s.descricaoDefeito }}</td>
-                <td>
-                  <span class="badge">{{ s.categoria?.nome }}</span>
-                </td>
-                <td>
-                  <span class="badge badge-{{ s.estadoAtual }}">{{ rotulo(s.estadoAtual) }}</span>
-                </td>
-                <td>
-                  @if (s.valorOrcamento) {
-                    {{ s.valorOrcamento | currency: 'BRL' }}
-                  }
-                </td>
-                <td class="acoes">
-                  @if (s.estadoAtual === 'ABERTA') {
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      class="valor-input"
-                      placeholder="Valor"
-                      [(ngModel)]="valores[s.id]"
-                      [name]="'valor-' + s.id"
-                    />
-                    <button type="button" class="acao acao--solid" [disabled]="carregando()" (click)="efetuarOrcamento(s)">
-                      Orçar
+                <td colspan="6" class="vazio">Carregando solicitações...</td>
+              </tr>
+            } @else {
+              @for (solicitacao of visiveis(); track solicitacao.id) {
+                <tr [class]="classeEstado(solicitacao.estado)">
+                  <td class="desc">{{ descricao(solicitacao.descricaoEquipamento) }}</td>
+                  <td>
+                    <button type="button" class="visualizar" (click)="visualizar(solicitacao)">
+                      Visualizar
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M7 17 17 7M9 7h8v8"/>
+                      </svg>
                     </button>
+                  </td>
+                  <td class="muted">{{ formatarDataHora(solicitacao.dataHoraAbertura) }}</td>
+                  <td>{{ solicitacao.cliente.nome }}</td>
+                  @if (vista() === 'todas') {
+                    <td>{{ rotuloEstado(solicitacao.estado) }}</td>
                   }
-                </td>
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="8" class="vazio">Nenhuma solicitação registrada.</td>
-              </tr>
+                  <td class="acoes">
+                    @switch (solicitacao.estado) {
+                      @case ('ABERTA') {
+                        <button type="button" class="acao acao--solid" (click)="orcar(solicitacao)">
+                          Efetuar Orçamento
+                        </button>
+                      }
+                      @case ('APROVADA') {
+                        <button type="button" class="acao acao--ghost" (click)="redirecionar(solicitacao)">
+                          Redirecionar
+                        </button>
+                        <button type="button" class="acao acao--solid" (click)="manter(solicitacao)">
+                          Efetuar Manutenção
+                        </button>
+                      }
+                      @case ('REDIRECIONADA') {
+                        <button type="button" class="acao acao--ghost" (click)="redirecionar(solicitacao)">
+                          Redirecionar
+                        </button>
+                        <button type="button" class="acao acao--solid" (click)="manter(solicitacao)">
+                          Efetuar Manutenção
+                        </button>
+                      }
+                      @case ('PAGA') {
+                        <button type="button" class="acao acao--pay" (click)="finalizar(solicitacao)">
+                          Finalizar Solicitação
+                        </button>
+                      }
+                    }
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6" class="vazio">
+                    @if (vista() === 'todas' && filtro() === 'HOJE') {
+                      Nenhuma solicitação com abertura hoje.
+                    } @else if (vista() === 'todas' && filtro() === 'PERIODO' && (dataInicio() || dataFim())) {
+                      Nenhuma solicitação no período informado.
+                    } @else {
+                      Nenhuma solicitação encontrada.
+                    }
+                  </td>
+                </tr>
+              }
             }
           </tbody>
         </table>
       </div>
     </div>
   </section>
+
+  <app-detalhe-solicitacao-funcionario
+    [aberto]="detalheAberto()"
+    [solicitacao]="solicitacaoAtual()"
+    [modo]="modoDetalhe()"
+    (fechou)="fecharDetalhe()"
+    (atualizou)="onAtualizou($event)"
+  />
 </main>

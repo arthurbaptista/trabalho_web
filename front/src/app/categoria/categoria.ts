@@ -1,15 +1,14 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 
+import { SidebarFuncionario } from '../componentes/sidebar-funcionario/sidebar-funcionario';
 import { mensagemHttpErro } from '../core/api';
 import { Auth } from '../core/auth';
-import { Logo } from '../shared/logo/logo';
 import { Categoria, CategoriaService } from './categoria.service';
 
 @Component({
   selector: 'app-categoria',
-  imports: [FormsModule, RouterLink, Logo],
+  imports: [FormsModule, SidebarFuncionario],
   templateUrl: './categoria.html',
   styleUrl: './categoria.css',
 })
@@ -24,13 +23,29 @@ export class CategoriaPage {
   sucesso = signal('');
   carregando = signal(false);
 
+  nomeUsuario = computed(() => this.auth.sessao()?.nome ?? '');
+  primeiroNome = computed(() => this.nomeUsuario().split(' ')[0] || 'Funcionário');
+  iniciais = computed(() => {
+    const partes = this.nomeUsuario().trim().split(/\s+/).filter(Boolean);
+    if (partes.length === 0) {
+      return 'F';
+    }
+    if (partes.length === 1) {
+      return partes[0].slice(0, 2).toUpperCase();
+    }
+    return (partes[0][0] + partes[1][0]).toUpperCase();
+  });
+
   constructor() {
     this.carregar();
   }
 
   carregar() {
     this.categoriaService.listar().subscribe({
-      next: (lista) => this.categorias.set(lista),
+      next: (lista) => {
+        this.categorias.set(lista);
+        this.erro.set('');
+      },
       error: (erro) => this.erro.set(mensagemHttpErro(erro, 'Nao foi possivel listar as categorias.')),
     });
   }

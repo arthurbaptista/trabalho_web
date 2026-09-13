@@ -5,6 +5,7 @@ import { SolicitacaoDetalhe, SolicitacaoResumo, SolicitacaoService } from '../..
 import {
   formatarDataHora,
   formatarMoeda,
+  rotuloAutor,
   rotuloEstado,
   temaEstado,
 } from '../../cliente/solicitacao.util';
@@ -152,6 +153,10 @@ export class DetalheSolicitacaoCliente {
   formatarMoeda = formatarMoeda;
   rotuloEstado = rotuloEstado;
   temaEstado = temaEstado;
+
+  autorDoPasso(autor: string): string {
+    return rotuloAutor(autor, this.detalhe()?.nomeCliente);
+  }
 
   private carregar(resumo: SolicitacaoResumo) {
     this.detalhe.set(null);

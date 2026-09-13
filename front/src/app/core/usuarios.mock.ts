@@ -1,3 +1,5 @@
+import { autenticarFuncionario, emailFuncionarioExiste } from '../funcionarios/funcionario-cadastro.store';
+
 export type PerfilDemo = 'CLIENTE' | 'FUNCIONARIO';
 
 export interface UsuarioDemo {
@@ -32,13 +34,31 @@ function lerClientesDemo(): UsuarioDemo[] {
   }
 }
 
-function todosUsuariosDemo(): UsuarioDemo[] {
-  return [...USUARIOS_DEMO, ...lerClientesDemo()];
+function todosClientesDemo(): UsuarioDemo[] {
+  return [
+    ...USUARIOS_DEMO.filter((usuario) => usuario.perfil === 'CLIENTE'),
+    ...lerClientesDemo(),
+  ];
+}
+
+export function emailClienteDemoExiste(email: string): boolean {
+  const emailNorm = email.trim().toLowerCase();
+  return todosClientesDemo().some((usuario) => usuario.email.toLowerCase() === emailNorm);
 }
 
 export function buscarUsuarioDemo(email: string, senha: string): UsuarioDemo | undefined {
   const emailNorm = email.trim().toLowerCase();
-  return todosUsuariosDemo().find(
+  const funcionario = autenticarFuncionario(emailNorm, senha);
+  if (funcionario) {
+    return {
+      nome: funcionario.nome,
+      email: funcionario.email,
+      senha: funcionario.senha,
+      perfil: 'FUNCIONARIO',
+    };
+  }
+
+  return todosClientesDemo().find(
     (usuario) => usuario.email.toLowerCase() === emailNorm && usuario.senha === senha,
   );
 }
@@ -51,7 +71,8 @@ export function cadastrarClienteDemo(dados: { nome: string; email: string; cpf: 
   const cpf = dados.cpf.replace(/\D/g, '');
   const existentes = lerClientesDemo();
 
-  if (todosUsuariosDemo().some((usuario) => usuario.email.toLowerCase() === email)) {
+  if (todosClientesDemo().some((usuario) => usuario.email.toLowerCase() === email)
+    || emailFuncionarioExiste(email)) {
     throw new Error('Erro: O E-mail informado ja esta cadastrado.');
   }
   if (existentes.some((usuario) => usuario.cpf === cpf)) {

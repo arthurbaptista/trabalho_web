@@ -1,0 +1,56 @@
+<main class="relatorio-page">
+  <app-sidebar-funcionario pagina="receitas-categoria" (sair)="sair()" />
+
+  <section class="relatorio-main">
+    <header class="relatorio-top">
+      <div class="user">
+        <div class="avatar" aria-hidden="true">{{ iniciais() }}</div>
+        <div class="user-meta">
+          <strong>Olá {{ primeiroNome() }}!</strong>
+          <span>Funcionário</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="relatorio-content">
+      <div class="titulo-row">
+        <h1>Receitas por categoria<span class="dot">.</span></h1>
+        <button type="button" class="btn-pdf" (click)="gerarPdf()">Gerar PDF</button>
+      </div>
+
+      <p class="intro">Receita da empresa desde sempre, agrupada por categoria de equipamento.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Categoria</th>
+              <th>Quantidade</th>
+              <th>Receita</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (linha of relatorio().linhas; track linha.chave) {
+              <tr>
+                <td class="desc">{{ linha.rotulo }}</td>
+                <td>{{ linha.quantidade }}</td>
+                <td>{{ formatarMoeda(linha.total) }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="3" class="vazio">Nenhuma receita encontrada.</td>
+              </tr>
+            }
+          </tbody>
+          <tfoot>
+            <tr>
+              <td>Total</td>
+              <td>{{ relatorio().quantidade }}</td>
+              <td>{{ formatarMoeda(relatorio().total) }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>

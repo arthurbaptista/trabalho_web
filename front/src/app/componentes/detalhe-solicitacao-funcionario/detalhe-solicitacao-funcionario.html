@@ -1,0 +1,209 @@
+@if (aberto() && solicitacao()) {
+  <div
+    class="overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="detalhe-funcionario-titulo"
+    (click)="fechar()"
+  >
+    <div class="modal" (click)="$event.stopPropagation()">
+      <button type="button" class="fechar" aria-label="Fechar" [disabled]="salvando" (click)="fechar()">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 18 18 6M6 6l12 12"/>
+        </svg>
+      </button>
+
+      <header class="cabecalho">
+        <div class="titulo-bloco">
+          <h2 id="detalhe-funcionario-titulo">{{ solicitacao()!.descricaoEquipamento }}</h2>
+          <p class="data-hora">{{ formatarDataHora(solicitacao()!.dataHoraAbertura) }}</p>
+        </div>
+
+        <div class="painel-acao">
+          @if (mensagem() === 'orcada') {
+            <p class="destaque" [style.color]="temaEstado('ORCADA').texto">
+              Orçamento registrado no valor {{ preco() }}
+            </p>
+            <button type="button" class="btn-solid" (click)="confirmarMensagem()">Ok</button>
+          } @else if (mensagem() === 'arrumada') {
+            <p class="destaque" [style.color]="temaEstado('ARRUMADA').texto">Manutenção efetuada.</p>
+            <button type="button" class="btn-solid btn-pay" (click)="confirmarMensagem()">Ok</button>
+          } @else if (mensagem() === 'redirecionada') {
+            <p class="destaque" [style.color]="temaEstado('REDIRECIONADA').texto">
+              Solicitação redirecionada para {{ detalhe()?.funcionarioDestino }}.
+            </p>
+            <button type="button" class="btn-solid" (click)="confirmarMensagem()">Ok</button>
+          } @else if (mensagem() === 'finalizada') {
+            <p class="destaque" [style.color]="temaEstado('FINALIZADA').texto">Solicitação finalizada.</p>
+            <button type="button" class="btn-solid btn-ok" (click)="confirmarMensagem()">Ok</button>
+          } @else if (modo() === 'orcamento' || estado() === 'ABERTA') {
+            <label class="campo">
+              <span>Valor do orçamento</span>
+              <input
+                type="text"
+                name="valorOrcamento"
+                inputmode="decimal"
+                [(ngModel)]="valorTexto"
+                placeholder="0,00"
+                [class.invalido]="valorInvalido()"
+              />
+            </label>
+            @if (valorInvalido()) {
+              <p class="alerta" role="alert">Informe um valor maior que zero.</p>
+            }
+            <button type="button" class="btn-solid" [disabled]="salvando" (click)="confirmarOrcamento()">
+              Efetuar Orçamento
+            </button>
+          } @else if ((modo() === 'manutencao' || estado() === 'APROVADA' || estado() === 'REDIRECIONADA') && etapaManutencao() === 'escolha') {
+            <p class="destaque" [style.color]="temaEstado(estado()).texto">
+              {{ rotuloEstado(estado()) }} {{ preco() ? '· ' + preco() : '' }}
+            </p>
+            <div class="acoes">
+              <button type="button" class="btn-ghost" (click)="escolherRedirecionar()">Redirecionar</button>
+              <button type="button" class="btn-solid" (click)="escolherEfetuar()">Efetuar Manutenção</button>
+            </div>
+          } @else if (etapaManutencao() === 'efetuar') {
+            <label class="campo campo-largo">
+              <span>Descrição da manutenção</span>
+              <textarea
+                name="descricaoManutencao"
+                [(ngModel)]="descricaoManutencao"
+                placeholder="O que foi feito no equipamento"
+                [class.invalido]="tentativa && !descricaoManutencao.trim()"
+              ></textarea>
+            </label>
+            @if (tentativa && !descricaoManutencao.trim()) {
+              <p class="alerta" role="alert">Informe a descrição da manutenção.</p>
+            }
+            <label class="campo campo-largo">
+              <span>Orientações para o cliente</span>
+              <textarea
+                name="orientacoesCliente"
+                [(ngModel)]="orientacoesCliente"
+                placeholder="Cuidados após o reparo"
+                [class.invalido]="tentativa && !orientacoesCliente.trim()"
+              ></textarea>
+            </label>
+            @if (tentativa && !orientacoesCliente.trim()) {
+              <p class="alerta" role="alert">Informe as orientações para o cliente.</p>
+            }
+            <div class="acoes">
+              <button type="button" class="btn-ghost" [disabled]="salvando" (click)="voltarEscolha()">Voltar</button>
+              <button type="button" class="btn-solid" [disabled]="salvando" (click)="confirmarManutencao()">
+                Confirmar Manutenção
+              </button>
+            </div>
+          } @else if (etapaManutencao() === 'redirecionar' || modo() === 'redirecionar') {
+            <label class="campo">
+              <span>Redirecionar para</span>
+              <select
+                name="funcionarioDestino"
+                [(ngModel)]="funcionarioDestinoId"
+                [class.invalido]="tentativa && funcionarioDestinoId == null"
+              >
+                <option [ngValue]="null" disabled>Selecione o funcionário</option>
+                @for (func of funcionariosDestino(); track func.id) {
+                  <option [ngValue]="func.id">{{ func.nome }}</option>
+                }
+              </select>
+            </label>
+            @if (funcionariosDestino().length === 0) {
+              <p class="alerta" role="alert">Não há outro funcionário para receber a manutenção.</p>
+            } @else if (tentativa && funcionarioDestinoId == null) {
+              <p class="alerta" role="alert">Selecione um funcionário diferente de você.</p>
+            }
+            <div class="acoes">
+              @if (modo() !== 'redirecionar') {
+                <button type="button" class="btn-ghost" [disabled]="salvando" (click)="voltarEscolha()">Voltar</button>
+              }
+              <button
+                type="button"
+                class="btn-solid"
+                [disabled]="salvando || funcionariosDestino().length === 0"
+                (click)="confirmarRedirecionamento()"
+              >
+                Redirecionar
+              </button>
+            </div>
+          } @else if (modo() === 'finalizar' || estado() === 'PAGA') {
+            <p class="destaque" [style.color]="temaEstado('PAGA').texto">
+              Serviço pago no valor de {{ preco() }}.
+            </p>
+            <button type="button" class="btn-solid btn-ok" [disabled]="salvando" (click)="confirmarFinalizacao()">
+              Finalizar Solicitação
+            </button>
+          } @else {
+            <p class="status" [style.color]="temaEstado(estado()).texto">{{ rotuloEstado(estado()) }}</p>
+            @if (preco()) {
+              <p class="destaque" [style.color]="temaEstado(estado()).texto">{{ preco() }}</p>
+            }
+          }
+        </div>
+      </header>
+
+      <span class="badge">{{ solicitacao()!.categoria }}</span>
+      <div class="divisor"></div>
+
+      <section class="cliente">
+        <h3>Cliente</h3>
+        <dl>
+          <div>
+            <dt>Nome</dt>
+            <dd>{{ detalhe()?.cliente?.nome || solicitacao()!.cliente.nome }}</dd>
+          </div>
+          <div>
+            <dt>E-mail</dt>
+            <dd>{{ detalhe()?.cliente?.email || solicitacao()!.cliente.email }}</dd>
+          </div>
+          <div>
+            <dt>CPF</dt>
+            <dd>{{ detalhe()?.cliente?.cpf || solicitacao()!.cliente.cpf }}</dd>
+          </div>
+          <div>
+            <dt>Telefone</dt>
+            <dd>{{ detalhe()?.cliente?.telefone || solicitacao()!.cliente.telefone }}</dd>
+          </div>
+          <div class="endereco">
+            <dt>Endereço</dt>
+            <dd>{{ detalhe()?.cliente?.endereco || solicitacao()!.cliente.endereco }}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="bloco">
+        <h3>Defeito</h3>
+        <p>{{ detalhe()?.descricaoDefeito || solicitacao()!.descricaoDefeito }}</p>
+      </section>
+
+      @if (detalhe()?.descricaoManutencao) {
+        <section class="bloco">
+          <h3>Manutenção realizada</h3>
+          <p>{{ detalhe()!.descricaoManutencao }}</p>
+        </section>
+      }
+
+      @if (detalhe()?.orientacoesCliente) {
+        <section class="bloco">
+          <h3>Orientações ao cliente</h3>
+          <p>{{ detalhe()!.orientacoesCliente }}</p>
+        </section>
+      }
+
+      @if (erro()) {
+        <p class="alerta" role="alert">{{ erro() }}</p>
+      }
+
+      <section class="historico" aria-label="Histórico da solicitação">
+        @for (passo of historico(); track $index) {
+          <article [style.background]="temaEstado(passo.estado).fundo">
+            <strong [style.color]="temaEstado(passo.estado).texto">{{ rotuloEstado(passo.estado) }}</strong>
+            <span [style.color]="temaEstado(passo.estado).sub">{{ formatarDataHora(passo.dataHora) }}</span>
+            <span [style.color]="temaEstado(passo.estado).sub">{{ autorDoPasso(passo.autor) }}</span>
+          </article>
+        } @empty {
+          <p class="historico-vazio">Carregando histórico...</p>
+        }
+      </section>
+    </div>
+  </div>
+}
