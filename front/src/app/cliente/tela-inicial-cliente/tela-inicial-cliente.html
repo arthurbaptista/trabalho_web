@@ -80,7 +80,7 @@
                 <tr [class]="classeEstado(solicitacao.estado)">
                   <td class="desc">{{ descricao(solicitacao.descricaoEquipamento) }}</td>
                   <td>
-                    <button type="button" class="visualizar">
+                    <button type="button" class="visualizar" (click)="visualizar(solicitacao)">
                       Visualizar
                       <svg viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M7 17 17 7M9 7h8v8"/>
@@ -96,14 +96,22 @@
                     @switch (solicitacao.estado) {
                       @case ('ORCADA') {
                         <span class="orcamento">Orçado {{ formatarMoeda(solicitacao.valorOrcamento) }}</span>
-                        <button type="button" class="acao acao--ghost">Rejeitar</button>
-                        <button type="button" class="acao acao--solid">Aprovar</button>
+                        <button type="button" class="acao acao--ghost" (click)="abrirOrcamento(solicitacao, true)">
+                          Rejeitar
+                        </button>
+                        <button type="button" class="acao acao--solid" (click)="abrirOrcamento(solicitacao)">
+                          Aprovar
+                        </button>
                       }
                       @case ('REJEITADA') {
-                        <button type="button" class="acao acao--danger">Resgatar Serviço</button>
+                        <button type="button" class="acao acao--danger" (click)="resgatar(solicitacao)">
+                          Resgatar Serviço
+                        </button>
                       }
                       @case ('ARRUMADA') {
-                        <button type="button" class="acao acao--pay">Pagar Serviço</button>
+                        <button type="button" class="acao acao--pay" (click)="pagar(solicitacao)">
+                          Pagar Serviço
+                        </button>
                       }
                     }
                   </td>
@@ -124,5 +132,13 @@
     [aberto]="modalAberto()"
     (fechou)="fecharModal()"
     (criou)="onCriou($event)"
+  />
+
+  <app-detalhe-solicitacao-cliente
+    [aberto]="detalheAberto()"
+    [solicitacao]="solicitacaoAtual()"
+    [iniciarRejeicao]="iniciarRejeicao()"
+    (fechou)="fecharDetalhe()"
+    (atualizou)="onAtualizou($event)"
   />
 </main>

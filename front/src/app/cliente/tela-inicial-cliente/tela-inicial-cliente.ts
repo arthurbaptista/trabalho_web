@@ -1,26 +1,17 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+import { DetalheSolicitacaoCliente } from '../../componentes/detalhe-solicitacao-cliente/detalhe-solicitacao-cliente';
 import { NovaSolicitacaoCliente } from '../../componentes/nova-solicitacao-cliente/nova-solicitacao-cliente';
 import { mensagemHttpErro } from '../../core/api';
 import { Auth } from '../../core/auth';
 import { Logo } from '../../shared/logo/logo';
 import { SolicitacaoResumo, SolicitacaoService } from '../solicitacao.service';
-
-const ROTULOS_ESTADO: Record<string, string> = {
-  ABERTA: 'Aberta',
-  ORCADA: 'Orçada',
-  APROVADA: 'Aprovada',
-  REJEITADA: 'Rejeitada',
-  REDIRECIONADA: 'Redirecionada',
-  ARRUMADA: 'Arrumada',
-  PAGA: 'Paga',
-  FINALIZADA: 'Finalizada',
-};
+import { formatarDataHora, formatarMoeda, rotuloEstado } from '../solicitacao.util';
 
 @Component({
   selector: 'app-tela-inicial-cliente',
-  imports: [RouterLink, Logo, NovaSolicitacaoCliente],
+  imports: [RouterLink, Logo, NovaSolicitacaoCliente, DetalheSolicitacaoCliente],
   templateUrl: './tela-inicial-cliente.html',
   styleUrl: './tela-inicial-cliente.css',
 })
@@ -32,6 +23,9 @@ export class TelaInicialCliente {
   erro = signal('');
   carregando = signal(true);
   modalAberto = signal(false);
+  detalheAberto = signal(false);
+  solicitacaoAtual = signal<SolicitacaoResumo | null>(null);
+  iniciarRejeicao = signal(false);
 
   nome = computed(() => this.auth.sessao()?.nome ?? '');
   primeiroNome = computed(() => this.nome().split(' ')[0] || 'Cliente');
@@ -72,37 +66,12 @@ export class TelaInicialCliente {
     return texto.length <= 30 ? texto : texto.slice(0, 30);
   }
 
-  rotuloEstado(estado: string): string {
-    return ROTULOS_ESTADO[estado] ?? estado;
-  }
+  rotuloEstado = rotuloEstado;
+  formatarDataHora = formatarDataHora;
+  formatarMoeda = formatarMoeda;
 
   classeEstado(estado: string): string {
     return `estado-${estado.toLowerCase()}`;
-  }
-
-  formatarDataHora(iso: string): string {
-    const data = new Date(iso);
-    if (Number.isNaN(data.getTime())) {
-      return iso;
-    }
-
-    const dia = new Intl.DateTimeFormat('pt-BR', { day: 'numeric' }).format(data);
-    const mes = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(data);
-    const hora = new Intl.DateTimeFormat('pt-BR', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    }).format(data);
-    const mesCap = mes.charAt(0).toUpperCase() + mes.slice(1);
-
-    return `${dia} de ${mesCap} ${hora.replace(':', 'h')}`;
-  }
-
-  formatarMoeda(valor: number | null): string {
-    if (valor == null) {
-      return '';
-    }
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
   }
 
   abrirModal() {
@@ -111,6 +80,35 @@ export class TelaInicialCliente {
 
   fecharModal() {
     this.modalAberto.set(false);
+  }
+
+  visualizar(solicitacao: SolicitacaoResumo) {
+    this.abrirDetalhe(solicitacao, false);
+  }
+
+  abrirOrcamento(solicitacao: SolicitacaoResumo, rejeitar = false) {
+    this.abrirDetalhe(solicitacao, rejeitar);
+  }
+
+  resgatar(solicitacao: SolicitacaoResumo) {
+    this.abrirDetalhe(solicitacao, false);
+  }
+
+  pagar(solicitacao: SolicitacaoResumo) {
+    this.abrirDetalhe(solicitacao, false);
+  }
+
+  fecharDetalhe() {
+    this.detalheAberto.set(false);
+    this.solicitacaoAtual.set(null);
+    this.iniciarRejeicao.set(false);
+  }
+
+  onAtualizou(atualizada: SolicitacaoResumo) {
+    this.solicitacoes.update((lista) =>
+      lista.map((item) => (item.id === atualizada.id ? { ...item, ...atualizada } : item)),
+    );
+    this.solicitacaoAtual.set(atualizada);
   }
 
   onCriou(nova: SolicitacaoResumo) {
@@ -124,5 +122,11 @@ export class TelaInicialCliente {
 
   sair() {
     this.auth.logout();
+  }
+
+  private abrirDetalhe(solicitacao: SolicitacaoResumo, rejeitar: boolean) {
+    this.iniciarRejeicao.set(rejeitar);
+    this.solicitacaoAtual.set(solicitacao);
+    this.detalheAberto.set(true);
   }
 }

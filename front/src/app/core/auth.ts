@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { TimeoutError, catchError, of, tap, throwError, timeout } from 'rxjs';
 
 import { API_URL, backendForaDoAr } from './api';
-import { USUARIOS_DEMO, buscarUsuarioDemo } from './usuarios.mock';
+import { USUARIOS_DEMO, buscarUsuarioDemo, cadastrarClienteDemo } from './usuarios.mock';
 
 export interface LoginResponse {
   token: string;
@@ -99,7 +99,35 @@ export class Auth {
   }
 
   cadastrar(payload: CadastroPayload) {
-    return this.http.post<CadastroResponse>(`${API_URL}/clientes/cadastro`, payload);
+    return this.http.post<CadastroResponse>(`${API_URL}/clientes/cadastro`, payload).pipe(
+      timeout(2000),
+      catchError((erro) => {
+        if (!this.backendIndisponivel(erro)) {
+          return throwError(() => erro);
+        }
+
+        try {
+          const demo = cadastrarClienteDemo({
+            nome: payload.nome,
+            email: payload.email,
+            cpf: payload.cpf,
+          });
+          const resposta: CadastroResponse = {
+            id: demo.id,
+            nome: payload.nome.trim(),
+            email: payload.email.trim().toLowerCase(),
+            mensagem: `Cadastro realizado. Sua senha de acesso e ${demo.senha}. Use este e-mail e a senha para entrar.`,
+            emailEnviado: false,
+          };
+          return of(resposta);
+        } catch (cadastroErro) {
+          const mensagem = cadastroErro instanceof Error
+            ? cadastroErro.message
+            : 'Nao foi possivel concluir o cadastro.';
+          return throwError(() => ({ error: mensagem }));
+        }
+      }),
+    );
   }
 
   rotaInicial(): string {

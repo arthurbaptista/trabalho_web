@@ -1,6 +1,9 @@
-import type { SolicitacaoResumo } from './solicitacao.service';
+import type { SolicitacaoDetalhe } from './solicitacao.service';
+import { historicoPara } from './solicitacao.util';
 
-export const SOLICITACOES_DEMO: SolicitacaoResumo[] = [
+type BaseDemo = Omit<SolicitacaoDetalhe, 'historico'> & { historico?: SolicitacaoDetalhe['historico'] };
+
+const BASE: BaseDemo[] = [
   {
     id: 1,
     dataHoraAbertura: '2026-01-12T14:10:00',
@@ -8,6 +11,7 @@ export const SOLICITACOES_DEMO: SolicitacaoResumo[] = [
     categoria: 'Notebook',
     estado: 'ABERTA',
     valorOrcamento: null,
+    descricaoDefeito: 'Nao carrega mesmo ligado na tomada.',
   },
   {
     id: 2,
@@ -16,6 +20,9 @@ export const SOLICITACOES_DEMO: SolicitacaoResumo[] = [
     categoria: 'Notebook',
     estado: 'FINALIZADA',
     valorOrcamento: 1100,
+    descricaoDefeito: 'Dobradica quebrada apos queda.',
+    descricaoManutencao: 'Troca da dobradica e alinhamento da tampa.',
+    orientacoesCliente: 'Evitar abrir a tela alem de 120 graus.',
   },
   {
     id: 3,
@@ -24,6 +31,7 @@ export const SOLICITACOES_DEMO: SolicitacaoResumo[] = [
     categoria: 'Desktop',
     estado: 'ABERTA',
     valorOrcamento: null,
+    descricaoDefeito: 'Nao da video ao ligar.',
   },
   {
     id: 4,
@@ -32,6 +40,9 @@ export const SOLICITACOES_DEMO: SolicitacaoResumo[] = [
     categoria: 'Impressora',
     estado: 'PAGA',
     valorOrcamento: 270,
+    descricaoDefeito: 'Nao puxa papel da bandeja.',
+    descricaoManutencao: 'Limpeza do rolete e troca do kit de alimentacao.',
+    orientacoesCliente: 'Usar papel dentro da gramatura recomendada.',
   },
   {
     id: 5,
@@ -40,6 +51,7 @@ export const SOLICITACOES_DEMO: SolicitacaoResumo[] = [
     categoria: 'Notebook',
     estado: 'ABERTA',
     valorOrcamento: null,
+    descricaoDefeito: 'Nao liga apos queda.',
   },
   {
     id: 6,
@@ -48,6 +60,7 @@ export const SOLICITACOES_DEMO: SolicitacaoResumo[] = [
     categoria: 'Notebook',
     estado: 'APROVADA',
     valorOrcamento: 890,
+    descricaoDefeito: 'Tela com listras verticais.',
   },
   {
     id: 7,
@@ -56,6 +69,9 @@ export const SOLICITACOES_DEMO: SolicitacaoResumo[] = [
     categoria: 'Teclado',
     estado: 'ARRUMADA',
     valorOrcamento: 210,
+    descricaoDefeito: 'Nao conecta no Bluetooth.',
+    descricaoManutencao: 'Atualizacao de firmware e troca do modulo wireless.',
+    orientacoesCliente: 'Reconectar o teclado nas preferencias de Bluetooth.',
   },
   {
     id: 8,
@@ -64,6 +80,9 @@ export const SOLICITACOES_DEMO: SolicitacaoResumo[] = [
     categoria: 'Desktop',
     estado: 'FINALIZADA',
     valorOrcamento: 450,
+    descricaoDefeito: 'Barulho constante no cooler.',
+    descricaoManutencao: 'Troca do cooler e limpeza interna.',
+    orientacoesCliente: 'Manter o gabinete ventilado.',
   },
   {
     id: 9,
@@ -72,6 +91,7 @@ export const SOLICITACOES_DEMO: SolicitacaoResumo[] = [
     categoria: 'Notebook',
     estado: 'ORCADA',
     valorOrcamento: 1250,
+    descricaoDefeito: 'Superaquecimento em jogos.',
   },
   {
     id: 10,
@@ -80,6 +100,7 @@ export const SOLICITACOES_DEMO: SolicitacaoResumo[] = [
     categoria: 'Teclado',
     estado: 'ORCADA',
     valorOrcamento: 180,
+    descricaoDefeito: 'Tecla W travando.',
   },
   {
     id: 11,
@@ -88,6 +109,7 @@ export const SOLICITACOES_DEMO: SolicitacaoResumo[] = [
     categoria: 'Desktop',
     estado: 'ORCADA',
     valorOrcamento: 410,
+    descricaoDefeito: 'Nao reconhece o monitor interno.',
   },
   {
     id: 12,
@@ -96,6 +118,9 @@ export const SOLICITACOES_DEMO: SolicitacaoResumo[] = [
     categoria: 'Desktop',
     estado: 'PAGA',
     valorOrcamento: 980,
+    descricaoDefeito: 'Superaquecimento apos 20 minutos de uso.',
+    descricaoManutencao: 'Troca da pasta termica e limpeza do dissipador.',
+    orientacoesCliente: 'Evitar obstruir as saidas de ar.',
   },
   {
     id: 13,
@@ -104,6 +129,7 @@ export const SOLICITACOES_DEMO: SolicitacaoResumo[] = [
     categoria: 'Mouse',
     estado: 'APROVADA',
     valorOrcamento: 150,
+    descricaoDefeito: 'Bateria nao carrega.',
   },
   {
     id: 14,
@@ -112,6 +138,7 @@ export const SOLICITACOES_DEMO: SolicitacaoResumo[] = [
     categoria: 'Impressora',
     estado: 'REDIRECIONADA',
     valorOrcamento: 320,
+    descricaoDefeito: 'Atolamento constante de papel.',
   },
   {
     id: 15,
@@ -120,6 +147,8 @@ export const SOLICITACOES_DEMO: SolicitacaoResumo[] = [
     categoria: 'Mouse',
     estado: 'REJEITADA',
     valorOrcamento: 180,
+    descricaoDefeito: 'Scroll com falha intermitente.',
+    motivoRejeicao: 'Valor acima do esperado para a peca.',
   },
   {
     id: 16,
@@ -128,6 +157,9 @@ export const SOLICITACOES_DEMO: SolicitacaoResumo[] = [
     categoria: 'Impressora',
     estado: 'ARRUMADA',
     valorOrcamento: 390,
+    descricaoDefeito: 'Manchas na impressao.',
+    descricaoManutencao: 'Limpeza dos cabeçotes e alinhamento.',
+    orientacoesCliente: 'Executar limpeza leve a cada 30 dias.',
   },
   {
     id: 17,
@@ -136,6 +168,8 @@ export const SOLICITACOES_DEMO: SolicitacaoResumo[] = [
     categoria: 'Mouse',
     estado: 'REJEITADA',
     valorOrcamento: 240,
+    descricaoDefeito: 'Sensor falhando em superficies claras.',
+    motivoRejeicao: 'Prefiro aguardar peca original.',
   },
   {
     id: 18,
@@ -144,6 +178,9 @@ export const SOLICITACOES_DEMO: SolicitacaoResumo[] = [
     categoria: 'Impressora',
     estado: 'ARRUMADA',
     valorOrcamento: 520,
+    descricaoDefeito: 'Cabeca de impressao com falhas.',
+    descricaoManutencao: 'Substituicao da cabeca e teste de cores.',
+    orientacoesCliente: 'Nao deixar a impressora sem uso por longos periodos.',
   },
   {
     id: 19,
@@ -152,6 +189,7 @@ export const SOLICITACOES_DEMO: SolicitacaoResumo[] = [
     categoria: 'Teclado',
     estado: 'REDIRECIONADA',
     valorOrcamento: 330,
+    descricaoDefeito: 'Teclas com iluminacao apagada.',
   },
   {
     id: 20,
@@ -160,5 +198,13 @@ export const SOLICITACOES_DEMO: SolicitacaoResumo[] = [
     categoria: 'Notebook',
     estado: 'FINALIZADA',
     valorOrcamento: 300,
+    descricaoDefeito: 'Wifi instavel em casa.',
+    descricaoManutencao: 'Troca da antena wireless.',
+    orientacoesCliente: 'Atualizar o driver de rede no Windows.',
   },
 ];
+
+export const SOLICITACOES_DEMO: SolicitacaoDetalhe[] = BASE.map((item) => ({
+  ...item,
+  historico: item.historico ?? historicoPara(item.estado, item.dataHoraAbertura),
+}));
