@@ -15,9 +15,7 @@
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     color: var(--text);
   }
-  
-  /* ---------- Página ---------- */
-  
+
   .cadastro-page {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -25,9 +23,7 @@
     overflow: hidden;
     background: var(--page);
   }
-  
-  /* ---------- Lado do formulário ---------- */
-  
+
   .cadastro-panel {
     display: flex;
     align-items: center;
@@ -65,9 +61,7 @@
   .cadastro-dot {
     color: var(--muted-soft);
   }
-  
-  /* ---------- Campos ---------- */
-  
+    
   .field {
     margin-bottom: clamp(0.38rem, 1.1vh, 0.7rem);
   }
@@ -190,9 +184,7 @@
     border-radius: 50%;
     animation: spin 0.7s linear infinite;
   }
-  
-  /* ---------- Erro ---------- */
-  
+    
   .cadastro-error,
   .cadastro-success {
     display: flex;
@@ -226,9 +218,7 @@
     25% { transform: translateX(-4px); }
     75% { transform: translateX(4px); }
   }
-  
-  /* ---------- Botão ---------- */
-  
+    
   .cadastro-submit {
     width: 100%;
     display: inline-flex;
@@ -280,8 +270,6 @@
     to { transform: rotate(360deg); }
   }
   
-  /* ---------- Link de login ---------- */
-  
   .cadastro-register {
     display: block;
     margin-top: clamp(0.55rem, 1.4vh, 0.9rem);
@@ -298,9 +286,7 @@
     color: var(--white);
     text-decoration-color: var(--white);
   }
-  
-  /* ---------- Lado da imagem ---------- */
-  
+    
   .cadastro-visual {
     position: relative;
     height: 100%;
@@ -326,9 +312,7 @@
       transparent 45%
     );
   }
-  
-  /* ---------- Responsivo ---------- */
-  
+    
   @media (max-width: 900px) {
     .cadastro-page {
       grid-template-columns: 1fr;
