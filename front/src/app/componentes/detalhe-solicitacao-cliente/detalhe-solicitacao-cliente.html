@@ -1,0 +1,156 @@
+@if (aberto() && solicitacao()) {
+  <div
+    class="overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="detalhe-solicitacao-titulo"
+    (click)="fechar()"
+  >
+    <div class="modal" (click)="$event.stopPropagation()">
+      <button
+        type="button"
+        class="fechar"
+        aria-label="Fechar"
+        [disabled]="salvando"
+        (click)="fechar()"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 18 18 6M6 6l12 12"/>
+        </svg>
+      </button>
+
+      <header class="cabecalho">
+        <div class="titulo-bloco">
+          <h2 id="detalhe-solicitacao-titulo">{{ solicitacao()!.descricaoEquipamento }}</h2>
+          <p class="data-hora">{{ formatarDataHora(solicitacao()!.dataHoraAbertura) }}</p>
+        </div>
+
+        <div class="painel-acao">
+          @if (mensagem() === 'aprovado') {
+            <p class="destaque" [style.color]="temaEstado('APROVADA').texto">
+              Serviço Aprovado no Valor {{ preco() }}
+            </p>
+            <button type="button" class="btn-solid" (click)="confirmarMensagem()">Ok</button>
+          } @else if (mensagem() === 'rejeitado') {
+            <p class="destaque" [style.color]="temaEstado('REJEITADA').texto">Serviço Rejeitado</p>
+            <button type="button" class="btn-solid btn-danger" (click)="confirmarMensagem()">Ok</button>
+          } @else if (mensagem() === 'resgatado') {
+            <p class="destaque" [style.color]="temaEstado('APROVADA').texto">
+              Serviço resgatado e aprovado no valor de {{ preco() }}.
+            </p>
+            <button type="button" class="btn-solid" (click)="confirmarMensagem()">Ok</button>
+          } @else if (mensagem() === 'pago') {
+            <p class="destaque" [style.color]="temaEstado('PAGA').texto">
+              Serviço pago no valor de {{ preco() }}.
+            </p>
+            <button type="button" class="btn-solid btn-pago" (click)="confirmarMensagem()">Ok</button>
+          } @else if (escrevendoRejeicao()) {
+            <label class="sr-only" for="motivo-rejeicao">Motivo da rejeição</label>
+            <textarea
+              id="motivo-rejeicao"
+              name="motivoRejeicao"
+              [(ngModel)]="motivoRejeicao"
+              placeholder="Descreva o motivo da rejeição"
+              [class.invalido]="tentativaRejeicao && !motivoRejeicao.trim()"
+            ></textarea>
+            @if (tentativaRejeicao && !motivoRejeicao.trim()) {
+              <p class="alerta" role="alert">Informe o motivo da rejeição.</p>
+            }
+            <div class="acoes">
+              <button type="button" class="btn-ghost" [disabled]="salvando" (click)="cancelarRejeicao()">
+                Cancelar
+              </button>
+              <button type="button" class="btn-solid btn-danger" [disabled]="salvando" (click)="confirmarRejeicao()">
+                Confirmar Rejeição
+              </button>
+            </div>
+          } @else if (confirmandoResgate()) {
+            <p class="destaque" [style.color]="temaEstado('APROVADA').texto">
+              Confirma o resgate? A solicitação voltará para Aprovada.
+            </p>
+            <div class="acoes">
+              <button type="button" class="btn-ghost" [disabled]="salvando" (click)="cancelarResgate()">
+                Cancelar
+              </button>
+              <button type="button" class="btn-solid" [disabled]="salvando" (click)="confirmarResgate()">
+                Resgatar
+              </button>
+            </div>
+          } @else if (estado() === 'ORCADA') {
+            <p class="destaque" [style.color]="temaEstado('ORCADA').texto">
+              Orçada em <strong>{{ preco() }}</strong>
+            </p>
+            <div class="acoes">
+              <button type="button" class="btn-ghost" [disabled]="salvando" (click)="comecarRejeicao()">
+                Rejeitar
+              </button>
+              <button type="button" class="btn-solid" [disabled]="salvando" (click)="aprovar()">
+                Aprovar
+              </button>
+            </div>
+          } @else if (estado() === 'REJEITADA') {
+            <p class="destaque riscado" [style.color]="temaEstado('REJEITADA').sub">{{ preco() }}</p>
+            <p class="destaque" [style.color]="temaEstado('REJEITADA').texto">Serviço Rejeitado</p>
+            <button type="button" class="btn-solid btn-danger" [disabled]="salvando" (click)="pedirResgate()">
+              Resgatar
+            </button>
+          } @else if (estado() === 'ARRUMADA') {
+            <p class="destaque" [style.color]="temaEstado('ARRUMADA').texto">
+              Serviço arrumado no valor de {{ preco() }}.
+            </p>
+            <button type="button" class="btn-solid btn-pay" [disabled]="salvando" (click)="pagar()">
+              Pagar Serviço
+            </button>
+          } @else {
+            <p class="status" [style.color]="temaEstado(estado()).texto">{{ rotuloEstado(estado()) }}</p>
+          }
+        </div>
+      </header>
+
+      <span class="badge">{{ solicitacao()!.categoria }}</span>
+      <div class="divisor"></div>
+
+      <section class="bloco">
+        <h3>Defeito</h3>
+        <p>{{ detalhe()?.descricaoDefeito || 'Carregando descricao...' }}</p>
+      </section>
+
+      @if (detalhe()?.descricaoManutencao) {
+        <section class="bloco">
+          <h3>Manutenção realizada</h3>
+          <p>{{ detalhe()!.descricaoManutencao }}</p>
+        </section>
+      }
+
+      @if (detalhe()?.orientacoesCliente) {
+        <section class="bloco">
+          <h3>Orientações ao cliente</h3>
+          <p>{{ detalhe()!.orientacoesCliente }}</p>
+        </section>
+      }
+
+      @if (detalhe()?.motivoRejeicao && estado() === 'REJEITADA') {
+        <section class="bloco">
+          <h3>Motivo da rejeição</h3>
+          <p>{{ detalhe()!.motivoRejeicao }}</p>
+        </section>
+      }
+
+      @if (erro()) {
+        <p class="alerta" role="alert">{{ erro() }}</p>
+      }
+
+      <section class="historico" aria-label="Histórico da solicitação">
+        @for (passo of historico(); track passo.estado + passo.dataHora) {
+          <article [style.background]="temaEstado(passo.estado).fundo">
+            <strong [style.color]="temaEstado(passo.estado).texto">{{ rotuloEstado(passo.estado) }}</strong>
+            <span [style.color]="temaEstado(passo.estado).sub">{{ formatarDataHora(passo.dataHora) }}</span>
+            <span [style.color]="temaEstado(passo.estado).sub">{{ passo.autor }}</span>
+          </article>
+        } @empty {
+          <p class="historico-vazio">Carregando histórico...</p>
+        }
+      </section>
+    </div>
+  </div>
+}

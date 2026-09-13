@@ -28,6 +28,7 @@ describe('TelaInicialCliente', () => {
           provide: SolicitacaoService,
           useValue: {
             listarDoCliente: () => of([]),
+            detalhar: () => of(null),
           },
         },
       ],
@@ -58,5 +59,19 @@ describe('TelaInicialCliente', () => {
 
   it('formata data e hora no padrao brasileiro', () => {
     expect(component.formatarDataHora('2026-02-19T19:47:00')).toMatch(/19 de Fevereiro 19h47/i);
+  });
+
+  it('abre o detalhe ao visualizar uma solicitacao', () => {
+    const item = {
+      id: 9,
+      dataHoraAbertura: '2026-02-19T19:47:00',
+      descricaoEquipamento: 'ASUS ROG Zephyrus',
+      categoria: 'Notebook',
+      estado: 'ORCADA',
+      valorOrcamento: 1250,
+    };
+    component.visualizar(item);
+    expect(component.detalheAberto()).toBe(true);
+    expect(component.solicitacaoAtual()?.id).toBe(9);
   });
 });
