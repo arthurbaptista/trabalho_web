@@ -46,7 +46,6 @@ export interface HistoricoPasso {
   estado: string;
   dataHora: string;
   autor: string;
-  detalhe?: string;
 }
 
 export function rotuloEstado(estado: string): string {

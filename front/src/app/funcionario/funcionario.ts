@@ -1,77 +1,84 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { CurrencyPipe, DatePipe } from '@angular/common';
+import { Component, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
-import { OrcamentoSolicitacaoFuncionario } from '../componentes/orcamento-solicitacao-funcionario/orcamento-solicitacao-funcionario';
-import { SolicitacaoResumo, SolicitacaoService } from '../cliente/solicitacao.service';
 import { mensagemHttpErro } from '../core/api';
 import { Auth } from '../core/auth';
 import { Logo } from '../shared/logo/logo';
-import { formatarDataHora } from '../cliente/solicitacao.util';
+import { FuncionarioService, Solicitacao } from './funcionario.service';
+
+const ESTADO_LABEL: Record<string, string> = {
+  ABERTA: 'Aberta',
+  ORCADA: 'Orçada',
+  APROVADA: 'Aprovada',
+  REJEITADA: 'Rejeitada',
+  REDIRECIONADA: 'Redirecionada',
+  ARRUMADA: 'Arrumada',
+  PAGA: 'Paga',
+  FINALIZADA: 'Finalizada',
+};
 
 @Component({
   selector: 'app-funcionario',
-  imports: [RouterLink, Logo, OrcamentoSolicitacaoFuncionario],
+  imports: [FormsModule, RouterLink, Logo, DatePipe, CurrencyPipe],
   templateUrl: './funcionario.html',
   styleUrl: './funcionario.css',
 })
 export class FuncionarioPage {
-  private readonly solicitacaoService = inject(SolicitacaoService);
+  private readonly funcionarioService = inject(FuncionarioService);
   readonly auth = inject(Auth);
 
-  solicitacoes = signal<SolicitacaoResumo[]>([]);
+  solicitacoes = signal<Solicitacao[]>([]);
+  valores: Record<number, number | null> = {};
   erro = signal('');
-  carregando = signal(true);
-  orcamentoAberto = signal(false);
-  solicitacaoAtual = signal<SolicitacaoResumo | null>(null);
-
-  nome = computed(() => this.auth.sessao()?.nome ?? '');
-  primeiroNome = computed(() => this.nome().split(' ')[0] || 'Funcionario');
-
-  abertas = computed(() =>
-    [...this.solicitacoes()]
-      .filter((s) => s.estado === 'ABERTA')
-      .sort((a, b) => new Date(a.dataHoraAbertura).getTime() - new Date(b.dataHoraAbertura).getTime()),
-  );
-
-  formatarDataHora = formatarDataHora;
+  sucesso = signal('');
+  carregando = signal(false);
 
   constructor() {
     this.carregar();
   }
 
   carregar() {
-    this.carregando.set(true);
-    this.erro.set('');
-    this.solicitacaoService.listarTodas().subscribe({
+    this.funcionarioService.listarSolicitacoes().subscribe({
       next: (lista) => {
-        this.solicitacoes.set(lista);
-        this.carregando.set(false);
+        const ordenadas = [...lista].sort(
+          (a, b) => new Date(a.dataHoraAbertura).getTime() - new Date(b.dataHoraAbertura).getTime(),
+        );
+        this.solicitacoes.set(ordenadas);
       },
-      error: (erro) => {
-        this.carregando.set(false);
-        this.erro.set(mensagemHttpErro(erro, 'Nao foi possivel listar as solicitacoes.'));
-      },
+      error: (erro) => this.erro.set(mensagemHttpErro(erro, 'Nao foi possivel listar as solicitacoes.')),
     });
   }
 
-  descricao(texto: string): string {
-    return texto.length <= 30 ? texto : texto.slice(0, 30);
+  rotulo(estado: string): string {
+    return ESTADO_LABEL[estado] ?? estado;
   }
 
-  abrirOrcamento(solicitacao: SolicitacaoResumo) {
-    this.solicitacaoAtual.set(solicitacao);
-    this.orcamentoAberto.set(true);
-  }
+  efetuarOrcamento(solicitacao: Solicitacao) {
+    const valor = this.valores[solicitacao.id];
+    if (!valor || valor <= 0) {
+      this.sucesso.set('');
+      this.erro.set('Informe um valor de orcamento valido.');
+      return;
+    }
 
-  fecharOrcamento() {
-    this.orcamentoAberto.set(false);
-    this.solicitacaoAtual.set(null);
-  }
+    this.erro.set('');
+    this.sucesso.set('');
+    this.carregando.set(true);
 
-  onOrcamentoFeito(atualizada: SolicitacaoResumo) {
-    this.solicitacoes.update((lista) =>
-      lista.map((item) => (item.id === atualizada.id ? { ...item, ...atualizada } : item)),
-    );
+    this.funcionarioService.efetuarOrcamento(solicitacao.id, valor).subscribe({
+      next: () => {
+        this.carregando.set(false);
+        this.sucesso.set(`Orcamento enviado para "${solicitacao.descricaoEquipamento}".`);
+        delete this.valores[solicitacao.id];
+        this.carregar();
+      },
+      error: (erro) => {
+        this.carregando.set(false);
+        this.erro.set(mensagemHttpErro(erro, 'Nao foi possivel registrar o orcamento.'));
+      },
+    });
   }
 
   sair() {

@@ -1,33 +1,19 @@
 <main class="funcionario-page">
   <aside class="sidebar" aria-label="Navegação do funcionário">
-    <a class="sidebar-logo" routerLink="/funcionario" aria-label="Início">
+    <a class="sidebar-logo" routerLink="/home" aria-label="Início">
       <app-logo [compact]="true" />
     </a>
 
     <nav class="sidebar-nav">
-      <a routerLink="/funcionario" routerLinkActive="active" title="Início" aria-current="page">
+      <a routerLink="/home" routerLinkActive="active" title="Início" aria-current="page">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M4.5 11.2 12 4.8l7.5 6.4"/>
           <path d="M6.5 10.5V19h11v-8.5"/>
         </svg>
       </a>
-      <a routerLink="/solicitacoes" routerLinkActive="active" title="Solicitações">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M6 4h9l3 3v13H6z"/>
-          <path d="M9 9h6M9 13h6M9 17h4"/>
-        </svg>
-      </a>
       <a routerLink="/categorias" routerLinkActive="active" title="Categorias">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M4 6h16M4 12h16M4 18h16"/>
-        </svg>
-      </a>
-      <a routerLink="/funcionarios" routerLinkActive="active" title="Funcionários">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M16 19v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 17.5V19"/>
-          <circle cx="9" cy="8" r="3.2"/>
-          <path d="M17.5 19v-1.5a3.5 3.5 0 0 0-2.3-3.29"/>
-          <path d="M14 4.9a3.2 3.2 0 0 1 0 6.2"/>
         </svg>
       </a>
     </nav>
@@ -43,16 +29,15 @@
   <section class="funcionario-main">
     <header class="funcionario-top">
       <div class="user-meta">
-        <strong>Olá {{ primeiroNome() }}!</strong>
-        <span>Funcionário</span>
+        <strong>Painel do Funcionário<span class="dot">.</span></strong>
+        <span>Solicitações de manutenção recebidas dos clientes</span>
       </div>
     </header>
 
     <div class="funcionario-content">
       <div class="titulo-row">
-        <h1>Solicitações Abertas<span class="dot">.</span></h1>
+        <h1>Solicitações<span class="dot">.</span></h1>
       </div>
-      <p class="hint">Solicitações recebidas dos clientes que ainda precisam de um orçamento.</p>
 
       @if (erro()) {
         <p class="funcionario-error" role="alert">
@@ -63,50 +48,73 @@
           {{ erro() }}
         </p>
       }
+      @if (sucesso()) {
+        <p class="funcionario-success" role="status">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="m8.5 12.5 2.5 2.5 5-5.5"/>
+          </svg>
+          {{ sucesso() }}
+        </p>
+      }
 
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th>Data/Hora</th>
+              <th>Data</th>
               <th>Cliente</th>
               <th>Equipamento</th>
+              <th>Defeito</th>
+              <th>Categoria</th>
+              <th>Estado</th>
+              <th>Valor</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
-            @if (carregando()) {
+            @for (s of solicitacoes(); track s.id) {
               <tr>
-                <td colspan="4" class="vazio">Carregando solicitações...</td>
-              </tr>
-            } @else {
-              @for (s of abertas(); track s.id) {
-                <tr>
-                  <td class="muted">{{ formatarDataHora(s.dataHoraAbertura) }}</td>
-                  <td>{{ s.clienteNome }}</td>
-                  <td class="desc">{{ descricao(s.descricaoEquipamento) }}</td>
-                  <td class="acoes">
-                    <button type="button" class="acao acao--solid" (click)="abrirOrcamento(s)">
-                      Efetuar Orçamento
+                <td class="muted">{{ s.dataHoraAbertura | date: 'dd/MM/yy HH:mm' }}</td>
+                <td>{{ s.cliente?.nome }}</td>
+                <td class="desc">{{ s.descricaoEquipamento }}</td>
+                <td class="defeito">{{ s.descricaoDefeito }}</td>
+                <td>
+                  <span class="badge">{{ s.categoria?.nome }}</span>
+                </td>
+                <td>
+                  <span class="badge badge-{{ s.estadoAtual }}">{{ rotulo(s.estadoAtual) }}</span>
+                </td>
+                <td>
+                  @if (s.valorOrcamento) {
+                    {{ s.valorOrcamento | currency: 'BRL' }}
+                  }
+                </td>
+                <td class="acoes">
+                  @if (s.estadoAtual === 'ABERTA') {
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      class="valor-input"
+                      placeholder="Valor"
+                      [(ngModel)]="valores[s.id]"
+                      [name]="'valor-' + s.id"
+                    />
+                    <button type="button" class="acao acao--solid" [disabled]="carregando()" (click)="efetuarOrcamento(s)">
+                      Orçar
                     </button>
-                  </td>
-                </tr>
-              } @empty {
-                <tr>
-                  <td colspan="4" class="vazio">Nenhuma solicitação aberta no momento.</td>
-                </tr>
-              }
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="8" class="vazio">Nenhuma solicitação registrada.</td>
+              </tr>
             }
           </tbody>
         </table>
       </div>
     </div>
   </section>
-
-  <app-orcamento-solicitacao-funcionario
-    [aberto]="orcamentoAberto()"
-    [solicitacao]="solicitacaoAtual()"
-    (fechou)="fecharOrcamento()"
-    (registrou)="onOrcamentoFeito($event)"
-  />
 </main>
