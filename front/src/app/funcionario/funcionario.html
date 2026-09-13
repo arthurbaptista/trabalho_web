@@ -30,7 +30,7 @@
     <header class="funcionario-top">
       <div class="user-meta">
         <strong>Painel do Funcionário<span class="dot">.</span></strong>
-        <span>Solicitações de manutenção recebidas dos clientes</span>
+        <span>Solicitações abertas aguardando orçamento</span>
       </div>
     </header>
 
@@ -62,54 +62,36 @@
         <table>
           <thead>
             <tr>
-              <th>Data</th>
+              <th>Data/Hora</th>
               <th>Cliente</th>
               <th>Equipamento</th>
-              <th>Defeito</th>
-              <th>Categoria</th>
-              <th>Estado</th>
-              <th>Valor</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
-            @for (s of solicitacoes(); track s.id) {
+            @for (s of solicitacoesAbertas(); track s.id) {
               <tr>
                 <td class="muted">{{ s.dataHoraAbertura | date: 'dd/MM/yy HH:mm' }}</td>
                 <td>{{ s.cliente?.nome }}</td>
-                <td class="desc">{{ s.descricaoEquipamento }}</td>
-                <td class="defeito">{{ s.descricaoDefeito }}</td>
-                <td>
-                  <span class="badge">{{ s.categoria?.nome }}</span>
-                </td>
-                <td>
-                  <span class="badge badge-{{ s.estadoAtual }}">{{ rotulo(s.estadoAtual) }}</span>
-                </td>
-                <td>
-                  @if (s.valorOrcamento) {
-                    {{ s.valorOrcamento | currency: 'BRL' }}
-                  }
-                </td>
+                <td class="desc">{{ truncar(s.descricaoEquipamento) }}</td>
                 <td class="acoes">
-                  @if (s.estadoAtual === 'ABERTA') {
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      class="valor-input"
-                      placeholder="Valor"
-                      [(ngModel)]="valores[s.id]"
-                      [name]="'valor-' + s.id"
-                    />
-                    <button type="button" class="acao acao--solid" [disabled]="carregando()" (click)="efetuarOrcamento(s)">
-                      Orçar
-                    </button>
-                  }
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    class="valor-input"
+                    placeholder="Valor"
+                    [(ngModel)]="valores[s.id]"
+                    [name]="'valor-' + s.id"
+                  />
+                  <button type="button" class="acao acao--solid" [disabled]="carregando()" (click)="efetuarOrcamento(s)">
+                    Efetuar Orçamento
+                  </button>
                 </td>
               </tr>
             } @empty {
               <tr>
-                <td colspan="8" class="vazio">Nenhuma solicitação registrada.</td>
+                <td colspan="4" class="vazio">Nenhuma solicitação aberta.</td>
               </tr>
             }
           </tbody>

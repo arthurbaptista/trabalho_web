@@ -1,5 +1,5 @@
-import { CurrencyPipe, DatePipe } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
@@ -8,20 +8,11 @@ import { Auth } from '../core/auth';
 import { Logo } from '../shared/logo/logo';
 import { FuncionarioService, Solicitacao } from './funcionario.service';
 
-const ESTADO_LABEL: Record<string, string> = {
-  ABERTA: 'Aberta',
-  ORCADA: 'Orçada',
-  APROVADA: 'Aprovada',
-  REJEITADA: 'Rejeitada',
-  REDIRECIONADA: 'Redirecionada',
-  ARRUMADA: 'Arrumada',
-  PAGA: 'Paga',
-  FINALIZADA: 'Finalizada',
-};
+const TAMANHO_MAX_EQUIPAMENTO = 30;
 
 @Component({
   selector: 'app-funcionario',
-  imports: [FormsModule, RouterLink, Logo, DatePipe, CurrencyPipe],
+  imports: [FormsModule, RouterLink, Logo, DatePipe],
   templateUrl: './funcionario.html',
   styleUrl: './funcionario.css',
 })
@@ -30,6 +21,10 @@ export class FuncionarioPage {
   readonly auth = inject(Auth);
 
   solicitacoes = signal<Solicitacao[]>([]);
+  solicitacoesAbertas = computed(() =>
+    this.solicitacoes().filter((s) => s.estadoAtual === 'ABERTA'),
+  );
+
   valores: Record<number, number | null> = {};
   erro = signal('');
   sucesso = signal('');
@@ -51,8 +46,10 @@ export class FuncionarioPage {
     });
   }
 
-  rotulo(estado: string): string {
-    return ESTADO_LABEL[estado] ?? estado;
+  truncar(texto: string): string {
+    return texto.length > TAMANHO_MAX_EQUIPAMENTO
+      ? `${texto.slice(0, TAMANHO_MAX_EQUIPAMENTO)}…`
+      : texto;
   }
 
   efetuarOrcamento(solicitacao: Solicitacao) {
