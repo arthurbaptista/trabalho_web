@@ -1,17 +1,8 @@
 import { Component, HostListener, effect, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { catchError, of, timeout } from 'rxjs';
 
 import { Categoria, CategoriaService } from '../../categoria/categoria.service';
 import { SolicitacaoResumo, SolicitacaoService } from '../../cliente/solicitacao.service';
-
-const CATEGORIAS_DEMO: Categoria[] = [
-  { id: 1, nome: 'Notebook', status: true },
-  { id: 2, nome: 'Desktop', status: true },
-  { id: 3, nome: 'Impressora', status: true },
-  { id: 4, nome: 'Mouse', status: true },
-  { id: 5, nome: 'Teclado', status: true },
-];
 
 @Component({
   selector: 'app-nova-solicitacao-cliente',
@@ -111,13 +102,7 @@ export class NovaSolicitacaoCliente {
   }
 
   private carregarCategorias() {
-    this.categoriaService
-      .listar()
-      .pipe(
-        timeout(2000),
-        catchError(() => of(CATEGORIAS_DEMO)),
-      )
-      .subscribe((lista) => this.categorias.set(lista));
+    this.categoriaService.listar().subscribe((lista) => this.categorias.set(lista));
   }
 
   private formatarAgora(): string {

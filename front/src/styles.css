@@ -17,3 +17,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background: #08080a;
 }
+
+app-login {
+  display: block;
+  height: 100%;
+}
+
+app-login .login-page,
+app-login .login-visual {
+  height: 100%;
+}

@@ -10,6 +10,7 @@
   --ink: #0b0b0d;
 
   display: block;
+  height: 100%;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   color: var(--text);
 }
@@ -19,7 +20,7 @@
 .login-page {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  min-height: 100dvh;
+  height: 100%;
   background: var(--page);
 }
 
@@ -27,11 +28,14 @@
 
 .login-panel {
   display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
   padding: clamp(1.75rem, 5vw, 4rem);
 }
 
 .login-content {
-  margin: auto auto 42vh;
+  margin: 0;
   width: 100%;
   max-width: 340px;
   animation: rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -347,6 +351,7 @@ input:-webkit-autofill:focus {
 
 .login-visual {
   position: relative;
+  height: 100%;
   overflow: hidden;
 }
 

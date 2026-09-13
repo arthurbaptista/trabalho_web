@@ -1,0 +1,102 @@
+<main class="funcionarios-page">
+  <app-sidebar-funcionario pagina="funcionarios" (sair)="sair()" />
+
+  <section class="funcionarios-main">
+    <header class="funcionarios-top">
+      <div class="user">
+        <div class="avatar" aria-hidden="true">{{ iniciais() }}</div>
+        <div class="user-meta">
+          <strong>Olá {{ primeiroNome() }}!</strong>
+          <span>Funcionário</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="funcionarios-content">
+      <div class="titulo-row">
+        <h1>Funcionários<span class="dot">.</span></h1>
+      </div>
+
+      <form (ngSubmit)="salvar()" novalidate>
+        <div class="form-grid">
+          <label>
+            Nome
+            <input name="nome" type="text" maxlength="100" [(ngModel)]="nome" placeholder="Nome completo" />
+          </label>
+          <label>
+            E-mail
+            <input name="email" type="email" [(ngModel)]="email" placeholder="grace.l@example.com" />
+          </label>
+          <label>
+            Data de nascimento
+            <input name="dataNascimento" type="date" [(ngModel)]="dataNascimento" />
+          </label>
+          <label>
+            Senha
+            <input
+              name="senha"
+              type="password"
+              [(ngModel)]="senha"
+              [placeholder]="editandoId === null ? 'Minimo 4 caracteres' : 'Em branco para manter'"
+            />
+          </label>
+        </div>
+        <div class="form-row">
+          <button type="submit" [disabled]="carregando()">
+            {{ editandoId === null ? 'Cadastrar' : 'Salvar' }}
+          </button>
+          @if (editandoId !== null) {
+            <button type="button" class="ghost" (click)="cancelarEdicao()">Cancelar</button>
+          }
+        </div>
+      </form>
+
+      @if (erro()) {
+        <p class="msg erro" role="alert">{{ erro() }}</p>
+      }
+      @if (sucesso()) {
+        <p class="msg ok" role="status">{{ sucesso() }}</p>
+      }
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nome</th>
+              <th>E-mail</th>
+              <th>Nascimento</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (funcionario of funcionarios(); track funcionario.id) {
+              <tr>
+                <td class="id">{{ funcionario.id }}</td>
+                <td class="desc">{{ funcionario.nome }}</td>
+                <td>{{ funcionario.email }}</td>
+                <td>{{ formatarNascimento(funcionario.dataNascimento) }}</td>
+                <td class="acoes">
+                  <button type="button" class="acao acao--ghost" (click)="editar(funcionario)">Editar</button>
+                  <button
+                    type="button"
+                    class="acao acao--danger"
+                    [disabled]="!podeRemover(funcionario)"
+                    [title]="motivoBloqueio(funcionario)"
+                    (click)="remover(funcionario)"
+                  >
+                    Remover
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="vazio">Nenhum funcionario cadastrado.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>

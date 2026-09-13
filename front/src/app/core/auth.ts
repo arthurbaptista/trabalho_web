@@ -39,6 +39,7 @@ export interface Sessao {
   token: string;
   perfil: string;
   nome: string;
+  email?: string;
 }
 
 const CHAVE_SESSAO = 'auth';
@@ -69,13 +70,14 @@ export class Auth {
       token: '',
       perfil: joao?.perfil ?? 'CLIENTE',
       nome: joao?.nome ?? 'Joao',
+      email: joao?.email ?? 'joao@manutencao.com',
     });
   }
 
   login(email: string, senha: string, persistente: boolean) {
     return this.http.post<LoginResponse>(`${API_URL}/auth/login`, { email, senha }).pipe(
       timeout(2000),
-      tap((resposta) => this.salvarSessao(resposta, persistente)),
+      tap((resposta) => this.salvarSessao(resposta, persistente, email)),
       catchError((erro) => {
         if (!this.backendIndisponivel(erro)) {
           return throwError(() => erro);
@@ -92,7 +94,7 @@ export class Auth {
           perfil: demo.perfil,
           nome: demo.nome,
         };
-        this.salvarSessao(resposta, persistente);
+        this.salvarSessao(resposta, persistente, email);
         return of(resposta);
       }),
     );
@@ -148,11 +150,27 @@ export class Auth {
     this.router.navigateByUrl('/login');
   }
 
-  private salvarSessao(resposta: LoginResponse, persistente: boolean) {
+  atualizarPerfil(nome: string, email: string) {
+    const atual = this.sessaoSignal();
+    if (!atual) {
+      return;
+    }
+    const sessao: Sessao = {
+      ...atual,
+      nome: nome.trim(),
+      email: email.trim().toLowerCase(),
+    };
+    const destino = localStorage.getItem(CHAVE_SESSAO) ? localStorage : sessionStorage;
+    destino.setItem(CHAVE_SESSAO, JSON.stringify(sessao));
+    this.sessaoSignal.set(sessao);
+  }
+
+  private salvarSessao(resposta: LoginResponse, persistente: boolean, email: string) {
     const sessao: Sessao = {
       token: resposta.token,
       perfil: resposta.perfil,
       nome: resposta.nome,
+      email: email.trim().toLowerCase(),
     };
     const destino = persistente ? localStorage : sessionStorage;
     const outro = persistente ? sessionStorage : localStorage;
@@ -172,7 +190,16 @@ export class Auth {
       if (!raw) {
         return null;
       }
-      return JSON.parse(raw) as Sessao;
+      const sessao = JSON.parse(raw) as Sessao;
+      if (!sessao.email && sessao.nome) {
+        const demo = USUARIOS_DEMO.find((usuario) =>
+          usuario.nome.trim().toLowerCase() === sessao.nome.trim().toLowerCase(),
+        );
+        if (demo) {
+          sessao.email = demo.email;
+        }
+      }
+      return sessao;
     } catch {
       return null;
     }
