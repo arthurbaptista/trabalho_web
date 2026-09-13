@@ -1,0 +1,131 @@
+<main class="funcionario-page">
+  <aside class="sidebar" aria-label="Navegação do funcionário">
+    <a class="sidebar-logo" routerLink="/funcionario" aria-label="Início">
+      <app-logo [compact]="true" />
+    </a>
+
+    <nav class="sidebar-nav">
+      <a routerLink="/funcionario" routerLinkActive="active" title="Início">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4.5 11.2 12 4.8l7.5 6.4"/>
+          <path d="M6.5 10.5V19h11v-8.5"/>
+        </svg>
+      </a>
+      <a routerLink="/solicitacoes" routerLinkActive="active" title="Solicitações">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 4h9l3 3v13H6z"/>
+          <path d="M9 9h6M9 13h6M9 17h4"/>
+        </svg>
+      </a>
+      <a routerLink="/categorias" routerLinkActive="active" title="Categorias">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </a>
+      <a routerLink="/funcionarios" routerLinkActive="active" title="Funcionários" aria-current="page">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M16 19v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 17.5V19"/>
+          <circle cx="9" cy="8" r="3.2"/>
+          <path d="M17.5 19v-1.5a3.5 3.5 0 0 0-2.3-3.29"/>
+          <path d="M14 4.9a3.2 3.2 0 0 1 0 6.2"/>
+        </svg>
+      </a>
+    </nav>
+
+    <button type="button" class="sidebar-sair" title="Sair" (click)="sair()">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M9 7V5.8A1.8 1.8 0 0 1 10.8 4h7.4A1.8 1.8 0 0 1 20 5.8v12.4A1.8 1.8 0 0 1 18.2 20h-7.4A1.8 1.8 0 0 1 9 18.2V17"/>
+        <path d="M13 12H4M7 9l-3 3 3 3"/>
+      </svg>
+    </button>
+  </aside>
+
+  <section class="funcionario-main">
+    <div class="funcionario-content">
+      <div class="titulo-row">
+        <h1>Funcionários<span class="dot">.</span></h1>
+      </div>
+      <p class="hint">Cadastre, edite ou remova funcionários.</p>
+
+      <form class="form-funcionario" (ngSubmit)="salvar()" novalidate>
+        <div class="campo">
+          <label for="nome">Nome</label>
+          <input id="nome" name="nome" type="text" maxlength="100" [(ngModel)]="nome" placeholder="Ex.: Ana" />
+        </div>
+        <div class="campo">
+          <label for="email">E-mail</label>
+          <input id="email" name="email" type="email" [(ngModel)]="email" placeholder="ana@manutencao.com" />
+        </div>
+        <div class="campo">
+          <label for="dataNascimento">Data de nascimento</label>
+          <input id="dataNascimento" name="dataNascimento" type="date" [(ngModel)]="dataNascimento" />
+        </div>
+        <div class="campo-acoes">
+          <button type="submit" class="acao acao--solid" [disabled]="carregando()">
+            {{ editandoId === null ? 'Cadastrar' : 'Salvar' }}
+          </button>
+          @if (editandoId !== null) {
+            <button type="button" class="acao acao--ghost" (click)="cancelarEdicao()">Cancelar</button>
+          }
+        </div>
+      </form>
+
+      @if (erro()) {
+        <p class="funcionario-error" role="alert">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M12 7.5v5M12 16h.01"/>
+          </svg>
+          {{ erro() }}
+        </p>
+      }
+      @if (sucesso()) {
+        <p class="funcionario-success" role="status">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="m8.5 12.5 2.5 2.5 5-5.5"/>
+          </svg>
+          {{ sucesso() }}
+        </p>
+      }
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>E-mail</th>
+              <th>Nascimento</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (f of funcionarios(); track f.id) {
+              <tr>
+                <td class="desc">{{ f.nome }}</td>
+                <td class="muted">{{ f.email }}</td>
+                <td class="muted">{{ f.dataNascimento | date: 'dd/MM/yyyy' }}</td>
+                <td class="acoes">
+                  <button type="button" class="acao acao--ghost" (click)="editar(f)">Editar</button>
+                  <button
+                    type="button"
+                    class="acao acao--danger"
+                    [disabled]="ehVoceMesmo(f) || ehUltimoAtivo()"
+                    [title]="ehVoceMesmo(f) ? 'Voce nao pode remover a si mesmo' : (ehUltimoAtivo() ? 'Deve haver pelo menos um funcionario ativo' : '')"
+                    (click)="remover(f)"
+                  >
+                    Remover
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" class="vazio">Nenhum funcionário ativo.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>

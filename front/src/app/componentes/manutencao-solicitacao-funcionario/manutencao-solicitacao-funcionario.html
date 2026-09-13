@@ -1,0 +1,134 @@
+@if (aberto() && solicitacao()) {
+  <div
+    class="overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="manutencao-solicitacao-titulo"
+    (click)="fechar()"
+  >
+    <div class="modal" (click)="$event.stopPropagation()">
+      <button
+        type="button"
+        class="fechar"
+        aria-label="Fechar"
+        [disabled]="salvando()"
+        (click)="fechar()"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 18 18 6M6 6l12 12"/>
+        </svg>
+      </button>
+
+      <header class="cabecalho">
+        <div class="titulo-bloco">
+          <h2 id="manutencao-solicitacao-titulo">{{ solicitacao()!.descricaoEquipamento }}</h2>
+          <p class="data-hora">{{ formatarDataHora(solicitacao()!.dataHoraAbertura) }}</p>
+        </div>
+        <span class="badge">{{ solicitacao()!.categoria }}</span>
+      </header>
+
+      <section class="bloco">
+        <h3>Cliente</h3>
+        <p>{{ solicitacao()!.clienteNome }}</p>
+      </section>
+
+      <section class="bloco">
+        <h3>Defeito informado</h3>
+        <p>{{ detalhe()?.descricaoDefeito || 'Carregando descricao...' }}</p>
+      </section>
+
+      <div class="divisor"></div>
+
+      @if (registrado() === 'manutencao') {
+        <div class="confirmacao">
+          <p class="destaque">Manutenção registrada. Solicitação marcada como Arrumada.</p>
+          <button type="button" class="btn-solid" (click)="fechar()">Ok</button>
+        </div>
+      } @else if (registrado() === 'redirecionado') {
+        <div class="confirmacao">
+          <p class="destaque">Solicitação redirecionada para {{ funcionarioDestino }}.</p>
+          <button type="button" class="btn-solid" (click)="fechar()">Ok</button>
+        </div>
+      } @else if (modo() === 'escolha') {
+        <div class="acoes-escolha">
+          <button type="button" class="btn-solid" [disabled]="!detalhe()" (click)="escolherManutencao()">
+            Efetuar Manutenção
+          </button>
+          <button type="button" class="btn-ghost" [disabled]="!detalhe()" (click)="escolherRedirecionar()">
+            Redirecionar Manutenção
+          </button>
+        </div>
+      } @else if (modo() === 'manutencao') {
+        <div class="campo">
+          <label for="descricao-manutencao">Descrição da Manutenção</label>
+          <textarea
+            id="descricao-manutencao"
+            name="descricaoManutencao"
+            rows="3"
+            [(ngModel)]="descricaoManutencao"
+            placeholder="O que foi feito no equipamento..."
+            [class.invalido]="tentouSalvar && !descricaoManutencao.trim()"
+          ></textarea>
+        </div>
+        <div class="campo">
+          <label for="orientacoes-cliente">Orientações para o Cliente</label>
+          <textarea
+            id="orientacoes-cliente"
+            name="orientacoesCliente"
+            rows="3"
+            [(ngModel)]="orientacoesCliente"
+            placeholder="Cuidados que o cliente deve ter..."
+            [class.invalido]="tentouSalvar && !orientacoesCliente.trim()"
+          ></textarea>
+        </div>
+        @if (tentouSalvar && (!descricaoManutencao.trim() || !orientacoesCliente.trim())) {
+          <p class="alerta" role="alert">Preencha a descrição da manutenção e as orientações ao cliente.</p>
+        }
+        @if (erro()) {
+          <p class="alerta" role="alert">{{ erro() }}</p>
+        }
+        <footer class="modal-acoes">
+          <button type="button" class="btn-ghost" [disabled]="salvando()" (click)="voltar()">Voltar</button>
+          <button type="button" class="btn-solid" [disabled]="salvando()" (click)="confirmarManutencao()">
+            @if (salvando()) {
+              Enviando...
+            } @else {
+              Confirmar Manutenção
+            }
+          </button>
+        </footer>
+      } @else {
+        <div class="campo">
+          <label for="funcionario-destino">Redirecionar para</label>
+          <select
+            id="funcionario-destino"
+            name="funcionarioDestino"
+            [(ngModel)]="funcionarioDestino"
+            [class.invalido]="tentouSalvar && !funcionarioDestino"
+          >
+            <option [ngValue]="null" disabled>Selecione um funcionário</option>
+            @for (f of outrosFuncionarios(); track f.id) {
+              <option [ngValue]="f.nome">{{ f.nome }}</option>
+            }
+          </select>
+        </div>
+        @if (tentouSalvar && !funcionarioDestino) {
+          <p class="alerta" role="alert">Selecione o funcionário de destino.</p>
+        }
+        @if (erro()) {
+          <p class="alerta" role="alert">{{ erro() }}</p>
+        }
+        <footer class="modal-acoes">
+          <button type="button" class="btn-ghost" [disabled]="salvando()" (click)="voltar()">Voltar</button>
+          <button type="button" class="btn-solid" [disabled]="salvando()" (click)="confirmarRedirecionamento()">
+            @if (salvando()) {
+              Enviando...
+            } @else {
+              Confirmar Redirecionamento
+            }
+          </button>
+        </footer>
+      }
+    </div>
+  </div>
+}

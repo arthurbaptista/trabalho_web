@@ -1,0 +1,106 @@
+@if (aberto()) {
+  <div class="overlay no-print" role="dialog" aria-modal="true" aria-labelledby="relatorio-titulo" (click)="fechar()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <button type="button" class="fechar" aria-label="Fechar" (click)="fechar()">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 18 18 6M6 6l12 12"/>
+        </svg>
+      </button>
+
+      <h2 id="relatorio-titulo">Relatório de Receitas<span class="dot">.</span></h2>
+
+      <div class="abas">
+        <button type="button" class="aba" [class.ativa]="aba() === 'DIA'" (click)="selecionarAba('DIA')">
+          Por Dia
+        </button>
+        <button type="button" class="aba" [class.ativa]="aba() === 'CATEGORIA'" (click)="selecionarAba('CATEGORIA')">
+          Por Categoria
+        </button>
+      </div>
+
+      <div id="relatorio-imprimir">
+        @if (aba() === 'DIA') {
+          <div class="periodo no-print">
+            <input type="date" [ngModel]="dataInicio()" (ngModelChange)="dataInicio.set($event)" name="relInicio" aria-label="Data inicial" />
+            <span>até</span>
+            <input type="date" [ngModel]="dataFim()" (ngModelChange)="dataFim.set($event)" name="relFim" aria-label="Data final" />
+            <span class="hint-periodo">(deixe em branco para considerar todo o período)</span>
+          </div>
+
+          <h3 class="titulo-impressao">Receita de Serviços Pagos — Agrupada por Dia</h3>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Serviços Pagos</th>
+                  <th>Receita</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (linha of porDia(); track linha.chave) {
+                  <tr>
+                    <td>{{ linha.rotulo }}</td>
+                    <td>{{ linha.quantidade }}</td>
+                    <td>{{ formatarMoeda(linha.total) }}</td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="3" class="vazio">Nenhuma receita encontrada para o período.</td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td>Total</td>
+                  <td></td>
+                  <td>{{ formatarMoeda(totalDia()) }}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        } @else {
+          <h3 class="titulo-impressao">Receita de Serviços Pagos — Agrupada por Categoria (histórico completo)</h3>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Categoria</th>
+                  <th>Serviços Pagos</th>
+                  <th>Receita</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (linha of porCategoria(); track linha.categoria) {
+                  <tr>
+                    <td>{{ linha.categoria }}</td>
+                    <td>{{ linha.quantidade }}</td>
+                    <td>{{ formatarMoeda(linha.total) }}</td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="3" class="vazio">Nenhuma receita registrada.</td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td>Total</td>
+                  <td></td>
+                  <td>{{ formatarMoeda(totalCategoria()) }}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        }
+      </div>
+
+      <footer class="modal-acoes no-print">
+        <button type="button" class="btn-ghost" (click)="fechar()">Fechar</button>
+        <button type="button" class="btn-solid" (click)="imprimir()">Baixar / Imprimir PDF</button>
+      </footer>
+    </div>
+  </div>
+}
