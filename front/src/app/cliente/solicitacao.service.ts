@@ -14,8 +14,6 @@ export interface SolicitacaoResumo {
   categoria: string;
   estado: string;
   valorOrcamento: number | null;
-  clienteNome: string;
-  funcionarioDestino?: string | null;
 }
 
 export interface SolicitacaoDetalhe extends SolicitacaoResumo {
@@ -42,14 +40,6 @@ export class SolicitacaoService {
   private readonly vistas = new Map<number, SolicitacaoDetalhe>();
 
   listarDoCliente() {
-    return this.buscarLista();
-  }
-
-  listarTodas() {
-    return this.buscarLista();
-  }
-
-  private buscarLista() {
     return this.http.get<SolicitacaoResumo[]>(`${API_URL}/solicitacoes`, this.auth.headers()).pipe(
       timeout(2000),
       map((lista) => this.mesclar(lista)),
@@ -116,58 +106,6 @@ export class SolicitacaoService {
     );
   }
 
-  efetuarOrcamento(id: number, valor: number, funcionarioNome: string) {
-    return this.http
-      .post<SolicitacaoDetalhe>(
-        `${API_URL}/api/solicitacoes/${id}/efetuar-orcamento`,
-        { solicitacaoId: id, valor },
-        this.auth.headers(),
-      )
-      .pipe(
-        timeout(2000),
-        map((detalhe) => {
-          const completo = this.completar(detalhe);
-          this.guardar(completo);
-          return completo;
-        }),
-        catchError(() => of(this.aplicarEstado(id, 'ORCADA', { valorOrcamento: valor }, funcionarioNome))),
-      );
-  }
-
-  efetuarManutencao(
-    id: number,
-    descricaoManutencao: string,
-    orientacoesCliente: string,
-    funcionarioNome: string,
-  ) {
-    return this.postAcao(id, 'efetuar-manutencao', { descricaoManutencao, orientacoesCliente }, () =>
-      this.aplicarEstado(
-        id,
-        'ARRUMADA',
-        { descricaoManutencao, orientacoesCliente, funcionarioDestino: null },
-        funcionarioNome,
-      ),
-    );
-  }
-
-  redirecionar(id: number, funcionarioDestino: string, funcionarioOrigem: string) {
-    return this.postAcao(id, 'redirecionar', { funcionarioDestino }, () =>
-      this.aplicarEstado(
-        id,
-        'REDIRECIONADA',
-        { funcionarioDestino },
-        funcionarioOrigem,
-        `Redirecionado para ${funcionarioDestino}`,
-      ),
-    );
-  }
-
-  finalizar(id: number, funcionarioNome: string) {
-    return this.postAcao(id, 'finalizar', {}, () =>
-      this.aplicarEstado(id, 'FINALIZADA', {}, funcionarioNome),
-    );
-  }
-
   private postAcao(
     id: number,
     caminho: string,
@@ -206,7 +144,6 @@ export class SolicitacaoService {
       categoria: payload.categoriaNome,
       estado: 'ABERTA',
       valorOrcamento: null,
-      clienteNome: this.auth.sessao()?.nome ?? 'Cliente',
       descricaoDefeito: payload.descricaoDefeito,
       historico: historicoPara('ABERTA', iso),
     };
@@ -218,8 +155,6 @@ export class SolicitacaoService {
     id: number,
     estado: string,
     extra: Partial<SolicitacaoDetalhe> = {},
-    autor = 'Cliente',
-    detalheHistorico?: string,
   ): SolicitacaoDetalhe {
     const atual = this.obterLocal(id);
     if (!atual) {
@@ -232,7 +167,7 @@ export class SolicitacaoService {
       estado,
       historico: [
         ...atual.historico,
-        { estado, dataHora: agoraIso(), autor, ...(detalheHistorico ? { detalhe: detalheHistorico } : {}) },
+        { estado, dataHora: agoraIso(), autor: 'Cliente' },
       ],
     };
     this.guardar(atualizada);
@@ -256,8 +191,6 @@ export class SolicitacaoService {
       categoria: item.categoria,
       estado: item.estado,
       valorOrcamento: item.valorOrcamento,
-      clienteNome: item.clienteNome ?? mock?.clienteNome ?? 'Cliente',
-      funcionarioDestino: item.funcionarioDestino !== undefined ? item.funcionarioDestino : (mock?.funcionarioDestino ?? null),
       descricaoDefeito: item.descricaoDefeito ?? mock?.descricaoDefeito ?? 'Defeito nao informado.',
       motivoRejeicao: item.motivoRejeicao ?? mock?.motivoRejeicao ?? null,
       descricaoManutencao: item.descricaoManutencao ?? mock?.descricaoManutencao ?? null,

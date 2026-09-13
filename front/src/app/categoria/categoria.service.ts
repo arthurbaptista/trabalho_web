@@ -1,18 +1,14 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { TimeoutError, catchError, map, of, throwError, timeout } from 'rxjs';
 
-import { API_URL, backendForaDoAr } from '../core/api';
+import { API_URL } from '../core/api';
 import { Auth } from '../core/auth';
-import {
-  CategoriaRegistro,
-  atualizarCategoriaDemo,
-  criarCategoriaDemo,
-  desativarCategoriaDemo,
-  listarCategoriasDemo,
-} from '../core/categorias.mock';
 
-export type Categoria = CategoriaRegistro;
+export interface Categoria {
+  id: number;
+  nome: string;
+  status: boolean;
+}
 
 @Injectable({ providedIn: 'root' })
 export class CategoriaService {
@@ -20,52 +16,25 @@ export class CategoriaService {
   private readonly auth = inject(Auth);
 
   listar() {
-    return this.http.get<Categoria[]>(`${API_URL}/categorias`, this.opcoes()).pipe(
-      timeout(2000),
-      catchError(() => of(listarCategoriasDemo())),
-    );
+    return this.http.get<Categoria[]>(`${API_URL}/categorias`, this.opcoes());
   }
 
   criar(nome: string) {
-    return this.http.post<Categoria>(`${API_URL}/categorias`, { nome }, this.opcoes()).pipe(
-      timeout(2000),
-      catchError((erro) => this.tentarLocal(erro, () => criarCategoriaDemo(nome))),
-    );
+    return this.http.post<Categoria>(`${API_URL}/categorias`, { nome }, this.opcoes());
   }
 
   atualizar(id: number, nome: string) {
-    return this.http.put<Categoria>(`${API_URL}/categorias/${id}`, { nome }, this.opcoes()).pipe(
-      timeout(2000),
-      catchError((erro) => this.tentarLocal(erro, () => atualizarCategoriaDemo(id, nome))),
-    );
+    return this.http.put<Categoria>(`${API_URL}/categorias/${id}`, { nome }, this.opcoes());
   }
 
   remover(id: number) {
-    return this.http.delete<void>(`${API_URL}/categorias/${id}`, this.opcoes()).pipe(
-      timeout(2000),
-      map(() => undefined),
-      catchError((erro) => this.tentarLocal(erro, () => {
-        desativarCategoriaDemo(id);
-        return undefined;
-      })),
-    );
-  }
-
-  private tentarLocal<T>(erroHttp: unknown, acaoLocal: () => T) {
-    const indisponivel = backendForaDoAr(erroHttp) || erroHttp instanceof TimeoutError;
-    if (!indisponivel) {
-      return throwError(() => erroHttp);
-    }
-
-    try {
-      return of(acaoLocal());
-    } catch (erroLocal) {
-      const mensagem = erroLocal instanceof Error ? erroLocal.message : 'Nao foi possivel concluir a operacao.';
-      return throwError(() => ({ error: mensagem }));
-    }
+    return this.http.delete<void>(`${API_URL}/categorias/${id}`, this.opcoes());
   }
 
   private opcoes() {
-    return this.auth.headers();
+    const token = this.auth.sessao()?.token;
+    return token
+      ? { headers: { Authorization: `Bearer ${token}` } }
+      : {};
   }
 }

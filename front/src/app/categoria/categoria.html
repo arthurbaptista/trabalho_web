@@ -3,15 +3,13 @@
     <div class="categoria-top">
       <app-logo />
       <div class="categoria-nav">
-        <a routerLink="/funcionario">Inicio</a>
-        <a routerLink="/solicitacoes">Solicitações</a>
-        <a routerLink="/funcionarios">Funcionários</a>
+        <a routerLink="/home">Inicio</a>
         <button type="button" (click)="sair()">Sair</button>
       </div>
     </div>
 
     <h1>Categorias<span class="dot">.</span></h1>
-    <p class="hint">Cadastre, edite ou desative categorias de equipamento.</p>
+    <p class="hint">CRUD de categoria de equipamento (RF017). A remocao apenas desativa o registro.</p>
 
     <form (ngSubmit)="salvar()" novalidate>
       <label for="nome">Nome da categoria</label>
