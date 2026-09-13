@@ -1,0 +1,258 @@
+:host {
+  --page: #08080a;
+  --field: #101014;
+  --line: rgba(255, 255, 255, 0.14);
+  --white: #ffffff;
+  --text: #f2f2f4;
+  --muted: #9a9aa3;
+  --muted-soft: #6b6b74;
+  --ink: #0b0b0d;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.62);
+}
+
+.modal {
+  position: relative;
+  width: min(100%, 720px);
+  max-height: calc(100vh - 3rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  overflow: auto;
+  padding: 2.2rem 2rem 1.6rem;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: #101014;
+  color: var(--text);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+}
+
+.fechar {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.fechar svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+.fechar:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--white);
+}
+
+h2 {
+  margin: 0;
+  padding-right: 2rem;
+  color: var(--white);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.dot {
+  color: var(--muted-soft);
+}
+
+.abas {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.aba {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  padding: 0.5rem 1.1rem;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.aba.ativa {
+  background: var(--white);
+  border-color: var(--white);
+  color: var(--ink);
+}
+
+.periodo {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.periodo input {
+  height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--page);
+  padding: 0 0.7rem;
+  color: var(--white);
+  font-family: inherit;
+  color-scheme: dark;
+}
+
+.periodo input::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
+.hint-periodo {
+  color: var(--muted-soft);
+  font-size: 0.76rem;
+}
+
+.titulo-impressao {
+  margin: 0 0 0.75rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.table-wrap {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: auto;
+  background: var(--field);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+th,
+td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+}
+
+th {
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 0.76rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+tfoot td {
+  border-bottom: 0;
+  border-top: 1px solid var(--line);
+  font-weight: 700;
+  color: var(--white);
+}
+
+.vazio {
+  color: var(--muted);
+  text-align: center;
+  padding: 1.6rem 1rem;
+}
+
+.modal-acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.7rem;
+}
+
+.btn-ghost,
+.btn-solid {
+  border-radius: 999px;
+  padding: 0.62rem 1.15rem;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-ghost {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text);
+}
+
+.btn-solid {
+  border: 0;
+  background: linear-gradient(100deg, #ffffff 0%, #d9d9df 50%, #ffffff 100%);
+  color: var(--ink);
+}
+
+.btn-ghost:hover,
+.btn-solid:hover {
+  filter: brightness(1.08);
+}
+
+@media print {
+  :host {
+    color: #000;
+  }
+
+  .overlay {
+    position: static;
+    background: none;
+    padding: 0;
+  }
+
+  .modal {
+    box-shadow: none;
+    border: 0;
+    background: #fff;
+    color: #000;
+    max-height: none;
+    overflow: visible;
+  }
+
+  h2,
+  .titulo-impressao {
+    color: #000;
+  }
+
+  .table-wrap {
+    background: #fff;
+    border-color: #ccc;
+  }
+
+  th {
+    color: #333;
+  }
+
+  td,
+  tfoot td {
+    color: #000;
+    border-color: #ddd;
+  }
+}

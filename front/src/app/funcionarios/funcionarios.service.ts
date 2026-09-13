@@ -5,47 +5,52 @@ import { TimeoutError, catchError, map, of, throwError, timeout } from 'rxjs';
 import { API_URL, backendForaDoAr } from '../core/api';
 import { Auth } from '../core/auth';
 import {
-  CategoriaRegistro,
-  atualizarCategoriaDemo,
-  criarCategoriaDemo,
-  desativarCategoriaDemo,
-  listarCategoriasDemo,
-} from '../core/categorias.mock';
+  FuncionarioRegistro,
+  atualizarFuncionarioDemo,
+  criarFuncionarioDemo,
+  desativarFuncionarioDemo,
+  listarFuncionariosDemo,
+} from '../core/funcionarios.mock';
 
-export type Categoria = CategoriaRegistro;
+export interface FuncionarioPayload {
+  nome: string;
+  email: string;
+  dataNascimento: string;
+}
 
 @Injectable({ providedIn: 'root' })
-export class CategoriaService {
+export class FuncionariosService {
   private readonly http = inject(HttpClient);
   private readonly auth = inject(Auth);
 
   listar() {
-    return this.http.get<Categoria[]>(`${API_URL}/categorias`, this.opcoes()).pipe(
+    return this.http.get<FuncionarioRegistro[]>(`${API_URL}/funcionarios`, this.auth.headers()).pipe(
       timeout(2000),
-      catchError(() => of(listarCategoriasDemo())),
+      catchError(() => of(listarFuncionariosDemo())),
     );
   }
 
-  criar(nome: string) {
-    return this.http.post<Categoria>(`${API_URL}/categorias`, { nome }, this.opcoes()).pipe(
+  criar(payload: FuncionarioPayload) {
+    return this.http.post<FuncionarioRegistro>(`${API_URL}/funcionarios`, payload, this.auth.headers()).pipe(
       timeout(2000),
-      catchError((erro) => this.tentarLocal(erro, () => criarCategoriaDemo(nome))),
+      catchError((erro) => this.tentarLocal(erro, () => criarFuncionarioDemo(payload))),
     );
   }
 
-  atualizar(id: number, nome: string) {
-    return this.http.put<Categoria>(`${API_URL}/categorias/${id}`, { nome }, this.opcoes()).pipe(
+  atualizar(id: number, payload: FuncionarioPayload) {
+    return this.http.put<FuncionarioRegistro>(`${API_URL}/funcionarios/${id}`, payload, this.auth.headers()).pipe(
       timeout(2000),
-      catchError((erro) => this.tentarLocal(erro, () => atualizarCategoriaDemo(id, nome))),
+      catchError((erro) => this.tentarLocal(erro, () => atualizarFuncionarioDemo(id, payload))),
     );
   }
 
   remover(id: number) {
-    return this.http.delete<void>(`${API_URL}/categorias/${id}`, this.opcoes()).pipe(
+    const nomeLogado = this.auth.sessao()?.nome ?? '';
+    return this.http.delete<void>(`${API_URL}/funcionarios/${id}`, this.auth.headers()).pipe(
       timeout(2000),
       map(() => undefined),
       catchError((erro) => this.tentarLocal(erro, () => {
-        desativarCategoriaDemo(id);
+        desativarFuncionarioDemo(id, nomeLogado);
         return undefined;
       })),
     );
@@ -63,9 +68,5 @@ export class CategoriaService {
       const mensagem = erroLocal instanceof Error ? erroLocal.message : 'Nao foi possivel concluir a operacao.';
       return throwError(() => ({ error: mensagem }));
     }
-  }
-
-  private opcoes() {
-    return this.auth.headers();
   }
 }

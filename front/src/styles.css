@@ -9,6 +9,7 @@ body {
   height: 100%;
   margin: 0;
   overflow: hidden;
+  color-scheme: dark;
 }
 
 body {
@@ -16,4 +17,22 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: #08080a;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #relatorio-imprimir,
+  #relatorio-imprimir * {
+    visibility: visible;
+  }
+
+  #relatorio-imprimir {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
 }

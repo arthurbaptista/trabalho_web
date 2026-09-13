@@ -1,0 +1,207 @@
+<main class="funcionario-page">
+  <aside class="sidebar" aria-label="Navegação do funcionário">
+    <a class="sidebar-logo" routerLink="/funcionario" aria-label="Início">
+      <app-logo [compact]="true" />
+    </a>
+
+    <nav class="sidebar-nav">
+      <a routerLink="/funcionario" routerLinkActive="active" title="Início">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4.5 11.2 12 4.8l7.5 6.4"/>
+          <path d="M6.5 10.5V19h11v-8.5"/>
+        </svg>
+      </a>
+      <a routerLink="/solicitacoes" routerLinkActive="active" title="Solicitações" aria-current="page">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 4h9l3 3v13H6z"/>
+          <path d="M9 9h6M9 13h6M9 17h4"/>
+        </svg>
+      </a>
+      <a routerLink="/categorias" routerLinkActive="active" title="Categorias">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </a>
+      <a routerLink="/funcionarios" routerLinkActive="active" title="Funcionários">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M16 19v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 17.5V19"/>
+          <circle cx="9" cy="8" r="3.2"/>
+          <path d="M17.5 19v-1.5a3.5 3.5 0 0 0-2.3-3.29"/>
+          <path d="M14 4.9a3.2 3.2 0 0 1 0 6.2"/>
+        </svg>
+      </a>
+    </nav>
+
+    <button type="button" class="sidebar-sair" title="Sair" (click)="sair()">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M9 7V5.8A1.8 1.8 0 0 1 10.8 4h7.4A1.8 1.8 0 0 1 20 5.8v12.4A1.8 1.8 0 0 1 18.2 20h-7.4A1.8 1.8 0 0 1 9 18.2V17"/>
+        <path d="M13 12H4M7 9l-3 3 3 3"/>
+      </svg>
+    </button>
+  </aside>
+
+  <section class="funcionario-main">
+    <div class="funcionario-content">
+      <div class="titulo-row">
+        <h1>Solicitações<span class="dot">.</span></h1>
+        <button type="button" class="acao acao--solid" (click)="relatorioAberto.set(true)">
+          Relatório de Receitas
+        </button>
+      </div>
+      <p class="hint">Todas as solicitações de manutenção, ordenadas por data de abertura.</p>
+
+      <div class="filtros">
+        <button
+          type="button"
+          class="filtro"
+          [class.ativo]="filtro() === 'TODAS'"
+          (click)="selecionarFiltro('TODAS')"
+        >
+          Todas
+        </button>
+        <button
+          type="button"
+          class="filtro"
+          [class.ativo]="filtro() === 'HOJE'"
+          (click)="selecionarFiltro('HOJE')"
+        >
+          Hoje
+        </button>
+        <button
+          type="button"
+          class="filtro"
+          [class.ativo]="filtro() === 'PERIODO'"
+          (click)="selecionarFiltro('PERIODO')"
+        >
+          Período
+        </button>
+
+        @if (filtro() === 'PERIODO') {
+          <div class="periodo">
+            <input
+              type="date"
+              [ngModel]="dataInicio()"
+              (ngModelChange)="dataInicio.set($event)"
+              name="dataInicio"
+              aria-label="Data inicial"
+            />
+            <span>até</span>
+            <input
+              type="date"
+              [ngModel]="dataFim()"
+              (ngModelChange)="dataFim.set($event)"
+              name="dataFim"
+              aria-label="Data final"
+            />
+          </div>
+        }
+      </div>
+
+      @if (erro()) {
+        <p class="funcionario-error" role="alert">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M12 7.5v5M12 16h.01"/>
+          </svg>
+          {{ erro() }}
+        </p>
+      }
+      @if (periodoIncompleto()) {
+        <p class="funcionario-error" role="alert">Informe a data inicial e a data final do período.</p>
+      }
+      @if (sucesso()) {
+        <p class="funcionario-success" role="status">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="m8.5 12.5 2.5 2.5 5-5.5"/>
+          </svg>
+          {{ sucesso() }}
+        </p>
+      }
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Data/Hora</th>
+              <th>Cliente</th>
+              <th>Equipamento</th>
+              <th>Categoria</th>
+              <th>Estado</th>
+              <th>Valor</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (carregando()) {
+              <tr>
+                <td colspan="7" class="vazio">Carregando solicitações...</td>
+              </tr>
+            } @else {
+              @for (s of filtradas(); track s.id) {
+                <tr>
+                  <td class="muted">{{ formatarDataHora(s.dataHoraAbertura) }}</td>
+                  <td>{{ s.clienteNome }}</td>
+                  <td class="desc">{{ s.descricaoEquipamento }}</td>
+                  <td>
+                    <span class="badge">{{ s.categoria }}</span>
+                  </td>
+                  <td>
+                    <span class="estado" [style.background]="temaEstado(s.estado).fundo" [style.color]="temaEstado(s.estado).texto">
+                      {{ rotuloEstado(s.estado) }}
+                    </span>
+                  </td>
+                  <td>{{ formatarMoeda(s.valorOrcamento) }}</td>
+                  <td class="acoes">
+                    @if (s.estado === 'ABERTA') {
+                      <button type="button" class="acao acao--solid" (click)="abrirOrcamento(s)">
+                        Efetuar Orçamento
+                      </button>
+                    } @else if (s.estado === 'APROVADA' || s.estado === 'REDIRECIONADA') {
+                      <button type="button" class="acao acao--solid" (click)="abrirManutencao(s)">
+                        Efetuar Manutenção
+                      </button>
+                    } @else if (s.estado === 'PAGA') {
+                      <button
+                        type="button"
+                        class="acao acao--solid"
+                        [disabled]="finalizandoId() === s.id"
+                        (click)="finalizar(s)"
+                      >
+                        Finalizar Solicitação
+                      </button>
+                    }
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="7" class="vazio">Nenhuma solicitação encontrada para este filtro.</td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <app-orcamento-solicitacao-funcionario
+    [aberto]="orcamentoAberto()"
+    [solicitacao]="solicitacaoAtual()"
+    (fechou)="fecharOrcamento()"
+    (registrou)="onAtualizou($event)"
+  />
+
+  <app-manutencao-solicitacao-funcionario
+    [aberto]="manutencaoAberta()"
+    [solicitacao]="solicitacaoAtual()"
+    (fechou)="fecharManutencao()"
+    (registrou)="onAtualizou($event)"
+  />
+
+  <app-relatorio-receitas
+    [aberto]="relatorioAberto()"
+    [solicitacoes]="solicitacoes()"
+    (fechou)="relatorioAberto.set(false)"
+  />
+</main>
