@@ -38,6 +38,8 @@ public class SolicitacaoService {
         solicitacao.setCategoria(categoria);
         solicitacao.setDescricaoDefeito(request.getDescricaoDefeito());
         solicitacao.setEstadoAtual(EstadoSolicitacao.ABERTA);
+        solicitacao.setDataHoraAbertura(LocalDateTime.now());
+        solicitacao.setStatus(true);
 
         Solicitacao salva = solicitacaoRepository.save(solicitacao);
         adicionarHistorico(salva, null, EstadoSolicitacao.ABERTA, "Solicitação criada");
@@ -79,10 +81,9 @@ public class SolicitacaoService {
     private void adicionarHistorico(Solicitacao solicitacao, EstadoSolicitacao estadoAnterior,
                                     EstadoSolicitacao estadoNovo, String observacao) {
         HistoricoSolicitacao historico = new HistoricoSolicitacao();
-
-        //        historico.setEstadoAnterior(estadoAnterior);
-//         historico.setEstadoNovo(estadoNovo);
-        //       historico.setObservacao(observacao);
+        historico.setSolicitacao(solicitacao);
+        historico.setDataHora(LocalDateTime.now());
+        historico.setEstadoAlcancado(estadoNovo);
         historicoRepository.save(historico);
     }
 

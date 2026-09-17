@@ -25,7 +25,7 @@ public class HistoricoSolicitacao {
     private Solicitacao solicitacao;
 
     @ManyToOne
-    @JoinColumn(name = "id_funcionario_origem", nullable = false)
+    @JoinColumn(name = "id_funcionario_origem")
     private Funcionario funcionarioOrigem;
 
     @ManyToOne
