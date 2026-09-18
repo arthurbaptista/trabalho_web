@@ -13,9 +13,31 @@ import { Auth } from '../../core/auth';
 import type { FuncionarioResumo, ModoDetalheFuncionario, SolicitacaoFuncionario } from '../../funcionario/funcionario.models';
 import { FuncionarioService } from '../../funcionario/funcionario.service';
 
+// Mensagem de confirmação mostrada depois que uma ação é concluída com sucesso.
+// Cada valor corresponde ao resultado de uma das quatro ações que este componente
+// executa: orçar (RF012), efetuar manutenção (RF014), redirecionar (RF015) e
+// finalizar (RF016).
 type MensagemAcao = 'orcada' | 'arrumada' | 'redirecionada' | 'finalizada';
+
+// O modo "manutencao" (ModoDetalheFuncionario) abre este componente numa tela
+// intermediária de escolha: o funcionário decide se vai efetuar a manutenção
+// ele mesmo ou redirecionar a solicitação para outro funcionário. EtapaManutencao
+// controla qual dessas sub-telas está visível dentro do modal.
 type EtapaManutencao = 'escolha' | 'efetuar' | 'redirecionar';
 
+/**
+ * Modal único que concentra as quatro ações que o funcionário pode executar
+ * sobre uma solicitação, dependendo do estado em que ela está:
+ *
+ *  - RF012 (Efetuar Orçamento): estado ABERTA -> ORCADA
+ *  - RF014 (Efetuar Manutenção): estado APROVADA/REDIRECIONADA -> ARRUMADA
+ *  - RF015 (Redirecionar Manutenção): estado APROVADA/REDIRECIONADA -> REDIRECIONADA
+ *  - RF016 (Finalizar Solicitação): estado PAGA -> FINALIZADA
+ *
+ * Qual dessas ações fica disponível é decidido pelo componente pai (FuncionarioPage),
+ * que passa o `modo` de entrada. Este componente só concentra a UI e a chamada ao
+ * service; a regra de "quem pode ver qual botão" mora em funcionario.filtro.ts.
+ */
 @Component({
   selector: 'app-detalhe-solicitacao-funcionario',
   imports: [FormsModule],
@@ -44,11 +66,20 @@ export class DetalheSolicitacaoFuncionario {
   salvando = false;
   erro = signal('');
 
+  // Guarda "id da solicitação + modo" da última vez que carregamos os dados.
+  // Serve para o effect abaixo não recarregar/resetar a UI toda vez que o
+  // Angular roda change detection - só quando o usuário efetivamente abriu
+  // uma solicitação (ou um modo) diferente do que já estava carregado.
   private chaveCarregada: string | null = null;
 
   historico = computed(() => this.detalhe()?.historico ?? []);
   estado = computed(() => this.detalhe()?.estado ?? this.solicitacao()?.estado ?? '');
   preco = computed(() => formatarMoeda(this.detalhe()?.valorOrcamento ?? this.solicitacao()?.valorOrcamento));
+
+  // RF015: "não pode ser redirecionada para si mesmo". Filtra o funcionário
+  // logado da lista de destinos possíveis, comparando por e-mail quando
+  // disponível (mais confiável) e caindo para comparação de nome normalizado
+  // (sem acento/maiúsculas) quando não há e-mail na sessão.
   funcionariosDestino = computed(() => {
     const sessao = this.auth.sessao();
     const nome = sessao?.nome ?? '';
@@ -60,6 +91,12 @@ export class DetalheSolicitacaoFuncionario {
   });
 
   constructor() {
+    // Este effect é o que faz o modal "trocar de conteúdo" sem ser destruído
+    // e recriado a cada clique: ele observa aberto()/solicitacao()/modo() e,
+    // só quando a combinação muda de fato, reseta o formulário e busca os
+    // dados completos da solicitação (ver carregar()). O untracked() evita
+    // que as próprias chamadas de resetarUi/carregar (que também mexem em
+    // signals) disparem o effect de novo, criando um loop.
     effect(() => {
       const aberta = this.aberto();
       const resumo = this.solicitacao();
@@ -186,6 +223,16 @@ export class DetalheSolicitacaoFuncionario {
     return this.tentativa && this.valorNumerico() == null;
   }
 
+  // Converte o texto digitado pelo funcionário no campo de orçamento (RF012)
+  // para um número válido, aceitando tanto o formato brasileiro quanto o
+  // americano:
+  //   "1.234,56" (BR: ponto de milhar, vírgula decimal)
+  //   "1234.56"  (US: sem separador de milhar, ponto decimal)
+  // Primeiro remove tudo que não for dígito/vírgula/ponto/sinal. Se houver
+  // vírgula, assumimos formato BR: os pontos são separador de milhar (somem)
+  // e a vírgula vira o ponto decimal. Sem vírgula, o texto já está num
+  // formato que o Number() do JS entende direto. Retorna null para texto
+  // vazio, não numérico ou valor <= 0 (orçamento tem que ser positivo).
   private valorNumerico(): number | null {
     const texto = this.valorTexto.trim().replace(/[^\d,.-]/g, '');
     if (!texto) {
@@ -199,6 +246,10 @@ export class DetalheSolicitacaoFuncionario {
   }
 
   private carregar(resumo: SolicitacaoFuncionario) {
+    // Preenche a UI com o resumo já disponível (a tabela da lista) enquanto o
+    // detalhe completo (histórico, defeito, etc.) e a lista de funcionários
+    // para o redirecionamento chegam de forma assíncrona - assim o modal abre
+    // instantâneo em vez de ficar em branco esperando as duas respostas.
     this.detalhe.set(resumo);
     this.funcionarioService.listarFuncionarios().subscribe((lista) => this.funcionarios.set(lista));
     this.funcionarioService.detalhar(resumo.id).subscribe({
