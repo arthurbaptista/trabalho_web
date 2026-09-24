@@ -6,18 +6,22 @@ import jakarta.validation.constraints.Size;
 
 public class SolicitacaoRequest {
 
-    @NotNull(message = "O cliente e obrigatorio.")
+    @NotNull(message = "O cliente é obrigatório.")
     private Long clienteId;
 
-    @NotBlank(message = "A descricao do equipamento e obrigatoria.")
-    @Size(max = 30, message = "A descricao do equipamento deve ter no maximo 30 caracteres.")
+    @NotBlank(message = "A descrição do equipamento é obrigatória.")
+    @Size(max = 30, message = "A descrição do equipamento deve ter no máximo 30 caracteres.")
     private String descricaoEquipamento;
 
-    @NotNull(message = "A categoria e obrigatoria.")
+    @NotNull(message = "A categoria é obrigatória.")
     private Long categoriaId;
 
-    @NotBlank(message = "A descricao do defeito e obrigatoria.")
+    @NotBlank(message = "A descrição do defeito é obrigatória.")
     private String descricaoDefeito;
+
+    // Novos campos adicionados para a etapa de manutenção
+    private String descricaoManutencao;
+    private String orientacoesCliente;
 
     public Long getClienteId() {
         return clienteId;
@@ -49,5 +53,21 @@ public class SolicitacaoRequest {
 
     public void setDescricaoDefeito(String descricaoDefeito) {
         this.descricaoDefeito = descricaoDefeito;
+    }
+
+    public String getDescricaoManutencao() {
+        return descricaoManutencao;
+    }
+
+    public void setDescricaoManutencao(String descricaoManutencao) {
+        this.descricaoManutencao = descricaoManutencao;
+    }
+
+    public String getOrientacoesCliente() {
+        return orientacoesCliente;
+    }
+
+    public void setOrientacoesCliente(String orientacoesCliente) {
+        this.orientacoesCliente = orientacoesCliente;
     }
 }

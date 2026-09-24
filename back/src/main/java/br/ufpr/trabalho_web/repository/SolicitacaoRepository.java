@@ -14,6 +14,8 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
 
     List<Solicitacao> findByClienteOrderByDataHoraAberturaAsc(Cliente cliente);
 
+    List<Solicitacao> findByClienteOrderByDataHoraAsc(Cliente cliente);
+
     List<Solicitacao> findByEstadoAtual(EstadoSolicitacao estadoAtual);
 
     List<Solicitacao> findByCliente(Cliente cliente);
