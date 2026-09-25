@@ -1,7 +1,7 @@
 /*
  * Dados de demonstracao da tela do funcionario.
  * Este bloco nao altera o comportamento do codigo.
- * Serve apenas como documentacao do mock local.
+ * Serve apenas como documentacao do mock local. Recriado.
  *
  * 01. O arquivo concentra clientes, funcionarios e solicitacoes ficticias.
  * 02. Os dados alimentam a listagem quando a API nao responde a tempo.
