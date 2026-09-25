@@ -1,109 +1,67 @@
 package br.ufpr.trabalho_web.controller;
 
-import br.ufpr.trabalho_web.dto.FinalizacaoRequest;
-import br.ufpr.trabalho_web.dto.ManutencaoRequest;
-import br.ufpr.trabalho_web.dto.RedirecionamentoRequest;
-import br.ufpr.trabalho_web.dto.RejeicaoRequest;
 import br.ufpr.trabalho_web.dto.SolicitacaoRequest;
-import br.ufpr.trabalho_web.model.HistoricoSolicitacao;
+import br.ufpr.trabalho_web.model.Cliente;
+import br.ufpr.trabalho_web.model.Funcionario;
 import br.ufpr.trabalho_web.model.Solicitacao;
 import br.ufpr.trabalho_web.service.SolicitacaoService;
-import jakarta.validation.Valid;
-import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
-@RequestMapping("/solicitacoes")
+@RequestMapping("/api/solicitacoes")
 public class SolicitacaoController {
 
-    private final SolicitacaoService solicitacaoService;
+    @Autowired
+    private SolicitacaoService solicitacaoService;
 
-    public SolicitacaoController(SolicitacaoService solicitacaoService) {
-        this.solicitacaoService = solicitacaoService;
+    @PostMapping("/cliente")
+    public ResponseEntity<Solicitacao> criar(@RequestBody Solicitacao solicitacao, @RequestAttribute("usuario") Cliente cliente) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(solicitacaoService.criarSolicitacao(solicitacao, cliente));
     }
 
-    @PostMapping
-    public ResponseEntity<Solicitacao> criar(@Valid @RequestBody SolicitacaoRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(solicitacaoService.criarSolicitacao(request));
+    @PatchMapping("/{id}/orcar")
+    public ResponseEntity<Solicitacao> orcar(@PathVariable Long id, @RequestBody BigDecimal valor, @RequestAttribute("usuario") Funcionario funcionario) {
+        return ResponseEntity.ok(solicitacaoService.efetuarOrcamento(id, valor, funcionario));
     }
 
-    @GetMapping("/abertas")
-    public List<Solicitacao> listarAbertas() {
-        return solicitacaoService.getSolicitacoesAbertas();
+    @PatchMapping("/{id}/aprovar")
+    public ResponseEntity<Solicitacao> aprovar(@PathVariable Long id, @RequestAttribute("usuario") Cliente cliente) {
+        return ResponseEntity.ok(solicitacaoService.aprovarServico(id, cliente));
     }
 
-    @GetMapping("/cliente/{clienteId}")
-    public List<Solicitacao> listarDoCliente(@PathVariable Long clienteId) {
-        return solicitacaoService.getSolicitacoesCliente(clienteId);
+    @PatchMapping("/{id}/rejeitar")
+    public ResponseEntity<Solicitacao> rejeitar(@PathVariable Long id, @RequestBody String motivo, @RequestAttribute("usuario") Cliente cliente) {
+        return ResponseEntity.ok(solicitacaoService.rejeitarServico(id, motivo, cliente));
     }
 
-    @GetMapping("/funcionario/{funcionarioId}")
-    public List<Solicitacao> listarParaFuncionario(
-            @PathVariable Long funcionarioId,
-            @RequestParam(defaultValue = "TODAS") String filtro,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim
-    ) {
-        return solicitacaoService.getSolicitacoesFuncionario(funcionarioId, filtro, inicio, fim);
+    @PatchMapping("/{id}/resgatar")
+    public ResponseEntity<Solicitacao> resgatar(@PathVariable Long id, @RequestAttribute("usuario") Cliente cliente) {
+        return ResponseEntity.ok(solicitacaoService.resgatarServico(id, cliente));
     }
 
-    @GetMapping("/{id}/historico")
-    public List<HistoricoSolicitacao> historico(@PathVariable Long id) {
-        return solicitacaoService.getHistorico(id);
+    @PatchMapping("/{id}/manutencao")
+    public ResponseEntity<Solicitacao> manutencao(@PathVariable Long id, @RequestBody SolicitacaoRequest request, @RequestAttribute("usuario") Funcionario funcionario) {
+        return ResponseEntity.ok(solicitacaoService.efetuarManutencao(id, request.getDescricaoEquipamento(), request.getOrientacoesCliente(), funcionario));
     }
 
-    @PostMapping("/{id}/aprovar")
-    public ResponseEntity<Solicitacao> aprovar(@PathVariable Long id) {
-        return ResponseEntity.ok(solicitacaoService.aprovarServico(id));
+    @PatchMapping("/{id}/redirecionar")
+    public ResponseEntity<Solicitacao> redirecionar(@PathVariable Long id, @RequestBody Funcionario destino, @RequestAttribute("usuario") Funcionario origem) {
+        return ResponseEntity.ok(solicitacaoService.redirecionarManutencao(id, origem, destino));
     }
 
-    @PostMapping("/{id}/rejeitar")
-    public ResponseEntity<Solicitacao> rejeitar(@PathVariable Long id, @Valid @RequestBody RejeicaoRequest request) {
-        return ResponseEntity.ok(solicitacaoService.rejeitarServico(id, request.getMotivo()));
+    @PatchMapping("/{id}/pagar")
+    public ResponseEntity<Solicitacao> pagar(@PathVariable Long id, @RequestAttribute("usuario") Cliente cliente) {
+        return ResponseEntity.ok(solicitacaoService.pagarServico(id, cliente));
     }
 
-    @PostMapping("/{id}/resgatar")
-    public ResponseEntity<Solicitacao> resgatar(@PathVariable Long id) {
-        return ResponseEntity.ok(solicitacaoService.resgatarServico(id));
-    }
-
-    @PostMapping("/{id}/pagar")
-    public ResponseEntity<Solicitacao> pagar(@PathVariable Long id) {
-        return ResponseEntity.ok(solicitacaoService.pagarServico(id));
-    }
-
-    @PostMapping("/{id}/manutencao")
-    public ResponseEntity<Solicitacao> efetuarManutencao(@PathVariable Long id, @Valid @RequestBody ManutencaoRequest request) {
-        return ResponseEntity.ok(solicitacaoService.efetuarManutencao(
-                id,
-                request.getFuncionarioId(),
-                request.getDescricaoManutencao(),
-                request.getOrientacoesCliente()
-        ));
-    }
-
-    @PostMapping("/{id}/redirecionar")
-    public ResponseEntity<Solicitacao> redirecionar(@PathVariable Long id, @Valid @RequestBody RedirecionamentoRequest request) {
-        return ResponseEntity.ok(solicitacaoService.redirecionarManutencao(
-                id,
-                request.getFuncionarioOrigemId(),
-                request.getFuncionarioDestinoId()
-        ));
-    }
-
-    @PostMapping("/{id}/finalizar")
-    public ResponseEntity<Solicitacao> finalizar(@PathVariable Long id, @Valid @RequestBody FinalizacaoRequest request) {
-        return ResponseEntity.ok(solicitacaoService.finalizarServico(id, request.getFuncionarioId()));
+    @PatchMapping("/{id}/finalizar")
+    public ResponseEntity<Solicitacao> finalizar(@PathVariable Long id, @RequestAttribute("usuario") Funcionario funcionario) {
+        return ResponseEntity.ok(solicitacaoService.finalizarSolicitacao(id, funcionario));
     }
 }

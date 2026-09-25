@@ -1,7 +1,15 @@
+<!-- ============================================ -->
+<!-- PÁGINA DE GERENCIAMENTO DE FUNCIONÁRIOS -->
+<!-- ============================================ -->
 <main class="funcionarios-page">
+  <!-- Sidebar de navegação -->
   <app-sidebar-funcionario pagina="funcionarios" (sair)="sair()" />
 
+  <!-- Seção principal de conteúdo -->
   <section class="funcionarios-main">
+    
+    <!-- ============ HEADER ============ -->
+    <!-- Exibe saudação e informações do usuário logado -->
     <header class="funcionarios-top">
       <div class="user">
         <div class="avatar" aria-hidden="true">{{ iniciais() }}</div>
@@ -12,12 +20,18 @@
       </div>
     </header>
 
+    <!-- Conteúdo principal -->
     <div class="funcionarios-content">
+      
+      <!-- Título da página -->
       <div class="titulo-row">
         <h1>Funcionários<span class="dot">.</span></h1>
       </div>
 
+      <!-- ============ FORMULÁRIO DE CADASTRO/EDIÇÃO ============ -->
+      <!-- Formulário para cadastrar novo funcionário ou editar existente -->
       <form (ngSubmit)="salvar()" novalidate>
+        <!-- Grid de campos do formulário -->
         <div class="form-grid">
           <label>
             Nome
@@ -41,6 +55,8 @@
             />
           </label>
         </div>
+
+        <!-- Botões de ação do formulário -->
         <div class="form-row">
           <button type="submit" [disabled]="carregando()">
             {{ editandoId === null ? 'Cadastrar' : 'Salvar' }}
@@ -51,6 +67,8 @@
         </div>
       </form>
 
+      <!-- ============ MENSAGENS DE FEEDBACK ============ -->
+      <!-- Exibe mensagens de erro ou sucesso -->
       @if (erro()) {
         <p class="msg erro" role="alert">{{ erro() }}</p>
       }
@@ -58,6 +76,8 @@
         <p class="msg ok" role="status">{{ sucesso() }}</p>
       }
 
+      <!-- ============ TABELA DE FUNCIONÁRIOS ============ -->
+      <!-- Lista todos os funcionários cadastrados -->
       <div class="table-wrap">
         <table>
           <thead>
@@ -70,12 +90,14 @@
             </tr>
           </thead>
           <tbody>
+            <!-- Itera sobre a lista de funcionários -->
             @for (funcionario of funcionarios(); track funcionario.id) {
               <tr>
                 <td class="id">{{ funcionario.id }}</td>
                 <td class="desc">{{ funcionario.nome }}</td>
                 <td>{{ funcionario.email }}</td>
                 <td>{{ formatarNascimento(funcionario.dataNascimento) }}</td>
+                <!-- Botões de ação (editar/remover) -->
                 <td class="acoes">
                   <button type="button" class="acao acao--ghost" (click)="editar(funcionario)">Editar</button>
                   <button
@@ -90,6 +112,7 @@
                 </td>
               </tr>
             } @empty {
+              <!-- Mensagem quando não há funcionários cadastrados -->
               <tr>
                 <td colspan="5" class="vazio">Nenhum funcionario cadastrado.</td>
               </tr>
@@ -97,6 +120,7 @@
           </tbody>
         </table>
       </div>
+
     </div>
   </section>
 </main>

@@ -8,9 +8,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.HexFormat;
 
-/**
- * Hash SHA-256 com SALT aleatorio, no formato salt$hash.
- */
 public class Sha256SaltPasswordEncoder implements PasswordEncoder {
 
     private static final String SEPARADOR = "$";
