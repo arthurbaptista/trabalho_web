@@ -1,16 +1,20 @@
-// Arquivo: src/main/java/com/maintech/backend/dto/OrcamentoRequest.java
 package br.ufpr.trabalho_web.dto;
+
+import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 
 public class OrcamentoRequest {
-    private Long solicitacaoId;
+
+    @NotNull(message = "O funcionario e obrigatorio.")
+    private Long funcionarioId;
+
+    @NotNull(message = "O valor do orcamento e obrigatorio.")
     private BigDecimal valor;
 
-    // Getters e Setters
-    public Long getSolicitacaoId() { return solicitacaoId; }
-    public void setSolicitacaoId(Long solicitacaoId) { this.solicitacaoId = solicitacaoId; }
-    
+    public Long getFuncionarioId() { return funcionarioId; }
+    public void setFuncionarioId(Long funcionarioId) { this.funcionarioId = funcionarioId; }
+
     public BigDecimal getValor() { return valor; }
     public void setValor(BigDecimal valor) { this.valor = valor; }
 }
