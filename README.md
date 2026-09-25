@@ -191,3 +191,55 @@ As credenciais apresentadas neste README são destinadas exclusivamente à execu
 O sistema foi desenvolvido para fins educacionais.
 
 As funcionalidades implementadas seguem os requisitos definidos para o Trabalho Final da disciplina.
+
+Funcionalidades do Sistema
+O sistema atende dois perfis: Cliente e Funcionário, cada um com telas e ações próprias.
+O acesso exige login, com exceção do autocadastro de clientes e da própria tela de login.
+O cliente se cadastra informando CPF, nome, e-mail, telefone e endereço completo.
+O CEP preenche o endereço automaticamente pela API ViaCEP, e todos os dados são armazenados.
+Após o cadastro, uma senha numérica de 4 dígitos é gerada e enviada por e-mail.
+O login identifica o perfil automaticamente e redireciona o usuário para a tela inicial correspondente.
+A tela inicial do cliente lista todas as suas solicitações, em ordem crescente de data e hora.
+Cada linha mostra descrição do equipamento (até 30 caracteres), data/hora, categoria e estado.
+Há um botão para visualizar a solicitação, com dados completos e histórico de atualizações.
+As ações mudam conforme o estado: aprovar/rejeitar, resgatar, pagar ou apenas visualizar.
+O cliente registra uma nova manutenção informando equipamento, categoria e descrição do defeito.
+A solicitação é criada no estado ABERTA, com data e hora do registro.
+Quando o serviço é orçado, o cliente vê o valor em destaque e pode aprovar ou rejeitar.
+A aprovação muda o estado para APROVADA; a rejeição exige motivo e passa para REJEITADA.
+Uma solicitação rejeitada pode ser resgatada, voltando para APROVADA e registrando o histórico.
+Quando o equipamento está ARRUMADA, o cliente confirma o pagamento e a data/hora é gravada.
+O funcionário vê primeiro as solicitações ABERTAS, que precisam de orçamento imediato.
+Na listagem geral, o funcionário filtra por hoje, período ou todas, em ordem de data/hora.
+As cores indicam o estado: cinza, marrom, vermelho, amarelo, roxo, azul, laranja e verde.
+O funcionário efetua o orçamento, registra valor, data/hora e o responsável, e o estado vira ORÇADA.
+Depois pode efetuar a manutenção, redirecionar para outro funcionário ou finalizar o pedido.
+O redirecionamento não pode ser feito para si mesmo e fica registrado no histórico.
+O funcionário também mantém o CRUD de categorias de equipamento e o CRUD de funcionários.
+Relatórios de receita podem ser gerados por período (agrupado por dia) e por categoria.
+Estados possíveis: ABERTA, ORÇADA, APROVADA, REJEITADA, REDIRECIONADA, ARRUMADA, PAGA e FINALIZADA.
+A interface do front segue o visual das telas de login e autocadastro, em tema escuro.
+As telas autenticadas usam barra lateral, listagens e modais para criação e detalhe da solicitação.
+O front é Angular (standalone) e o back é Spring Boot com API REST e PostgreSQL.
+As senhas são armazenadas com hash SHA-256 e SALT; as remoções desativam o registro.
+Datas e valores monetários são exibidos no formato brasileiro.
+Dados iniciais para teste: 2 funcionários (Maria e Mário) e 4 clientes (João, José, Joana e Joaquina).
+Há 5 categorias: Notebook, Desktop, Impressora, Mouse e Teclado.
+Uma massa de solicitações cobre estados, datas e clientes diferentes para avaliação dos requisitos.
+Login de funcionário: maria@manutencao.com / senha 1234.
+Login de cliente: joao@manutencao.com / senha 1234.
+Também existem jose@manutencao.com, joana@manutencao.com e joaquina@manutencao.com, senha 1234.
+Para executar o back, configure o PostgreSQL e suba a API Spring Boot na porta 8080.
+Para executar o front, entre na pasta front e rode o servidor Angular (ng serve), em geral na porta 4200.
+Com o front no ar, a rota /login abre o acesso; /cadastro abre o autocadastro.
+Após o login, o cliente vai para /cliente e o funcionário para a área operacional correspondente.
+Se a API estiver fora, a tela do cliente ainda pode ser vista com dados de exemplo no front.
+O botão Nova Solicitação abre um modal para cadastrar equipamento, categoria e defeito.
+A confirmação inclui a solicitação na lista no estado Aberta, mesmo sem o backend respondendo.
+O projeto foi feito para o Trabalho Final de WEB II (UFPR/SEPT/TADS).
+Os requisitos funcionais principais cobertos incluem RF001 a RF018, além dos relatórios RF019 e RF020.
+RF001 e RF002 tratam de autocadastro e login; RF003 a RF010 cobrem o fluxo do cliente.
+RF011 a RF016 cobrem a operação do funcionário; RF017 e RF018 são os CRUDs administrativos.
+O leiaute, a validação de campos e o uso de Angular + Spring + REST seguem os requisitos da disciplina.
+As credenciais deste README servem apenas para execução e avaliação acadêmica do sistema.
+
