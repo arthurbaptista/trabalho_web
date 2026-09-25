@@ -7,6 +7,7 @@ import br.ufpr.trabalho_web.model.Solicitacao;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -19,6 +20,13 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
     List<Solicitacao> findByCliente(Cliente cliente);
 
     boolean existsByEstadoAtual(EstadoSolicitacao estadoAtual);
+
+    List<Solicitacao> findAllByOrderByDataHoraAberturaAsc();
+
+    List<Solicitacao> findByDataHoraAberturaBetweenOrderByDataHoraAberturaAsc(
+            LocalDateTime inicio,
+            LocalDateTime fim
+    );
 }
 
 //package br.ufpr.trabalho_web.repository;
