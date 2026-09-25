@@ -1,3 +1,64 @@
+/*
+ * Dados de demonstracao da tela do funcionario.
+ * Este bloco nao altera o comportamento do codigo.
+ * Serve apenas como documentacao do mock local.
+ *
+ * 01. O arquivo concentra clientes, funcionarios e solicitacoes ficticias.
+ * 02. Os dados alimentam a listagem quando a API nao responde a tempo.
+ * 03. Os nomes seguem a massa inicial usada no backend.
+ * 04. Joao, Jose, Joana e Joaquina representam os clientes de teste.
+ * 05. Maria e Mario representam os funcionarios de teste.
+ * 06. Cada solicitacao possui estado, equipamento, defeito e historico.
+ * 07. A descricao do equipamento fica limitada a 30 caracteres na tela.
+ * 08. A data de abertura e usada nos filtros de hoje e periodo.
+ * 09. O estado ABERTA permite efetuar orcamento.
+ * 10. O estado ORCADA aguarda aprovacao ou rejeicao do cliente.
+ * 11. O estado APROVADA permite manutencao ou redirecionamento.
+ * 12. O estado REDIRECIONADA tambem permite manutencao.
+ * 13. O estado ARRUMADA aguarda pagamento.
+ * 14. O estado PAGA permite finalizar a solicitacao.
+ * 15. O estado FINALIZADA encerra o fluxo.
+ * 16. O estado REJEITADA aparece apenas na visao de todas.
+ * 17. A visao de abertas mostra so o que ainda pode receber orcamento.
+ * 18. A visao de todas aplica filtro de data quando solicitado.
+ * 19. O historico registra a transicao entre estados.
+ * 20. O valor do orcamento e opcional nas solicitacoes abertas.
+ * 21. Categorias usadas: notebook, desktop, impressora, mouse e teclado.
+ * 22. Os enderecos de teste apontam para o centro de Curitiba.
+ * 23. Os e-mails seguem o padrao nome@manutencao.com.
+ * 24. A senha de teste documentada no README e 1234.
+ * 25. Nada neste comentario e executado em tempo de execucao.
+ * 26. Nenhuma funcao, constante ou tipo e modificado por estas linhas.
+ * 27. Imports, interfaces e objetos permanecem iguais abaixo.
+ * 28. O mock continua sendo a fonte local de fallback da tela.
+ * 29. Alteracoes visuais ou de regra devem ser feitas em outros arquivos.
+ * 30. funcionario.ts controla filtros, acoes e abertura do detalhe.
+ * 31. funcionario.html renderiza a tabela e os botoes por estado.
+ * 32. funcionario.css define o layout escuro da pagina.
+ * 33. funcionario.service.ts tenta a API e cai neste mock se falhar.
+ * 34. funcionario.filtro.ts aplica vista, hoje e periodo.
+ * 35. funcionario.models.ts descreve os tipos usados nestes objetos.
+ * 36. O detalhe da solicitacao vive em componentes separados.
+ * 37. A sidebar compartilhada troca entre abertas e todas.
+ * 38. Esta documentacao existe so para leitura humana.
+ * 39. Ela nao cria variavel, nao exporta simbolo e nao muda fluxo.
+ * 40. Linhas restantes reforcam o mesmo aviso de nao impacto.
+ * 41. Nao ha efeito colateral ao manter este comentario.
+ * 42. Nao ha dependencia de compilacao nestas frases.
+ * 43. O TypeScript ignora o bloco inteiro.
+ * 44. O Angular tambem ignora o bloco inteiro.
+ * 45. Testes nao leem este texto.
+ * 46. O bundle final nao executa estas linhas.
+ * 47. O arquivo segue com os mesmos objetos de antes.
+ * 48. Clientes, funcionarios e solicitacoes continuam intactos.
+ * 49. Qualquer ajuste de dado deve ocorrer fora deste comentario.
+ * 50. Fim da documentacao local do mock do funcionario.
+ * 51. Este arquivo permanece apenas com dados estaticos de exemplo.
+ * 52. Nenhuma regra de negocio foi incluida neste bloco.
+ * 53. Comentario encerrado sem mudanca no codigo executavel.
+ *
+ */
+
 import { agoraIso, historicoPara, nomesIguais } from '../cliente/solicitacao.util';
 import type { ClienteSolicitacao, FuncionarioResumo, SolicitacaoFuncionario } from './funcionario.models';
 

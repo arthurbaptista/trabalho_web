@@ -1,9 +1,11 @@
 package br.ufpr.trabalho_web.service;
 
 import br.ufpr.trabalho_web.dto.SolicitacaoRequest;
+import br.ufpr.trabalho_web.dto.SolicitacaoResumoDTO;
 import br.ufpr.trabalho_web.exception.RegraNegocioException;
 import br.ufpr.trabalho_web.model.*;
 import br.ufpr.trabalho_web.repository.CategoriaRepository;
+import br.ufpr.trabalho_web.repository.ClienteRepository;
 import br.ufpr.trabalho_web.repository.HistoricoSolicitacaoRepository;
 import br.ufpr.trabalho_web.repository.SolicitacaoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class SolicitacaoService {
@@ -27,6 +26,9 @@ public class SolicitacaoService {
 
     @Autowired
     private HistoricoSolicitacaoRepository historicoRepository;
+
+    @Autowired
+    private ClienteRepository clienteRepository;
 
     public Solicitacao criarSolicitacao(SolicitacaoRequest request) {
         Categoria categoria = categoriaRepository.findById(request.getCategoriaId())
@@ -44,15 +46,55 @@ public class SolicitacaoService {
         return salva;
     }
 
-    // public List<Solicitacao> getSolicitacoesCliente() {
-//        Usuario usuario = usuarioService.getUsuarioAtual();
-//        if (!(usuario instanceof Cliente)) {
-//            throw new RuntimeException("Apenas clientes podem ver suas solicitações");
-//        }
+    public List<SolicitacaoResumoDTO> listarDoCliente(String email) {
+        Cliente cliente = clienteRepository.findByEmail(email);
+        if (cliente == null) {
+            throw new RegraNegocioException("Apenas clientes podem ver a pagina inicial de solicitacoes.");
+        }
 
-//        Cliente cliente = (Cliente) usuario;
-        //   return solicitacaoRepository.findByClienteOrderByDataHoraAberturaAsc(cliente);
-        // }
+        return solicitacaoRepository.findByClienteOrderByDataHoraAberturaAsc(cliente)
+                .stream()
+                .map(this::paraResumo)
+                .toList();
+    }
+
+    public SolicitacaoResumoDTO criarDoCliente(String email, SolicitacaoRequest request) {
+        Cliente cliente = clienteRepository.findByEmail(email);
+        if (cliente == null) {
+            throw new RegraNegocioException("Apenas clientes podem abrir solicitacoes.");
+        }
+
+        Categoria categoria = categoriaRepository.findById(request.getCategoriaId())
+                .orElseThrow(() -> new RegraNegocioException("Categoria nao encontrada."));
+
+        String descricao = request.getDescricaoEquipamento() == null
+                ? ""
+                : request.getDescricaoEquipamento().trim();
+        String defeito = request.getDescricaoDefeito() == null
+                ? ""
+                : request.getDescricaoDefeito().trim();
+
+        if (descricao.isEmpty()) {
+            throw new RegraNegocioException("Informe a descricao do equipamento.");
+        }
+        if (descricao.length() > 30) {
+            descricao = descricao.substring(0, 30);
+        }
+        if (defeito.isEmpty()) {
+            throw new RegraNegocioException("Informe a descricao do defeito.");
+        }
+
+        Solicitacao solicitacao = new Solicitacao();
+        solicitacao.setCliente(cliente);
+        solicitacao.setCategoria(categoria);
+        solicitacao.setDescricaoEquipamento(descricao);
+        solicitacao.setDescricaoDefeito(defeito);
+        solicitacao.setDataHoraAbertura(LocalDateTime.now());
+        solicitacao.setEstadoAtual(EstadoSolicitacao.ABERTA);
+        solicitacao.setStatus(true);
+
+        return paraResumo(solicitacaoRepository.save(solicitacao));
+    }
 
     public List<Solicitacao> getSolicitacoesAbertas() {
         return solicitacaoRepository.findByEstadoAtual(EstadoSolicitacao.ABERTA);
@@ -74,6 +116,26 @@ public class SolicitacaoService {
     }
     public List<Solicitacao> getSolicitacoes(){
         return solicitacaoRepository.findAll();
+    }
+
+    private SolicitacaoResumoDTO paraResumo(Solicitacao solicitacao) {
+        String descricao = solicitacao.getDescricaoEquipamento() == null
+                ? ""
+                : solicitacao.getDescricaoEquipamento();
+        if (descricao.length() > 30) {
+            descricao = descricao.substring(0, 30);
+        }
+
+        String categoria = solicitacao.getCategoria() == null ? "" : solicitacao.getCategoria().getNome();
+
+        return new SolicitacaoResumoDTO(
+                solicitacao.getId(),
+                solicitacao.getDataHoraAbertura(),
+                descricao,
+                categoria,
+                solicitacao.getEstadoAtual().name(),
+                solicitacao.getValorOrcamento()
+        );
     }
 
     private void adicionarHistorico(Solicitacao solicitacao, EstadoSolicitacao estadoAnterior,
