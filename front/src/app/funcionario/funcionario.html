@@ -1,8 +1,4 @@
-<!-- ================================================ -->
-<!-- PÁGINA DE SOLICITAÇÕES DO FUNCIONÁRIO -->
-<!-- ================================================ -->
 <main class="funcionario-page">
-  <!-- Sidebar de navegação com filtro de vistas -->
   <app-sidebar-funcionario
     pagina="funcionario"
     [vista]="vista()"
@@ -11,11 +7,8 @@
     (sair)="sair()"
   />
 
-  <!-- Seção principal de conteúdo -->
   <section class="funcionario-main">
     
-    <!-- ============ HEADER ============ -->
-    <!-- Exibe saudação e informações do usuário logado -->
     <header class="funcionario-top">
       <div class="user">
         <div class="avatar" aria-hidden="true">{{ iniciais() }}</div>
@@ -26,15 +19,11 @@
       </div>
     </header>
 
-    <!-- Conteúdo principal da página -->
     <div class="funcionario-content">
       
-      <!-- ============ SEÇÃO DE TÍTULO E FILTROS ============ -->
-      <!-- Título dinâmico da página e botões de filtro de vista -->
       <div class="titulo-row">
         <h1>{{ titulo() }}<span class="dot">.</span></h1>
 
-        <!-- Filtros de período (apenas visível na vista "todas") -->
         @if (vista() === 'todas') {
           <div class="filtros" role="group" aria-label="Filtro de período">
             <button type="button" [class.active]="filtro() === 'TODAS'" (click)="escolherFiltro('TODAS')">
@@ -50,8 +39,6 @@
         }
       </div>
 
-      <!-- ============ FILTRO POR PERÍODO ============ -->
-      <!-- Inputs de data inicial e final (aparece quando filtro é 'PERIODO') -->
       @if (vista() === 'todas' && filtro() === 'PERIODO') {
         <div class="periodo">
           <label>
@@ -80,8 +67,6 @@
         </div>
       }
 
-      <!-- ============ MENSAGEM DE ERRO ============ -->
-      <!-- Exibe alerta de erro com ícone (quando houver erro) -->
       @if (erro()) {
         <p class="funcionario-error" role="alert">
           <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -92,8 +77,6 @@
         </p>
       }
 
-      <!-- ============ TABELA DE SOLICITAÇÕES ============ -->
-      <!-- Lista todas as solicitações de manutenção com suas informações -->
       <div class="table-wrap">
         <table>
           <thead>
@@ -110,20 +93,16 @@
           </thead>
           <tbody>
             
-            <!-- Indicador de carregamento -->
             @if (carregando()) {
               <tr>
                 <td colspan="6" class="vazio">Carregando solicitações...</td>
               </tr>
             } @else {
               
-              <!-- Loop de solicitações com rastreamento por ID -->
               @for (solicitacao of visiveis(); track solicitacao.id) {
-                <!-- Linha da tabela com classe dinâmica baseada no estado -->
                 <tr [class]="classeEstado(solicitacao.estado)">
                   <td class="desc">{{ descricao(solicitacao.descricaoEquipamento) }}</td>
                   
-                  <!-- Botão para abrir modal com detalhes -->
                   <td>
                     <button type="button" class="visualizar" (click)="visualizar(solicitacao)">
                       Visualizar
@@ -136,13 +115,10 @@
                   <td class="muted">{{ formatarDataHora(solicitacao.dataHoraAbertura) }}</td>
                   <td>{{ solicitacao.cliente.nome }}</td>
                   
-                  <!-- Coluna de status (apenas em vista "todas") -->
                   @if (vista() === 'todas') {
                     <td>{{ rotuloEstado(solicitacao.estado) }}</td>
                   }
                   
-                  <!-- ============ BOTÕES DE AÇÃO POR ESTADO ============ -->
-                  <!-- Ações dinâmicas conforme o estado da solicitação (ABERTA, APROVADA, etc) -->
                   <td class="acoes">
                     @switch (solicitacao.estado) {
                       @case ('ABERTA') {
@@ -175,7 +151,6 @@
                   </td>
                 </tr>
               } @empty {
-                <!-- Mensagem quando não há solicitações -->
                 <tr>
                   <td colspan="6" class="vazio">
                     @if (vista() === 'todas' && filtro() === 'HOJE') {
@@ -195,8 +170,6 @@
     </div>
   </section>
 
-  <!-- ============ MODAL DE DETALHES ============ -->
-  <!-- Componente filho que exibe detalhes da solicitação selecionada -->
   <app-detalhe-solicitacao-funcionario
     [aberto]="detalheAberto()"
     [solicitacao]="solicitacaoAtual()"
