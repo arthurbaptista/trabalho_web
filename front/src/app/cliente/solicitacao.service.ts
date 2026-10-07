@@ -4,7 +4,7 @@ import { Observable, of, throwError } from 'rxjs';
 import { Auth } from '../core/auth';
 import { SolicitacaoStore } from '../core/solicitacao.store';
 import { agoraIso, HistoricoPasso, historicoPara, rotuloAutor } from './solicitacao.util';
-import type { SolicitacaoFuncionario } from '../funcionario/funcionario.models';
+import type { SolicitacaoFuncionario } from '../solicitacao/solicitacao.models';
 
 export interface SolicitacaoResumo {
   id: number;

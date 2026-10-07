@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
 
-import { emailClienteDemoExiste } from '../core/usuarios.mock';
-import type { FuncionarioResumo } from '../funcionario/funcionario.models';
+import { emailClienteDemoExiste } from '../../core/usuarios.mock';
+import type { FuncionarioResumo } from '../../solicitacao/solicitacao.models';
 import {
   atualizarFuncionarioCadastro,
   criarFuncionarioCadastro,

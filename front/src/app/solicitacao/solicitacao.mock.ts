@@ -1,5 +1,5 @@
 import { agoraIso, historicoPara, nomesIguais } from '../cliente/solicitacao.util';
-import type { ClienteSolicitacao, FuncionarioResumo, SolicitacaoFuncionario } from './funcionario.models';
+import type { ClienteSolicitacao, FuncionarioResumo, SolicitacaoFuncionario } from './solicitacao.models';
 
 const JOAO: ClienteSolicitacao = {
   id: 1,

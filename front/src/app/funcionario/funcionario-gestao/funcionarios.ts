@@ -1,10 +1,10 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { nomesIguais } from '../cliente/solicitacao.util';
-import { SidebarFuncionario } from '../componentes/sidebar-funcionario/sidebar-funcionario';
-import { mensagemHttpErro } from '../core/api';
-import { Auth } from '../core/auth';
+import { nomesIguais } from '../../cliente/solicitacao.util';
+import { SidebarFuncionario } from '../../componentes/sidebar-funcionario/sidebar-funcionario';
+import { mensagemHttpErro } from '../../core/api';
+import { Auth } from '../../core/auth';
 import { FuncionarioCadastroService } from './funcionario-cadastro.service';
 import type { FuncionarioCadastro } from './funcionario-cadastro.store';
 

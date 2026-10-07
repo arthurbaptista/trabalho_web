@@ -10,8 +10,8 @@ import {
   temaEstado,
 } from '../../cliente/solicitacao.util';
 import { Auth } from '../../core/auth';
-import type { FuncionarioResumo, ModoDetalheFuncionario, SolicitacaoFuncionario } from '../../funcionario/funcionario.models';
-import { FuncionarioService } from '../../funcionario/funcionario.service';
+import type { FuncionarioResumo, ModoDetalheFuncionario, SolicitacaoFuncionario } from '../../solicitacao/solicitacao.models';
+import { SolicitacaoService } from '../../solicitacao/solicitacao.service';
 
 // Mensagem de confirmação mostrada depois que uma ação é concluída com sucesso.
 // Cada valor corresponde ao resultado de uma das quatro ações que este componente
@@ -45,7 +45,7 @@ type EtapaManutencao = 'escolha' | 'efetuar' | 'redirecionar';
   styleUrl: './detalhe-solicitacao-funcionario.css',
 })
 export class DetalheSolicitacaoFuncionario {
-  private readonly funcionarioService = inject(FuncionarioService);
+  private readonly funcionarioService = inject(SolicitacaoService);
   private readonly auth = inject(Auth);
 
   aberto = input(false);
@@ -259,7 +259,7 @@ export class DetalheSolicitacaoFuncionario {
   }
 
   private executar(
-    acao: () => ReturnType<FuncionarioService['efetuarOrcamento']>,
+    acao: () => ReturnType<SolicitacaoService['efetuarOrcamento']>,
     mensagem: MensagemAcao,
   ) {
     this.salvando = true;
