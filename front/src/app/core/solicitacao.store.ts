@@ -82,8 +82,8 @@
 import { Injectable } from '@angular/core';
 
 import { normalizarTexto } from '../cliente/solicitacao.util';
-import { clienteDemoPorNome, SOLICITACOES_FUNCIONARIO_DEMO } from '../funcionario/funcionario.mock';
-import type { ClienteSolicitacao, SolicitacaoFuncionario } from '../funcionario/funcionario.models';
+import { clienteDemoPorNome, SOLICITACOES_FUNCIONARIO_DEMO } from '../solicitacao/solicitacao.mock';
+import type { ClienteSolicitacao, SolicitacaoFuncionario } from '../solicitacao/solicitacao.models';
 
 const CHAVE = 'solicitacoes_demo_v3';
 

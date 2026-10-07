@@ -1,5 +1,5 @@
 import { nomesIguais } from '../cliente/solicitacao.util';
-import type { FiltroPeriodo, SolicitacaoFuncionario, VistaFuncionario } from './funcionario.models';
+import type { FiltroPeriodo, SolicitacaoFuncionario, VistaFuncionario } from './solicitacao.models';
 
 export function diaAbertura(iso: string): string {
   const match = /^(\d{4}-\d{2}-\d{2})/.exec(iso);

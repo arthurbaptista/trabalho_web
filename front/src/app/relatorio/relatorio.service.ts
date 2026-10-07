@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 
 import { formatarMoeda } from '../cliente/solicitacao.util';
 import { SolicitacaoStore } from '../core/solicitacao.store';
-import type { SolicitacaoFuncionario } from '../funcionario/funcionario.models';
+import type { SolicitacaoFuncionario } from '../solicitacao/solicitacao.models';
 
 export interface LinhaReceita {
   chave: string;

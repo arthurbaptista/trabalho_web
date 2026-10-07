@@ -4,11 +4,11 @@ import { Observable, of, throwError } from 'rxjs';
 import { agoraIso, nomesIguais } from '../cliente/solicitacao.util';
 import { Auth } from '../core/auth';
 import { SolicitacaoStore } from '../core/solicitacao.store';
-import { FuncionarioCadastroService } from '../funcionarios/funcionario-cadastro.service';
-import type { SolicitacaoFuncionario } from './funcionario.models';
+import { FuncionarioCadastroService } from '../funcionario/funcionario-gestao/funcionario-cadastro.service';
+import type { SolicitacaoFuncionario } from './solicitacao.models';
 
 @Injectable({ providedIn: 'root' })
-export class FuncionarioService {
+export class SolicitacaoService {
   private readonly auth = inject(Auth);
   private readonly store = inject(SolicitacaoStore);
   private readonly funcionarios = inject(FuncionarioCadastroService);

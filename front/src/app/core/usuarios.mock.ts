@@ -1,4 +1,4 @@
-import { autenticarFuncionario, emailFuncionarioExiste } from '../funcionarios/funcionario-cadastro.store';
+import { autenticarFuncionario, emailFuncionarioExiste } from '../funcionario/funcionario-gestao/funcionario-cadastro.store';
 
 export type PerfilDemo = 'CLIENTE' | 'FUNCIONARIO';
 

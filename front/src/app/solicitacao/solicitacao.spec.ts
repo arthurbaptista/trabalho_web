@@ -4,17 +4,17 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
 import { Auth } from '../core/auth';
-import { SOLICITACOES_FUNCIONARIO_DEMO } from './funcionario.mock';
-import { FuncionarioPage } from './funcionario';
-import { FuncionarioService } from './funcionario.service';
+import { SOLICITACOES_FUNCIONARIO_DEMO } from './solicitacao.mock';
+import { SolicitacaoPage } from './solicitacao';
+import { SolicitacaoService } from './solicitacao.service';
 
-describe('FuncionarioPage', () => {
-  let component: FuncionarioPage;
-  let fixture: ComponentFixture<FuncionarioPage>;
+describe('SolicitacaoPage', () => {
+  let component: SolicitacaoPage;
+  let fixture: ComponentFixture<SolicitacaoPage>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FuncionarioPage],
+      imports: [SolicitacaoPage],
       providers: [
         provideHttpClient(),
         provideRouter([]),
@@ -26,7 +26,7 @@ describe('FuncionarioPage', () => {
           },
         },
         {
-          provide: FuncionarioService,
+          provide: SolicitacaoService,
           useValue: {
             listar: () => of(SOLICITACOES_FUNCIONARIO_DEMO),
             detalhar: (id: number) => of(SOLICITACOES_FUNCIONARIO_DEMO.find((item) => item.id === id)),
@@ -36,7 +36,7 @@ describe('FuncionarioPage', () => {
       ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(FuncionarioPage);
+    fixture = TestBed.createComponent(SolicitacaoPage);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

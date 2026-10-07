@@ -1,5 +1,5 @@
-import { SOLICITACOES_FUNCIONARIO_DEMO } from './funcionario.mock';
-import { filtrarSolicitacoesFuncionario } from './funcionario.filtro';
+import { SOLICITACOES_FUNCIONARIO_DEMO } from './solicitacao.mock';
+import { filtrarSolicitacoesFuncionario } from './solicitacao.filtro';
 
 describe('filtrarSolicitacoesFuncionario', () => {
   const lista = SOLICITACOES_FUNCIONARIO_DEMO;
