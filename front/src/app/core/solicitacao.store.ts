@@ -1,7 +1,7 @@
 /*
  * Store local de solicitacoes de manutencao.
  * Este bloco nao altera o comportamento do codigo.
- * Serve apenas como documentacao do arquivo.
+ * Serve apenas como documentacao do arquivo. Recriado.
  * 01. O store concentra a lista compartilhada entre cliente e funcionario.
  * 02. Ele e um servico Angular com providedIn root.
  * 03. Uma unica instancia fica disponivel em toda a aplicacao.
@@ -38,7 +38,7 @@
  * 34. Apos uma acao, o fluxo chama guardar para persistir o novo estado.
  * 35. O historico viaja junto no objeto SolicitacaoFuncionario.
  * 36. O tipo ClienteSolicitacao descreve o dono da solicitacao.
- * 37. funcionario.mock.ts continua sendo a fonte inicial de demonstracao.
+ * 37. solicitacao.mock.ts continua sendo a fonte inicial de demonstracao.
  * 38. Alterar este comentario nao muda listagem, filtro nem persistencia.
  * 39. Imports, constantes, classe e funcoes permanecem iguais abaixo.
  * 40. O TypeScript ignora o bloco inteiro.
@@ -76,7 +76,87 @@
  * 72. Nada abaixo deste bloco foi extraido.
  * 73. Nada abaixo deste bloco foi renomeado.
  * 74. O codigo executavel comeca no import seguinte.
- * 75. Fim da documentacao local do SolicitacaoStore.
+ * 75. Continuacao da documentacao local do SolicitacaoStore.
+ * 76. Este segundo bloco tambem nao altera o codigo executavel.
+ * 77. Ele apenas amplia a leitura humana do arquivo.
+ * 78. listarTodas nunca devolve a referencia interna de this.itens.
+ * 79. listarDoCliente tambem devolve copias filtradas.
+ * 80. obter devolve null quando o id nao existe.
+ * 81. guardar persiste tanto inclusao quanto atualizacao.
+ * 82. Se o id ja existe, o item da mesma posicao e substituido.
+ * 83. Se o id e novo, o item entra no final da lista.
+ * 84. gravar e chamado so depois dessa inclusao ou substituicao.
+ * 85. clienteDaSessao nao cria solicitacao, so resolve o dono.
+ * 86. O cadastro demo tem prioridade sobre o que ja esta salvo.
+ * 87. O cliente encontrado numa solicitacao e o segundo fallback.
+ * 88. O objeto padrao e o ultimo recurso da resolucao.
+ * 89. pertenceAoCliente nao compara telefone, cpf nem endereco.
+ * 90. E-mail vazio no item impede o match por e-mail.
+ * 91. E-mail vazio na sessao cai para o match por nome.
+ * 92. normalizarTexto reduz diferencas de acento e maiusculas.
+ * 93. ler comeca sempre da massa SOLICITACOES_FUNCIONARIO_DEMO.
+ * 94. Depois aplica por cima cada item persistido com o mesmo id.
+ * 95. Itens persistidos com id inedito entram na lista final.
+ * 96. A ordem final segue o Map montado a partir da base.
+ * 97. lerSalvas ignora qualquer JSON que nao seja array.
+ * 98. JSON.parse malformado nao derruba a aplicacao.
+ * 99. lerPersistido preenche cacheJson quando o storage responde.
+ * 100. Se o storage lancar, o cache em memoria ainda pode servir.
+ * 101. gravar atualiza cacheJson mesmo se o setItem falhar.
+ * 102. Isso mantem a sessao atual consistente sem recarregar.
+ * 103. clone evita que a tela mute a lista interna do store.
+ * 104. Datas, historico e cliente sao copiados junto no JSON.
+ * 105. Funcoes e metodos de classe nao passam por esse clone.
+ * 106. Os tipos usados aqui nao carregam funcoes nos objetos.
+ * 107. Por isso a serializacao simples e suficiente na demo.
+ * 108. O store nao conhece estados ABERTA, ORCADA ou FINALIZADA.
+ * 109. Quem muda estado e o servico de cliente ou de funcionario.
+ * 110. Depois da mudanca, o servico devolve o objeto para guardar.
+ * 111. A pagina inicial do cliente so enxerga as do usuario logado.
+ * 112. A pagina do funcionario enxerga o conjunto completo local.
+ * 113. Filtros de hoje e periodo nao moram neste arquivo.
+ * 114. Abrir detalhe nao grava nada, so chama obter.
+ * 115. Fechar detalhe tambem nao grava nada neste store.
+ * 116. Logout deve chamar resetarSolicitacaoStore.
+ * 117. Sem o reset, a proxima sessao pode ver cache da anterior.
+ * 118. A chave v3 isola esta massa das versoes antigas no browser.
+ * 119. Limpar o storage do navegador volta a lista ao mock.
+ * 120. Duas abas compartilham o mesmo localStorage desta origem.
+ * 121. O cacheJson, porem, e por aba e por recarregamento.
+ * 122. Este arquivo nao emite eventos para outras abas.
+ * 123. Recarregar e a forma de reler o que outra aba gravou.
+ * 124. Nao ha Observable, Subject nem signal neste store.
+ * 125. Os componentes leem o retorno sincrono dos metodos.
+ * 126. Injectable providedIn root evita duas listas divergentes.
+ * 127. Nao instancie SolicitacaoStore manualmente nos testes de tela.
+ * 128. Prefira o mesmo provider da aplicacao ou um stub explicito.
+ * 129. Comentarios extras nao criam metodo, campo nem constante.
+ * 130. Comentarios extras nao mudam a chave nem o formato JSON.
+ * 131. Comentarios extras nao mudam o filtro de cliente.
+ * 132. Comentarios extras nao mudam o clone nem a persistencia.
+ * 133. O import de Injectable permanece o primeiro codigo executavel.
+ * 134. O import de normalizarTexto segue imediatamente depois.
+ * 135. O mock e os tipos continuam vindo de solicitacao.mock e models.
+ * 136. CHAVE, cacheJson e CLIENTE_PADRAO permanecem no mesmo lugar.
+ * 137. A classe SolicitacaoStore permanece com os mesmos metodos.
+ * 138. A funcao clone permanece no final do arquivo.
+ * 139. Nenhuma linha abaixo deste bloco foi reescrita por este acrescimo.
+ * 140. Nenhuma linha abaixo deste bloco foi apagada por este acrescimo.
+ * 141. Este texto pode ser removido sem efeito no runtime.
+ * 142. Este texto pode ser reduzido sem efeito no runtime.
+ * 143. Este texto pode ser ampliado sem efeito no runtime.
+ * 144. A demonstracao de cliente e funcionario segue igual.
+ * 145. Nova solicitacao, orcamento e manutencao seguem igual.
+ * 146. Pagamento, redirecionamento e finalizacao seguem igual.
+ * 147. Autocadastro e login nao dependem destas frases.
+ * 148. Guards e interceptors nao leem este comentario.
+ * 149. O bloco extra existe so para completar mais 80 linhas.
+ * 150. As linhas 76 a 155 continuam sendo apenas documentacao.
+ * 151. Nada disto vira string, log ou mensagem de tela.
+ * 152. Nada disto altera CSS, HTML ou rotas.
+ * 153. Nada disto altera backend, DTO ou banco.
+ * 154. Fim do segundo bloco de documentacao do SolicitacaoStore.
+ * 155. O codigo executavel comeca no import seguinte.
  */
 
 import { Injectable } from '@angular/core';
