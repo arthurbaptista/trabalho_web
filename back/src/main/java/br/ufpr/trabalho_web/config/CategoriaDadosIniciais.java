@@ -3,11 +3,13 @@ package br.ufpr.trabalho_web.config;
 import br.ufpr.trabalho_web.model.Categoria;
 import br.ufpr.trabalho_web.repository.CategoriaRepository;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
+@Order(1)
 public class CategoriaDadosIniciais implements CommandLineRunner {
 
     private final CategoriaRepository categoriaRepository;
