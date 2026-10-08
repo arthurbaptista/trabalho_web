@@ -15,7 +15,7 @@
   color: var(--text);
 }
 
-.funcionario-page {
+.solicitacao-page {
   display: grid;
   grid-template-columns: 76px 1fr;
   grid-template-rows: minmax(0, 1fr);
@@ -82,7 +82,7 @@
   stroke-linejoin: round;
 }
 
-.funcionario-main {
+.solicitacao-main {
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -90,7 +90,7 @@
   overflow: hidden;
 }
 
-.funcionario-top {
+.solicitacao-top {
   display: flex;
   justify-content: flex-end;
   padding: 1.15rem 1.75rem 0;
@@ -131,7 +131,7 @@
   font-size: 0.75rem;
 }
 
-.funcionario-content {
+.solicitacao-content {
   flex: 1;
   min-height: 0;
   padding: 1.4rem 2rem 2rem;
