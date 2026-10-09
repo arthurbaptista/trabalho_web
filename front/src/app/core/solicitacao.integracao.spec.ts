@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
 
 import { SolicitacaoService } from '../cliente/solicitacao.service';
-import { FuncionarioService } from '../funcionario/funcionario.service';
+import { SolicitacaoService as FuncionarioService } from '../solicitacao/solicitacao.service';
 import { Auth } from './auth';
 import { SolicitacaoStore, resetarSolicitacaoStore } from './solicitacao.store';
 

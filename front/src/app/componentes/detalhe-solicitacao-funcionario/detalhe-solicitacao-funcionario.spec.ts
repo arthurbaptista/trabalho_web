@@ -3,8 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
 import { Auth } from '../../core/auth';
-import { SOLICITACOES_FUNCIONARIO_DEMO } from '../../funcionario/funcionario.mock';
-import { FuncionarioService } from '../../funcionario/funcionario.service';
+import { SOLICITACOES_FUNCIONARIO_DEMO } from '../../solicitacao/solicitacao.mock';
+import { SolicitacaoService as FuncionarioService } from '../../solicitacao/solicitacao.service';
 import { DetalheSolicitacaoFuncionario } from './detalhe-solicitacao-funcionario';
 
 describe('DetalheSolicitacaoFuncionario', () => {
