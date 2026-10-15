@@ -1,8 +1,8 @@
 import { provideRouter } from '@angular/router';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Auth } from '../../core/auth';
-import { resetarFuncionariosCadastro } from './funcionario-cadastro.store';
+import { Auth } from '../core/auth';
+import { resetarFuncionariosCadastro } from '../funcionario/funcionario-gestao/funcionario-cadastro.store';
 import { FuncionariosPage } from './funcionarios';
 
 describe('FuncionariosPage', () => {
