@@ -1,11 +1,19 @@
 <main class="funcionarios-page">
-  <app-sidebar-funcionario pagina="funcionarios" (sair)="sair()" />
+  <!-- Menu lateral de navegação -->
+  <app-sidebar-funcionario
+    pagina="funcionarios"
+    (sair)="sair()"
+  />
 
   <section class="funcionarios-main">
     
+    <!-- Cabeçalho com dados do usuário logado -->
     <header class="funcionarios-top">
       <div class="user">
-        <div class="avatar" aria-hidden="true">{{ iniciais() }}</div>
+        <div
+          class="avatar"
+          aria-hidden="true"
+        >{{ iniciais() }}</div>
         <div class="user-meta">
           <strong>Olá {{ primeiroNome() }}!</strong>
           <span>Funcionário</span>
@@ -15,23 +23,43 @@
 
     <div class="funcionarios-content">
       
+      <!-- Título da página -->
       <div class="titulo-row">
         <h1>Funcionários<span class="dot">.</span></h1>
       </div>
 
-      <form (ngSubmit)="salvar()" novalidate>
+      <!-- Formulário de cadastro e edição -->
+      <form
+        (ngSubmit)="salvar()"
+        novalidate
+      >
         <div class="form-grid">
           <label>
             Nome
-            <input name="nome" type="text" maxlength="100" [(ngModel)]="nome" placeholder="Nome completo" />
+            <input
+              name="nome"
+              type="text"
+              maxlength="100"
+              [(ngModel)]="nome"
+              placeholder="Nome completo"
+            />
           </label>
           <label>
             E-mail
-            <input name="email" type="email" [(ngModel)]="email" placeholder="grace.l@example.com" />
+            <input
+              name="email"
+              type="email"
+              [(ngModel)]="email"
+              placeholder="grace.l@example.com"
+            />
           </label>
           <label>
             Data de nascimento
-            <input name="dataNascimento" type="date" [(ngModel)]="dataNascimento" />
+            <input
+              name="dataNascimento"
+              type="date"
+              [(ngModel)]="dataNascimento"
+            />
           </label>
           <label>
             Senha
@@ -45,20 +73,36 @@
         </div>
 
         <div class="form-row">
-          <button type="submit" [disabled]="carregando()">
+          <button
+            type="submit"
+            [disabled]="carregando()"
+          >
             {{ editandoId === null ? 'Cadastrar' : 'Salvar' }}
           </button>
           @if (editandoId !== null) {
-            <button type="button" class="ghost" (click)="cancelarEdicao()">Cancelar</button>
+            <button
+              type="button"
+              class="ghost"
+              (click)="cancelarEdicao()"
+            >
+              Cancelar
+            </button>
           }
         </div>
       </form>
 
+      <!-- Mensagens de erro e sucesso -->
       @if (erro()) {
-        <p class="msg erro" role="alert">{{ erro() }}</p>
+        <p
+          class="msg erro"
+          role="alert"
+        >{{ erro() }}</p>
       }
       @if (sucesso()) {
-        <p class="msg ok" role="status">{{ sucesso() }}</p>
+        <p
+          class="msg ok"
+          role="status"
+        >{{ sucesso() }}</p>
       }
 
       <div class="table-wrap">
@@ -80,7 +124,13 @@
                 <td>{{ funcionario.email }}</td>
                 <td>{{ formatarNascimento(funcionario.dataNascimento) }}</td>
                 <td class="acoes">
-                  <button type="button" class="acao acao--ghost" (click)="editar(funcionario)">Editar</button>
+                  <button
+                    type="button"
+                    class="acao acao--ghost"
+                    (click)="editar(funcionario)"
+                  >
+                    Editar
+                  </button>
                   <button
                     type="button"
                     class="acao acao--danger"

@@ -10,7 +10,7 @@ import { Autocadastro } from './home/autocadastro/autocadastro';
 import { Login } from './home/login/login';
 import { RelatorioReceitasPage } from './relatorio/relatorio-receitas/relatorio-receitas';
 import { RelatorioReceitasCategoriaPage } from './relatorio/relatorio-receitas-categoria/relatorio-receitas-categoria';
-import { FuncionariosPage } from './funcionario/funcionario-gestao/funcionarios';
+import { FuncionariosPage } from './funcionario/funcionarios';
 
 export const routes: Routes = [
   { path: 'login', component: Login },
