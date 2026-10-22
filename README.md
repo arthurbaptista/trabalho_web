@@ -243,3 +243,60 @@ RF011 a RF016 cobrem a operação do funcionário; RF017 e RF018 são os CRUDs a
 O leiaute, a validação de campos e o uso de Angular + Spring + REST seguem os requisitos da disciplina.
 As credenciais deste README servem apenas para execução e avaliação acadêmica do sistema.
 
+
+## Arquitetura e Detalhes Técnicos
+
+### Visão Geral
+O projeto é dividido em duas aplicações independentes na mesma raiz:
+- `front/`: aplicação Angular (standalone components) com Bootstrap.
+- `back/`: API REST em Spring Boot 4.1 (Java 21) com Maven Wrapper.
+- O front consome a API por HTTP e a autenticação é feita via token JWT.
+
+### Estrutura do Back-end
+O pacote base é `br.ufpr.trabalho_web`, organizado em camadas:
+- `controller`: endpoints REST (Auth, Cliente, Funcionário, Categoria, Solicitação, Orçamento e Relatório).
+- `service`: regras de negócio, como transições de estado e validações.
+- `repository`: acesso a dados com Spring Data JPA.
+- `model`: entidades JPA (Usuário, Cliente, Funcionário, Endereço, Categoria, Solicitação e Histórico).
+- `dto`: objetos de entrada e saída da API.
+- `security`: filtro JWT, utilitário de token e encoder de senha SHA-256 com SALT.
+- `exception`: tratamento centralizado de erros (`ApiExceptionHandler`).
+- `config`: configuração do Spring Security e carga dos dados iniciais.
+
+### Estrutura do Front-end
+Em `front/src/app` as telas ficam separadas por domínio:
+- `home`, `cliente`, `funcionario`, `categoria`, `solicitacao` e `relatorio`.
+- `componentes` e `shared` reúnem elementos reutilizáveis.
+- `core` concentra serviços, guards (auth, cliente, funcionário) e stores compartilhados.
+- As rotas ficam em `app.routes.ts` e a configuração global em `app.config.ts`.
+
+### Principais Endpoints da API
+- `POST /auth/login`: autentica o usuário e retorna o token e o perfil.
+- `POST /clientes/cadastro`: autocadastro de cliente.
+- `GET/PUT/DELETE /categorias` e `/funcionarios`: CRUDs administrativos.
+- `POST /api/solicitacoes/cliente`: abertura de solicitação pelo cliente.
+- `PATCH /api/solicitacoes/{id}/orcar`: registra o orçamento.
+- `PATCH /api/solicitacoes/{id}/aprovar` e `/rejeitar`: decisão do cliente sobre o orçamento.
+- `PATCH /api/solicitacoes/{id}/resgatar`: reverte uma rejeição para aprovada.
+- `PATCH /api/solicitacoes/{id}/manutencao`, `/redirecionar`, `/pagar` e `/finalizar`: demais etapas do fluxo.
+- `GET /relatorios/receitas` e `/relatorios/receitas-categoria`: relatórios de receita.
+
+### Regras de Negócio Importantes
+- A remoção de funcionários e categorias é lógica (desativação), preservando o histórico.
+- Um funcionário não pode remover a si mesmo.
+- O último funcionário ativo do sistema não pode ser removido.
+- Não é permitido cadastrar CPF ou e-mail duplicado (`RecursoDuplicadoException`).
+- Violações de regra retornam erro tratado por `RegraNegocioException`.
+- Toda mudança de estado de uma solicitação gera um registro no histórico.
+
+### Como Executar
+1. Crie o banco PostgreSQL `manutencao_db` e ajuste usuário e senha em `back/src/main/resources/application.properties`.
+2. No diretório `back`, execute `./mvnw spring-boot:run` (a API sobe na porta 8080).
+3. Em outro terminal, entre em `front`, rode `npm install` e depois `ng serve`.
+4. Acesse `http://localhost:4200/login` e use as credenciais de teste listadas acima.
+5. As tabelas são criadas automaticamente (`ddl-auto=update`) e os dados iniciais são carregados na primeira execução.
+6. Para enviar e-mails reais com a senha gerada, descomente e configure as propriedades `spring.mail.*`; sem isso a senha aparece no log do back-end.
+
+### Testes
+- Back-end: `./mvnw test` executa os testes unitários e de serviço.
+- Front-end: `ng test` executa os testes com Vitest.
