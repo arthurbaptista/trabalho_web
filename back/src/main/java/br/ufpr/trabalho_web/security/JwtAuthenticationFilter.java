@@ -1,5 +1,7 @@
 package br.ufpr.trabalho_web.security;
 
+import br.ufpr.trabalho_web.model.Usuario;
+import br.ufpr.trabalho_web.repository.UsuarioRepository;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -22,6 +24,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -56,6 +61,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+
+                Usuario usuario = usuarioRepository.findByEmail(email);
+                if (usuario != null) {
+                    request.setAttribute("usuario", usuario);
+                }
             }
         }
         chain.doFilter(request, response);

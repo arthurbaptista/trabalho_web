@@ -177,4 +177,17 @@ public class SolicitacaoService {
     public List<Solicitacao> listarAbertas() {
         return solicitacaoRepository.findByEstadoAtual(EstadoSolicitacao.ABERTA);
     }
+
+    public List<Solicitacao> listarTodas() {
+        return solicitacaoRepository.findAllByOrderByDataHoraAberturaAsc();
+    }
+
+    public Solicitacao obterPorId(Long id) {
+        return buscarPorId(id);
+    }
+
+    public List<HistoricoSolicitacao> listarHistorico(Long id) {
+        buscarPorId(id);
+        return historicoRepository.findBySolicitacaoIdOrderByDataHoraAsc(id);
+    }
 }
