@@ -30,48 +30,56 @@ public class ClienteService {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
-    }package br.ufpr.trabalho_web.service;
-
-import br.ufpr.trabalho_web.exception.RegraNegocioException;
-import br.ufpr.trabalho_web.model.Cliente;
-import br.ufpr.trabalho_web.repository.ClienteRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Random;
-
-    @Service
-    public class ClienteService {
-
-        @Autowired
-        private ClienteRepository clienteRepository;
-
-        public List<Cliente> buscarTodos() {
-            return clienteRepository.findAll();
-        }
-
-        public Cliente buscarPorId(Long id) {
-            return clienteRepository.findById(id)
-                    .orElseThrow(() -> new RegraNegocioException("Cliente não encontrado."));
-        }
-
-        @Transactional
-        public Cliente autocadastro(Cliente cliente) {
-            String senhaAleatoria = String.format("%04d", new Random().nextInt(10000));
-            cliente.setSenha(senhaAleatoria);
-
-            Cliente salvo = clienteRepository.save(cliente);
-
-            return salvo;
-        }
-
-        @Transactional
-        public Cliente atualizar(Long id, Cliente dadosAtualizados) {
-            Cliente existente = buscarPorId(id);
-            existente.setNome(dadosAtualizados.getNome());
-            existente.setTelefone(dadosAtualizados.getTelefone());
-            return clienteRepository.save(existente);
-        }
     }
+
+    public CadastroResponse cadastrar(ClienteCadastroDTO dto) {
+        String cpf = soDigitos(dto.cpf());
+        String telefone = soDigitos(dto.telefone());
+        String cep = soDigitos(dto.cep());
+        String email = dto.email().trim().toLowerCase();
+
+        if (clienteRepository.existsByCpf(cpf)) {
+            throw new RegraNegocioException("Erro: O CPF informado ja esta cadastrado.");
+        }
+        if (usuarioRepository.existsByEmail(email)) {
+            throw new RegraNegocioException("Erro: O E-mail informado ja esta cadastrado.");
+        }
+
+        String senhaAleatoria = gerarSenhaAleatoria();
+
+        Cliente cliente = new Cliente();
+        cliente.setNome(dto.nome().trim());
+        cliente.setCpf(cpf);
+        cliente.setEmail(email);
+        cliente.setSenha(passwordEncoder.encode(senhaAleatoria));
+        cliente.setTelefone(telefone);
+        cliente.setStatus(true);
+
+        Endereco endereco = new Endereco();
+        endereco.setCep(cep);
+        endereco.setLogradouro(dto.logradouro().trim());
+        endereco.setNumero(dto.numero().trim());
+        endereco.setComplemento(dto.complemento() == null ? null : dto.complemento().trim());
+        endereco.setBairro(dto.bairro().trim());
+        endereco.setCidade(dto.cidade().trim());
+        endereco.setEstado(dto.estado().trim().toUpperCase());
+        cliente.setEndereco(endereco);
+
+        Cliente salvo = clienteRepository.save(cliente);
+        boolean emailEnviado = emailService.enviarSenhaCadastro(salvo.getEmail(), senhaAleatoria);
+
+        String mensagem = emailEnviado
+                ? "Cadastro realizado. A senha foi enviada para o e-mail informado."
+                : "Cadastro realizado. A senha de 4 digitos foi gerada; confira o terminal do backend se o e-mail nao chegou.";
+
+        return new CadastroResponse(salvo.getId(), salvo.getNome(), salvo.getEmail(), mensagem, emailEnviado);
+    }
+
+    private String gerarSenhaAleatoria() {
+        return String.format("%04d", new SecureRandom().nextInt(10000));
+    }
+
+    private String soDigitos(String valor) {
+        return valor == null ? "" : valor.replaceAll("\\D", "");
+    }
+}
