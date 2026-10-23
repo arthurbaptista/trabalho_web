@@ -3,6 +3,7 @@ package br.ufpr.trabalho_web.controller;
 import br.ufpr.trabalho_web.dto.SolicitacaoRequest;
 import br.ufpr.trabalho_web.model.Cliente;
 import br.ufpr.trabalho_web.model.Funcionario;
+import br.ufpr.trabalho_web.model.HistoricoSolicitacao;
 import br.ufpr.trabalho_web.model.Solicitacao;
 import br.ufpr.trabalho_web.service.SolicitacaoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,31 @@ public class SolicitacaoController {
 
     @Autowired
     private SolicitacaoService solicitacaoService;
+
+    @GetMapping
+    public List<Solicitacao> listarTodas() {
+        return solicitacaoService.listarTodas();
+    }
+
+    @GetMapping("/abertas")
+    public List<Solicitacao> listarAbertas() {
+        return solicitacaoService.listarAbertas();
+    }
+
+    @GetMapping("/cliente")
+    public List<Solicitacao> listarDoCliente(@RequestAttribute("usuario") Cliente cliente) {
+        return solicitacaoService.listarPorCliente(cliente);
+    }
+
+    @GetMapping("/{id}")
+    public Solicitacao buscar(@PathVariable Long id) {
+        return solicitacaoService.obterPorId(id);
+    }
+
+    @GetMapping("/{id}/historico")
+    public List<HistoricoSolicitacao> historico(@PathVariable Long id) {
+        return solicitacaoService.listarHistorico(id);
+    }
 
     @PostMapping("/cliente")
     public ResponseEntity<Solicitacao> criar(@RequestBody Solicitacao solicitacao, @RequestAttribute("usuario") Cliente cliente) {
@@ -47,7 +73,7 @@ public class SolicitacaoController {
 
     @PatchMapping("/{id}/manutencao")
     public ResponseEntity<Solicitacao> manutencao(@PathVariable Long id, @RequestBody SolicitacaoRequest request, @RequestAttribute("usuario") Funcionario funcionario) {
-        return ResponseEntity.ok(solicitacaoService.efetuarManutencao(id, request.getDescricaoEquipamento(), request.getOrientacoesCliente(), funcionario));
+        return ResponseEntity.ok(solicitacaoService.efetuarManutencao(id, request.getDescricaoManutencao(), request.getOrientacoesCliente(), funcionario));
     }
 
     @PatchMapping("/{id}/redirecionar")
