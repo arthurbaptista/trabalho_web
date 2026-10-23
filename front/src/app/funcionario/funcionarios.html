@@ -1,5 +1,4 @@
 <main class="funcionarios-page">
-  <!-- Menu lateral de navegação -->
   <app-sidebar-funcionario
     pagina="funcionarios"
     (sair)="sair()"
@@ -7,7 +6,6 @@
 
   <section class="funcionarios-main">
     
-    <!-- Cabeçalho com dados do usuário logado -->
     <header class="funcionarios-top">
       <div class="user">
         <div
@@ -23,12 +21,10 @@
 
     <div class="funcionarios-content">
       
-      <!-- Título da página -->
       <div class="titulo-row">
         <h1>Funcionários<span class="dot">.</span></h1>
       </div>
 
-      <!-- Formulário de cadastro e edição -->
       <form
         (ngSubmit)="salvar()"
         novalidate
@@ -91,7 +87,6 @@
         </div>
       </form>
 
-      <!-- Mensagens de erro e sucesso -->
       @if (erro()) {
         <p
           class="msg erro"
