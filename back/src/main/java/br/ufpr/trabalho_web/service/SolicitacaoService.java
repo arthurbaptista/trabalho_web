@@ -2,7 +2,6 @@ package br.ufpr.trabalho_web.service;
 
 import br.ufpr.trabalho_web.exception.RegraNegocioException;
 import br.ufpr.trabalho_web.model.*;
-import br.ufpr.trabalho_web.repository.FuncionarioRepository;
 import br.ufpr.trabalho_web.repository.HistoricoSolicitacaoRepository;
 import br.ufpr.trabalho_web.repository.SolicitacaoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,136 +21,160 @@ public class SolicitacaoService {
     @Autowired
     private HistoricoSolicitacaoRepository historicoRepository;
 
-    @Autowired
-    private FuncionarioRepository funcionarioRepository;
-
-    public List<Solicitacao> buscarTodas() {
-        return solicitacaoRepository.findAll();
-    }
-
-    public Solicitacao buscarPorId(Long id) {
-        return solicitacaoRepository.findById(id)
-                .orElseThrow(() -> new RegraNegocioException("Solicitação não encontrada."));
-    }
-
     @Transactional
     public Solicitacao criarSolicitacao(Solicitacao solicitacao, Cliente cliente) {
         solicitacao.setCliente(cliente);
-        solicitacao.setData(LocalDateTime.now());
-        solicitacao.setStatus(EstadoSolicitacao.ABERTA);
-
+        solicitacao.setEstadoAtual(EstadoSolicitacao.ABERTA);
+        solicitacao.setDataHoraAbertura(LocalDateTime.now());
         Solicitacao salva = solicitacaoRepository.save(solicitacao);
-        registrarHistorico(salva, null, null, "Solicitação criada.");
+        registrarHistorico(salva, EstadoSolicitacao.ABERTA, null, null);
         return salva;
     }
 
     @Transactional
     public Solicitacao efetuarOrcamento(Long id, BigDecimal valor, Funcionario funcionario) {
         Solicitacao solicitacao = buscarPorId(id);
-        solicitacao.setStatus(EstadoSolicitacao.ORCADA);
-        solicitacao.setValor(valor);
-        solicitacaoRepository.save(solicitacao);
+        validarEstado(solicitacao, EstadoSolicitacao.ABERTA);
 
-        registrarHistorico(solicitacao, funcionario, null, "Orçamento efetuado no valor de R$ " + valor);
-        return solicitacao;
+        solicitacao.setValorOrcamento(valor);
+        solicitacao.setEstadoAtual(EstadoSolicitacao.ORCADA);
+        Solicitacao salva = solicitacaoRepository.save(solicitacao);
+
+        registrarHistorico(salva, EstadoSolicitacao.ORCADA, funcionario, null);
+        return salva;
     }
 
     @Transactional
     public Solicitacao aprovarServico(Long id, Cliente cliente) {
         Solicitacao solicitacao = buscarPorId(id);
-        solicitacao.setStatus(EstadoSolicitacao.APROVADA);
-        solicitacaoRepository.save(solicitacao);
+        validarPertencimento(solicitacao, cliente);
+        validarEstado(solicitacao, EstadoSolicitacao.ORCADA);
 
-        registrarHistorico(solicitacao, null, null, "Serviço aprovado pelo cliente " + cliente.getNome());
-        return solicitacao;
+        solicitacao.setEstadoAtual(EstadoSolicitacao.APROVADA);
+        Solicitacao salva = solicitacaoRepository.save(solicitacao);
+
+        registrarHistorico(salva, EstadoSolicitacao.APROVADA, null, null);
+        return salva;
     }
 
     @Transactional
     public Solicitacao rejeitarServico(Long id, String motivo, Cliente cliente) {
         Solicitacao solicitacao = buscarPorId(id);
-        solicitacao.setStatus(EstadoSolicitacao.REJEITADA);
-        solicitacao.setMotivo(motivo);
-        solicitacaoRepository.save(solicitacao);
+        validarPertencimento(solicitacao, cliente);
+        validarEstado(solicitacao, EstadoSolicitacao.ORCADA);
 
-        registrarHistorico(solicitacao, null, null, "Serviço rejeitado. Motivo: " + motivo);
-        return solicitacao;
+        solicitacao.setMotivoRejeicao(motivo);
+        solicitacao.setEstadoAtual(EstadoSolicitacao.REJEITADA);
+        Solicitacao salva = solicitacaoRepository.save(solicitacao);
+
+        registrarHistorico(salva, EstadoSolicitacao.REJEITADA, null, null);
+        return salva;
     }
 
     @Transactional
     public Solicitacao resgatarServico(Long id, Cliente cliente) {
         Solicitacao solicitacao = buscarPorId(id);
-        solicitacao.setStatus(EstadoSolicitacao.APROVADA);
-        solicitacaoRepository.save(solicitacao);
+        validarPertencimento(solicitacao, cliente);
+        validarEstado(solicitacao, EstadoSolicitacao.REJEITADA);
 
-        registrarHistorico(solicitacao, null, null, "Serviço resgatado de rejeitada para aprovada.");
-        return solicitacao;
+        solicitacao.setEstadoAtual(EstadoSolicitacao.APROVADA);
+        Solicitacao salva = solicitacaoRepository.save(solicitacao);
+
+        registrarHistorico(salva, EstadoSolicitacao.APROVADA, null, null);
+        return salva;
     }
 
     @Transactional
     public Solicitacao efetuarManutencao(Long id, String descricao, String orientacoes, Funcionario funcionario) {
         Solicitacao solicitacao = buscarPorId(id);
-        solicitacao.setStatus(EstadoSolicitacao.ARRUMADA);
-        solicitacao.setDescricao(descricao);
-        solicitacao.setOrientacoes(orientacoes);
-        solicitacaoRepository.save(solicitacao);
+        if (solicitacao.getEstadoAtual() != EstadoSolicitacao.APROVADA && solicitacao.getEstadoAtual() != EstadoSolicitacao.REDIRECIONADA) {
+            throw new RegraNegocioException("A solicitação não está num estado válido para manutenção.");
+        }
 
-        registrarHistorico(solicitacao, funcionario, null, "Manutenção efetuada.");
-        return solicitacao;
+        solicitacao.setDescricaoManutencao(descricao);
+        solicitacao.setOrientacoesCliente(orientacoes);
+        solicitacao.setEstadoAtual(EstadoSolicitacao.ARRUMADA);
+        Solicitacao salva = solicitacaoRepository.save(solicitacao);
+
+        registrarHistorico(salva, EstadoSolicitacao.ARRUMADA, funcionario, null);
+        return salva;
     }
 
     @Transactional
-    public Solicitacao redirecionarManutencao(Long id, Long origemId, Long destinoId) {
-        if (origemId.equals(destinoId)) {
-            throw new RegraNegocioException("Não é possível redirecionar a manutenção para si mesmo.");
+    public Solicitacao redirecionarManutencao(Long id, Funcionario origem, Funcionario destino) {
+        if (origem.getId().equals(destino.getId())) {
+            throw new RegraNegocioException("Não é possível redirecionar para o próprio utilizador.");
+        }
+        Solicitacao solicitacao = buscarPorId(id);
+        if (solicitacao.getEstadoAtual() != EstadoSolicitacao.APROVADA && solicitacao.getEstadoAtual() != EstadoSolicitacao.REDIRECIONADA) {
+            throw new RegraNegocioException("Estado inválido para redirecionamento.");
         }
 
-        Solicitacao solicitacao = buscarPorId(id);
-        Funcionario origem = funcionarioRepository.findById(origemId)
-                .orElseThrow(() -> new RegraNegocioException("Funcionário de origem não encontrado."));
-        Funcionario destino = funcionarioRepository.findById(destinoId)
-                .orElseThrow(() -> new RegraNegocioException("Funcionário de destino não encontrado."));
+        solicitacao.setFuncionarioResponsavel(destino);
+        solicitacao.setEstadoAtual(EstadoSolicitacao.REDIRECIONADA);
+        Solicitacao salva = solicitacaoRepository.save(solicitacao);
 
-        solicitacao.setStatus(EstadoSolicitacao.REDIRECIONADA);
-        solicitacaoRepository.save(solicitacao);
-
-        registrarHistorico(solicitacao, origem, destino, "Solicitação redirecionada para " + destino.getNome());
-        return solicitacao;
+        registrarHistorico(salva, EstadoSolicitacao.REDIRECIONADA, origem, destino);
+        return salva;
     }
 
     @Transactional
     public Solicitacao pagarServico(Long id, Cliente cliente) {
         Solicitacao solicitacao = buscarPorId(id);
-        solicitacao.setStatus(EstadoSolicitacao.PAGA);
-        solicitacaoRepository.save(solicitacao);
+        validarPertencimento(solicitacao, cliente);
+        validarEstado(solicitacao, EstadoSolicitacao.ARRUMADA);
 
-        registrarHistorico(solicitacao, null, null, "Pagamento do serviço confirmado pelo cliente.");
-        return solicitacao;
+        solicitacao.setEstadoAtual(EstadoSolicitacao.PAGA);
+        Solicitacao salva = solicitacaoRepository.save(solicitacao);
+
+        registrarHistorico(salva, EstadoSolicitacao.PAGA, null, null);
+        return salva;
     }
 
     @Transactional
     public Solicitacao finalizarSolicitacao(Long id, Funcionario funcionario) {
         Solicitacao solicitacao = buscarPorId(id);
-        solicitacao.setStatus(EstadoSolicitacao.FINALIZADA);
-        solicitacaoRepository.save(solicitacao);
-k
-        registrarHistorico(solicitacao, funcionario, null, "Solicitação finalizada.");
-        return solicitacao;
+        validarEstado(solicitacao, EstadoSolicitacao.PAGA);
+
+        solicitacao.setEstadoAtual(EstadoSolicitacao.FINALIZADA);
+        Solicitacao salva = solicitacaoRepository.save(solicitacao);
+
+        registrarHistorico(salva, EstadoSolicitacao.FINALIZADA, funcionario, null);
+        return salva;
     }
 
-    private void registrarHistorico(Solicitacao solicitacao, Funcionario origem, Funcionario destino, String observacao) {
+    private void registrarHistorico(Solicitacao solicitacao, EstadoSolicitacao estado, Funcionario origem, Funcionario destino) {
         HistoricoSolicitacao historico = new HistoricoSolicitacao();
         historico.setSolicitacao(solicitacao);
+        historico.setEstadoAlcancado(estado);
         historico.setDataHora(LocalDateTime.now());
-        historico.setEstadoAlcancado(solicitacao.getStatus());
-
-        if (origem != null) {
-            historico.setFuncionarioOrigem(origem);
-        }
-        if (destino != null) {
-            historico.setFuncionarioDestino(destino);
-        }
-
-        historico.setObservacao(observacao);
+        historico.setFuncionarioOrigem(origem);
+        historico.setFuncionarioDestino(destino);
         historicoRepository.save(historico);
+    }
+
+    private Solicitacao buscarPorId(Long id) {
+        return solicitacaoRepository.findById(id)
+                .orElseThrow(() -> new RegraNegocioException("Solicitação não encontrada."));
+    }
+
+    private void validarEstado(Solicitacao solicitacao, EstadoSolicitacao estadoEsperado) {
+        if (solicitacao.getEstadoAtual() != estadoEsperado) {
+            throw new RegraNegocioException("Ação não permitida para o estado atual da solicitação.");
+        }
+    }
+
+    private void validarPertencimento(Solicitacao solicitacao, Cliente cliente) {
+        if (!solicitacao.getCliente().getId().equals(cliente.getId())) {
+            throw new RegraNegocioException("Esta solicitação não pertence a este cliente.");
+        }
+    }
+
+    public List<Solicitacao> listarPorCliente(Cliente cliente) {
+        return solicitacaoRepository.findByClienteOrderByDataHoraAberturaAsc(cliente);
+    }
+
+    public List<Solicitacao> listarAbertas() {
+        return solicitacaoRepository.findByEstadoAtual(EstadoSolicitacao.ABERTA);
     }
 }
