@@ -300,3 +300,110 @@ Em `front/src/app` as telas ficam separadas por domínio:
 ### Testes
 - Back-end: `./mvnw test` executa os testes unitários e de serviço.
 - Front-end: `ng test` executa os testes com Vitest.
+
+
+## Máquina de Estados da Solicitação
+
+Todas as transições são validadas em `SolicitacaoService`; uma ação fora do estado correto lança `RegraNegocioException`
+("Ação não permitida para o estado atual da solicitação.").
+
+| Ação | Quem executa | Estado exigido | Estado resultante |
+|------|--------------|----------------|-------------------|
+| Abrir solicitação | Cliente | — | `ABERTA` |
+| Orçar (`/orcar`) | Funcionário | `ABERTA` | `ORCADA` |
+| Aprovar (`/aprovar`) | Cliente | `ORCADA` | `APROVADA` |
+| Rejeitar (`/rejeitar`) | Cliente | `ORCADA` | `REJEITADA` (exige motivo) |
+| Resgatar (`/resgatar`) | Cliente | `REJEITADA` | `APROVADA` |
+| Efetuar manutenção (`/manutencao`) | Funcionário | `APROVADA` ou `REDIRECIONADA` | `ARRUMADA` |
+| Redirecionar (`/redirecionar`) | Funcionário | `APROVADA` ou `REDIRECIONADA` | `REDIRECIONADA` |
+| Pagar (`/pagar`) | Cliente | `ARRUMADA` | `PAGA` |
+| Finalizar (`/finalizar`) | Funcionário | `PAGA` | `FINALIZADA` |
+
+Fluxo principal: `ABERTA → ORCADA → APROVADA → ARRUMADA → PAGA → FINALIZADA`.
+Desvios: `ORCADA → REJEITADA → APROVADA` (resgate) e `APROVADA → REDIRECIONADA → ARRUMADA`.
+
+## Modelo de Dados
+
+- `usuario`: tabela única (`SINGLE_TABLE`) que armazena Cliente e Funcionário, diferenciados pelo perfil.
+- `usuario.email` é único; `cliente.cpf` também é único.
+- `solicitacao`: guarda descrição do equipamento (máx. 30 caracteres), descrição do defeito, estado atual,
+  valor do orçamento, motivo de rejeição, descrição da manutenção e orientações ao cliente.
+- `solicitacao` se relaciona com o cliente dono, a categoria do equipamento e o funcionário responsável.
+- `historico_solicitacao`: uma linha por mudança de estado, com data/hora, estado alcançado, funcionário
+  de origem e, no caso de redirecionamento, funcionário de destino.
+- `categoria` e `funcionario` usam `StatusBase` para controlar o campo de ativo/inativo (remoção lógica).
+- As tabelas são geradas pelo Hibernate (`ddl-auto=update`), então não há scripts SQL de migração.
+
+## Autenticação e Segurança
+
+- O login (`POST /auth/login`) devolve um token JWT e o perfil do usuário.
+- O `JwtAuthenticationFilter` lê o token do cabeçalho `Authorization: Bearer <token>` e disponibiliza o usuário
+  autenticado para os controllers (atributo de requisição `usuario`).
+- No front, os guards `auth`, `cliente` e `funcionario` (em `front/src/app/core`) bloqueiam rotas por perfil.
+- Senhas são salvas com SHA-256 + SALT (`Sha256SaltPasswordEncoder`), nunca em texto puro.
+- O CORS permite apenas a origem `http://localhost:4200`.
+- Atenção: o `SecurityConfig` atual libera todas as rotas (`anyRequest().permitAll()`); a restrição por perfil é
+  feita pelos guards do front e pelas validações dos serviços. Para um ambiente real, as rotas deveriam
+  exigir autenticação e papel (`hasRole`) também no back-end.
+
+## Configuração do Ambiente
+
+| Item | Valor padrão |
+|------|--------------|
+| Porta da API | `8080` |
+| Porta do front | `4200` |
+| Banco de dados | PostgreSQL em `localhost:5432`, banco `manutencao_db` |
+| Usuário do banco | `postgres` (a senha fica em `application.properties`) |
+| Fuso horário | `America/Sao_Paulo` |
+
+- Altere `spring.datasource.username` e `spring.datasource.password` conforme o seu PostgreSQL local.
+- Não publique senhas reais no repositório; use variáveis de ambiente em um cenário de produção.
+- Pré-requisitos: JDK 21, Node.js 22 e PostgreSQL instalados.
+- O Maven Wrapper (`mvnw` / `mvnw.cmd`) dispensa instalar o Maven.
+- O log SQL está ativo (`show-sql=true`), o que ajuda a depurar mas deixa o terminal verboso.
+
+## Estrutura de Pastas
+
+```text
+trabalho_web/
+├── back/                      # API Spring Boot
+│   ├── pom.xml
+│   └── src/main/java/br/ufpr/trabalho_web/
+│       ├── config/            # SecurityConfig e dados iniciais
+│       ├── controller/        # Endpoints REST
+│       ├── dto/               # Requests e responses
+│       ├── exception/         # Tratamento de erros
+│       ├── model/             # Entidades JPA
+│       ├── repository/        # Spring Data JPA
+│       ├── security/          # JWT e encoder de senha
+│       └── service/           # Regras de negócio
+└── front/                     # Aplicação Angular
+    └── src/app/
+        ├── home/              # Login e autocadastro
+        ├── cliente/           # Tela inicial do cliente
+        ├── funcionario/       # Gestão de funcionários
+        ├── categoria/         # CRUD de categorias
+        ├── relatorio/         # Relatórios de receita
+        ├── componentes/       # Modais e sidebar
+        └── core/              # Serviços, guards e stores
+```
+
+## Problemas Comuns
+
+- **Erro de conexão com o banco ao subir a API:** confirme que o PostgreSQL está rodando e que o banco
+  `manutencao_db` existe (ele não é criado automaticamente, apenas as tabelas).
+- **Erro de CORS no navegador:** o front precisa rodar em `http://localhost:4200`, a única origem liberada.
+- **Senha do cadastro não chegou por e-mail:** sem `spring.mail.*` configurado, a senha é impressa no log da API.
+- **Dados iniciais duplicados ou ausentes:** eles são carregados na primeira execução; para recarregar,
+  esvazie as tabelas ou recrie o banco.
+- **`ng` não encontrado:** use `npx ng serve` ou `npm start` dentro de `front`.
+
+## Possíveis Melhorias Futuras
+
+- Proteger as rotas no back-end por papel de usuário (Spring Security).
+- Mover credenciais e segredo do JWT para variáveis de ambiente.
+- Adotar BCrypt no lugar de SHA-256 com SALT.
+- Adicionar migrações versionadas (Flyway) em vez de `ddl-auto=update`.
+- Documentar a API com OpenAPI/Swagger.
+- Incluir paginação nas listagens de solicitações.
+- Criar um `docker-compose.yml` com PostgreSQL, API e front para subir tudo com um comando.
