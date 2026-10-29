@@ -1,23 +1,26 @@
 :host {
-  --page: #08080a;
-  --field: #101014;
-  --line: rgba(255, 255, 255, 0.14);
-  --white: #ffffff;
-  --text: #f2f2f4;
-  --muted: #9a9aa3;
-  --muted-soft: #6b6b74;
-  --ink: #0b0b0d;
+  --page: #ffffff;
+  --field: #ffffff;
+  --line: #808080;
+  --strong: #000000;
+  --text: #222222;
+  --muted: #555555;
+  --link: #0000cc;
+  --blue: #003399;
+  --face: #d4d0c8;
 
   display: block;
   height: 100%;
   overflow: hidden;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: Verdana, Arial, sans-serif;
+  font-size: 13px;
   color: var(--text);
 }
 
 .relatorio-page {
   display: grid;
   grid-template-columns: 76px 1fr;
+  grid-template-rows: minmax(0, 1fr);
   height: 100%;
   background: var(--page);
 }
@@ -33,48 +36,50 @@
 .relatorio-top {
   display: flex;
   justify-content: flex-end;
-  padding: 1.15rem 1.75rem 0;
+  padding: 8px 16px;
+  background: #ececec;
+  border-bottom: 3px solid var(--blue);
 }
 
 .user {
   display: flex;
   align-items: center;
-  gap: 0.7rem;
+  gap: 10px;
 }
 
 .avatar {
   display: grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: linear-gradient(100deg, #ffffff 0%, #d9d9df 50%, #ffffff 100%);
-  color: var(--ink);
-  font-size: 0.72rem;
+  width: 34px;
+  height: 34px;
+  background: var(--face);
+  border: 2px outset #ffffff;
+  color: #000000;
+  font-size: 12px;
   font-weight: 700;
 }
 
 .user-meta {
   display: flex;
   flex-direction: column;
-  line-height: 1.15;
+  line-height: 1.3;
 }
 
 .user-meta strong {
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: var(--white);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--blue);
 }
 
 .user-meta span {
   color: var(--muted);
-  font-size: 0.75rem;
+  font-size: 11px;
 }
 
 .relatorio-content {
   flex: 1;
   min-height: 0;
-  padding: 1.4rem 2rem 2rem;
+  padding: 16px 20px 24px;
   overflow: auto;
 }
 
@@ -82,118 +87,130 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 0.7rem;
+  gap: 16px;
+  margin-bottom: 10px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--blue);
 }
 
 h1 {
   margin: 0;
-  color: var(--white);
-  font-size: clamp(1.55rem, 2.4vw, 2rem);
+  color: var(--blue);
+  font-family: 'Times New Roman', serif;
+  font-size: 24px;
   font-weight: 700;
-  letter-spacing: -0.03em;
 }
 
 .dot {
-  color: var(--muted-soft);
+  color: var(--blue);
 }
 
 .intro {
-  margin: 0 0 1.15rem;
+  margin: 0 0 12px;
   color: var(--muted);
-  font-size: 0.92rem;
+  font-size: 12px;
 }
 
 .btn-pdf {
-  border: 0;
-  border-radius: 999px;
-  padding: 0.55rem 1.1rem;
-  background: linear-gradient(100deg, #ffffff 0%, #d9d9df 50%, #ffffff 100%);
-  color: var(--ink);
+  height: 26px;
+  padding: 0 14px;
+  border: 2px outset #ffffff;
+  background: var(--face);
+  color: var(--blue);
   font: inherit;
-  font-size: 0.88rem;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
   cursor: pointer;
+}
+
+.btn-pdf:active {
+  border-style: inset;
 }
 
 .periodo {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.85rem;
-  margin-bottom: 1.15rem;
+  gap: 10px 16px;
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px solid #999999;
+  background: #f4f4f4;
 }
 
 .periodo label {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  color: var(--muted);
-  font-size: 0.75rem;
-  font-weight: 600;
+  gap: 3px;
+  color: var(--strong);
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .periodo input {
-  height: 40px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
+  height: 28px;
+  border: 2px inset #999999;
   background: var(--field);
-  color: var(--text);
-  padding: 0 0.8rem;
+  color: #000000;
+  padding: 0 6px;
   font: inherit;
-  color-scheme: dark;
+  font-weight: 400;
 }
 
 .table-wrap {
-  border: 1px solid var(--line);
-  border-radius: 22px;
+  border: 1px solid #666666;
   overflow: auto;
-  background: var(--field);
+  background: #ffffff;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-size: 12px;
 }
 
 th,
 td {
-  padding: 0.95rem 1rem;
+  padding: 6px 8px;
   text-align: left;
+  border: 1px solid #999999;
 }
 
 th {
-  color: var(--muted);
-  font-weight: 500;
-  font-size: 0.78rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: #121218;
+  background: #c9d6e8;
+  color: var(--blue);
+  font-weight: 700;
+}
+
+tbody tr:nth-child(even) {
+  background: #f0f0f0;
 }
 
 .desc {
-  font-weight: 600;
-  color: var(--white);
+  font-weight: 700;
+  color: #000000;
 }
 
 tfoot td {
+  background: #e4e4e4;
   font-weight: 700;
-  color: var(--white);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: #000000;
+  border-top: 2px solid var(--blue);
 }
 
 .vazio {
   color: var(--muted);
   text-align: center;
-  padding: 2.4rem 1rem;
+  padding: 24px 8px;
 }
 
 @media (max-width: 900px) {
   .relatorio-page {
     grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
   }
 
   .relatorio-content {
-    padding: 1rem;
+    padding: 12px;
   }
 
   .titulo-row {
