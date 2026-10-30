@@ -179,6 +179,96 @@
 // =============================================================================
 // Fim dos comentarios de codigo (90 linhas)
 // =============================================================================
+// =============================================================================
+// Continuacao dos comentarios de codigo deste modulo (mais 90 linhas)
+// =============================================================================
+// 85. Este segundo bloco amplia a documentacao do mock de usuarios.
+// 86. O objetivo e registrar detalhes de uso, testes e limitacoes.
+// 87. Nada neste bloco altera o comportamento das funcoes exportadas.
+// 88. Use os logins mockados apenas em ambiente local de desenvolvimento.
+// 89. Maria representa o funcionario padrao para o primeiro acesso interno.
+// 90. Mario e o segundo funcionario, util para testar troca de atendente.
+// 91. Joao e o cliente base para abrir a primeira solicitacao de servico.
+// 92. Jose serve para testar um segundo cliente no mesmo navegador.
+// 93. Joana cobre o cenario de cliente com nome feminino no roteiro.
+// 94. Joaquina completa a lista fixa de clientes da demonstracao.
+// 95. A senha 1234 e propositalmente simples para facilitar o teste manual.
+// 96. Clientes cadastrados na tela nao reutilizam a senha 1234.
+// 97. A senha gerada no cadastro precisa ser copiada na tela de sucesso.
+// 98. Sem a senha gerada, o novo cliente nao consegue autenticar.
+// 99. O CPF e gravado so para clientes criados em tempo de execucao.
+// 100. Os usuarios fixos de USUARIOS_DEMO nao possuem CPF preenchido.
+// 101. Por isso a unicidade de CPF vale so entre clientes persistidos.
+// 102. A unicidade de e-mail vale para clientes fixos, persistidos e funcionarios.
+// 103. emailClienteDemoExiste nao consulta funcionarios; o cadastro faz isso a parte.
+// 104. cadastrarClienteDemo chama emailFuncionarioExiste para fechar essa lacuna.
+// 105. buscarUsuarioDemo nao usa emailClienteDemoExiste; compara e-mail e senha juntos.
+// 106. A ordem de autenticacao evita que um cliente reuse e-mail de funcionario.
+// 107. Se o mesmo e-mail existisse nos dois lados, o funcionario venceria.
+// 108. O cadastro impede essa situacao antes de gravar o cliente novo.
+// 109. lerClientesDemo e privada porque so o proprio modulo precisa dela.
+// 110. todosClientesDemo tambem e privada e so monta a lista combinada.
+// 111. Nao exporte lerClientesDemo para nao vazar detalhes de persistencia.
+// 112. Nao exporte todosClientesDemo para manter o contrato pequeno.
+// 113. O contrato publico fica em tres funcoes e nas estruturas de tipo.
+// 114. PerfilDemo deve permanecer alinhado com as telas de cliente e funcionario.
+// 115. Se surgir um terceiro perfil, atualize o tipo e as telas de rota.
+// 116. UsuarioDemo.cpf e opcional para nao quebrar os registros fixos.
+// 117. Ao persistir cliente novo, sempre grave o CPF sanitizado.
+// 118. Nao grave pontuacao de CPF; a comparacao depende so dos digitos.
+// 119. Nao grave espacos no e-mail; a busca depende do valor normalizado.
+// 120. Nao grave nome com espacos nas pontas; o trim ocorre no cadastro.
+// 121. localStorage pode falhar em modo privado ou sem API de storage.
+// 122. O optional chaining transforma essa falha em no-op na gravacao.
+// 123. Na leitura, getItem indefinido e tratado como lista vazia.
+// 124. JSON.parse pode lancar se outro script corromper a chave.
+// 125. O catch de lerClientesDemo devolve [] nesse caso.
+// 126. Um storage corrompido nao deve derrubar a tela de login.
+// 127. Um storage corrompido tambem nao deve derrubar a tela de cadastro.
+// 128. Se a lista persistida nao for array, ignore o valor e use [].
+// 129. Nao tente reparar JSON invalido; o proximo cadastro regrava a chave.
+// 130. Date.now como id evita dependencia de backend neste mock.
+// 131. Esse id nao e sequencial e pode repetir se o relogio mudar.
+// 132. Para demonstracao, a colisao de id e aceitavel.
+// 133. Math.random gera senha previsivel o bastante para um trabalho academico.
+// 134. Nao reutilize este gerador de senha em sistema real.
+// 135. padStart(4, '0') garante senhas como 0007, nao 7.
+// 136. O login compara senha em texto puro, sem hash.
+// 137. Qualquer alteracao na senha persistida exige novo cadastro ou edicao manual do storage.
+// 138. Nao existe funcao de recuperar senha neste arquivo.
+// 139. Nao existe funcao de logout neste arquivo; isso fica na sessao da UI.
+// 140. Nao existe funcao de listar todos os usuarios para a interface.
+// 141. Para inspecionar clientes novos, abra o localStorage na chave clientes_demo.
+// 142. Para voltar ao estado inicial, apague essa chave e recarregue.
+// 143. Funcionarios novos nao sao gravados neste arquivo; use o store de funcionario.
+// 144. Por isso o login de funcionario delega para autenticarFuncionario.
+// 145. Se o store de funcionario estiver vazio, Maria e Mario ainda existem em USUARIOS_DEMO.
+// 146. Mesmo assim, buscarUsuarioDemo nao autentica funcionario pela lista local.
+// 147. Funcionarios da lista local servem de referencia e de semente visual.
+// 148. A autenticacao efetiva de funcionario acontece no outro modulo.
+// 149. Clientes da lista local sao autenticados aqui, junto com os persistidos.
+// 150. Mantenha essa divisao para nao duplicar regra de funcionario.
+// 151. Teste de regressao sugerido: login Maria com senha 1234.
+// 152. Teste de regressao sugerido: login Joao com senha 1234.
+// 153. Teste de regressao sugerido: cadastro com e-mail ja usado por Joao.
+// 154. Teste de regressao sugerido: cadastro com e-mail ja usado por Maria.
+// 155. Teste de regressao sugerido: dois cadastros com o mesmo CPF.
+// 156. Teste de regressao sugerido: login do cliente recem cadastrado.
+// 157. Teste de regressao sugerido: senha errada deve falhar com undefined.
+// 158. Teste de regressao sugerido: e-mail com maiusculas deve autenticar.
+// 159. Teste de regressao sugerido: e-mail com espacos nas pontas deve autenticar.
+// 160. Teste de regressao sugerido: storage vazio nao quebra todosClientesDemo.
+// 161. Ao integrar a API, troque buscarUsuarioDemo por um POST de login.
+// 162. Ao integrar a API, troque cadastrarClienteDemo por um POST de cliente.
+// 163. Ao integrar a API, troque emailClienteDemoExiste por validacao no servidor.
+// 164. Ate a integracao, este arquivo e a fonte de verdade do login demo.
+// 165. Nao misture regras de tela neste modulo; ele so trata dados e lookup.
+// 166. Nao importe componentes Angular aqui; o mock deve permanecer simples.
+// 167. Nao adicione efeitos colaterais alem da escrita no localStorage.
+// 168. Fim da continuacao da documentacao do mock de usuarios.
+// =============================================================================
+// Fim dos comentarios adicionais (90 linhas)
+// =============================================================================
 
 import { autenticarFuncionario, emailFuncionarioExiste } from '../funcionario/funcionario-gestao/funcionario-cadastro.store';
 
