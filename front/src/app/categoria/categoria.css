@@ -269,7 +269,6 @@ tbody tr:nth-child(even) {
   color: #000000;
 }
 
-/* Se .acoes estiver no <td>, precisa continuar sendo célula de tabela */
 td.acoes {
   display: table-cell;
   text-align: right;
@@ -280,7 +279,6 @@ td.acoes .acao + .acao {
   margin-left: 6px;
 }
 
-/* Se .acoes for uma <div> dentro do <td>, flex normal */
 .acoes:not(td) {
   display: flex;
   gap: 8px;
