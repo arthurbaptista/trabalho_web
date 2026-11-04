@@ -3,6 +3,7 @@ package br.ufpr.trabalho_web.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,9 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
 
+    @Value("${spring.mail.username:}")
+    private String remetente;
+
     public EmailService(ObjectProvider<JavaMailSender> mailSender) {
         this.mailSender = mailSender.getIfAvailable();
     }
@@ -21,13 +25,14 @@ public class EmailService {
     public boolean enviarSenhaCadastro(String destinatario, String senha) {
         log.info("Senha de autocadastro para {}: {}", destinatario, senha);
 
-        if (mailSender == null) {
+        if (mailSender == null || remetente == null || remetente.isBlank()) {
             log.warn("JavaMailSender nao configurado. A senha ficou apenas no log do servidor.");
             return false;
         }
 
         try {
             SimpleMailMessage mensagem = new SimpleMailMessage();
+            mensagem.setFrom(remetente);
             mensagem.setTo(destinatario);
             mensagem.setSubject("Sua senha de acesso - Manutencao de Equipamentos");
             mensagem.setText(
