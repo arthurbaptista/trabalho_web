@@ -206,4 +206,83 @@ trabalho_web/
   esvazie as tabelas ou recrie o banco.
 - **`ng` não encontrado:** use `npx ng serve` ou `npm start` dentro de `front`.
 
+///////////////////////////////////////////
+
+
+
+
+
+
+# TADS SYSTEM — Gerenciamento de Manutenção de Equipamentos
+
+Sistema web para controle de solicitações de manutenção de equipamentos,
+desenvolvido como trabalho da disciplina de Desenvolvimento Web II (UFPR).
+
+## Sumário
+
+- [Sobre o projeto](#sobre-o-projeto)
+- [Tecnologias](#tecnologias)
+- [Estrutura do repositório](#estrutura-do-repositório)
+- [Pré-requisitos](#pré-requisitos)
+- [Como rodar o frontend](#como-rodar-o-frontend)
+- [Como rodar o backend](#como-rodar-o-backend)
+- [Funcionalidades](#funcionalidades)
+- [Padrão de branches](#padrão-de-branches)
+- [Padrão de commits](#padrão-de-commits)
+- [Equipe](#equipe)
+
+## Sobre o projeto
+
+O TADS SYSTEM permite que clientes abram solicitações de manutenção e que
+funcionários acompanhem, orcem e finalizem essas solicitações. Cada
+solicitação passa por um fluxo de estados (aberta, orçada, aprovada,
+rejeitada, em execução, finalizada, paga), com histórico de alterações.
+
+## Tecnologias
+
+| Camada    | Tecnologia                                  |
+|-----------|---------------------------------------------|
+| Frontend  | Angular (standalone components, sem NgModule) |
+| Backend   | Spring Boot                                 |
+| Banco     | <PostgreSQL / H2 / MySQL>                   |
+| Fonte     | Inter (Google Fonts)                        |
+| Editor    | VS Code                                     |
+
+## Estrutura do repositório
+# TADS SYSTEM — Gerenciamento de Manutenção de Equipamentos
+
+Sistema web para controle de solicitações de manutenção de equipamentos,
+desenvolvido como trabalho da disciplina de Desenvolvimento Web II (UFPR).
+
+## Sumário
+
+- [Sobre o projeto](#sobre-o-projeto)
+- [Tecnologias](#tecnologias)
+- [Estrutura do repositório](#estrutura-do-repositório)
+- [Pré-requisitos](#pré-requisitos)
+- [Como rodar o frontend](#como-rodar-o-frontend)
+- [Como rodar o backend](#como-rodar-o-backend)
+- [Funcionalidades](#funcionalidades)
+- [Padrão de branches](#padrão-de-branches)
+- [Padrão de commits](#padrão-de-commits)
+- [Equipe](#equipe)
+
+## Sobre o projeto
+
+O TADS SYSTEM permite que clientes abram solicitações de manutenção e que
+funcionários acompanhem, orcem e finalizem essas solicitações. Cada
+solicitação passa por um fluxo de estados (aberta, orçada, aprovada,
+rejeitada, em execução, finalizada, paga), com histórico de alterações.
+
+## Tecnologias
+
+| Camada    | Tecnologia                                  |
+|-----------|---------------------------------------------|
+| Frontend  | Angular (standalone components, sem NgModule) |
+| Backend   | Spring Boot                                 |
+| Banco     | <PostgreSQL / H2 / MySQL>                   |
+| Fonte     | Inter (Google Fonts)                        |
+| Editor    | VS Code                                     |
+
+## Estrutura do repositório
 
