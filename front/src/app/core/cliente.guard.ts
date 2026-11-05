@@ -8,7 +8,7 @@ export const clienteGuard: CanActivateFn = () => {
   const router = inject(Router);
 
   if (!auth.estaLogado()) {
-    auth.ativarSessaoDemo();
+    return router.createUrlTree(['/login']);
   }
 
   if (auth.sessao()?.perfil !== 'CLIENTE') {
