@@ -286,3 +286,103 @@ rejeitada, em execução, finalizada, paga), com histórico de alterações.
 
 ## Estrutura do repositório
 
+```text
+trabalho_web/
+├── back/    # API REST (Spring Boot, Java 21, Maven)
+└── front/   # Aplicação web (Angular, Bootstrap)
+```
+
+## Pré-requisitos
+
+- JDK 21
+- Node.js 22 e npm
+- PostgreSQL com o banco `manutencao_db` criado
+- Git
+
+## Como rodar o frontend
+
+```bash
+cd front
+npm install
+npm start        # ou: npx ng serve
+```
+
+- A aplicação fica disponível em `http://localhost:4200`.
+- A rota inicial redireciona para `/login`.
+- Testes: `npm test` (Vitest).
+
+## Como rodar o backend
+
+```bash
+cd back
+./mvnw spring-boot:run     # Windows: mvnw.cmd spring-boot:run
+```
+
+- A API sobe em `http://localhost:8080`.
+- Ajuste usuário e senha do banco em `back/src/main/resources/application.properties`.
+- Testes: `./mvnw test`.
+
+## Funcionalidades
+
+### Públicas
+- Login com e-mail e senha (`/login`).
+- Autocadastro de cliente (`/cadastro`), com senha gerada pelo sistema e enviada por e-mail.
+
+### Perfil Cliente
+- Tela inicial com a lista das próprias solicitações (`/cliente`).
+- Abertura de solicitação de manutenção informando equipamento, categoria e defeito.
+- Aprovação ou rejeição do orçamento (a rejeição exige motivo).
+- Resgate de uma solicitação rejeitada.
+- Pagamento do serviço após a manutenção.
+- Consulta ao histórico de cada solicitação.
+
+### Perfil Funcionário
+- Lista de solicitações com filtros (`/funcionario`).
+- Orçamento, manutenção, redirecionamento e finalização de solicitações.
+- CRUD de categorias de equipamento (`/categorias`).
+- CRUD de funcionários (`/funcionarios`).
+- Relatório de receitas por período (`/relatorios/receitas`).
+- Relatório de receitas por categoria (`/relatorios/receitas-categoria`).
+
+## Rotas do Front-end
+
+| Rota | Acesso | Tela |
+|------|--------|------|
+| `/login` | Público | Login |
+| `/cadastro` | Público | Autocadastro de cliente |
+| `/home` | Autenticado | Redireciona conforme o perfil |
+| `/cliente` | Cliente | Tela inicial do cliente |
+| `/funcionario` | Funcionário | Gestão de solicitações |
+| `/categorias` | Funcionário | Categorias |
+| `/funcionarios` | Funcionário | Funcionários |
+| `/relatorios/receitas` | Funcionário | Relatório de receitas |
+| `/relatorios/receitas-categoria` | Funcionário | Receitas por categoria |
+
+## Padrão de branches
+
+- `main`: versão estável do projeto; recebe alterações somente via Pull Request.
+- `feature/<nome>`: novas funcionalidades (ex.: `feature/categoria-management`).
+- `fix/<nome>`: correções de bugs.
+- `refactor/<nome>`: mudanças de código ou layout sem alterar o comportamento.
+
+## Padrão de commits
+
+- Mensagens curtas, no imperativo e descrevendo o que mudou.
+- Prefixos opcionais: `feat:`, `fix:`, `refactor:`, `docs:`.
+- Exemplos: `fix: ajusta tela de login`, `refactor: atualiza layout das telas de funcionarios`.
+- Cada Pull Request deve ser revisado por pelo menos um integrante antes do merge.
+
+## Equipe
+
+| Nome | GRR |
+|------|-----|
+| Arthur Dias Baptista | GRR20224100 |
+| Eduardo Seiji Ishida | GRR20241969 |
+| João Alberto François | GRR20211640 |
+| Larissa Ribeiro Borges | GRR20204495 |
+| Murilo Santana Cardoso | GRR20234187 |
+| Nathaly Martins da Cunha | GRR20223387 |
+
+## Disciplina
+
+- Desenvolvimento Web II — Universidade Federal do Paraná (UFPR).
