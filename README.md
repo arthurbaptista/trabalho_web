@@ -72,10 +72,12 @@ O pacote base é `br.ufpr.trabalho_web`, organizado em camadas:
 - `config`: configuração do Spring Security e carga dos dados iniciais.
 
 ### Estrutura do Front-end
-Em `front/src/app` as telas ficam separadas por domínio:
-- `home`, `cliente`, `funcionario`, `categoria`, `solicitacao` e `relatorio`.
-- `componentes` e `shared` reúnem elementos reutilizáveis.
-- `core` concentra serviços, guards (auth, cliente, funcionário) e stores compartilhados.
+Em `front/src/app` as telas ficam separadas por perfil de usuário:
+- `auth`: login e autocadastro (telas públicas).
+- `cliente`: tela inicial, nova solicitação e detalhe da solicitação.
+- `funcionario`: solicitações, detalhe, categorias, funcionários, relatórios e sidebar.
+- `shared`: logo e código de solicitação reaproveitado por cliente e funcionário.
+- `core`: serviço de autenticação, guards (auth, cliente, funcionário) e utilitários da API.
 - As rotas ficam em `app.routes.ts` e a configuração global em `app.config.ts`.
 
 ### Principais Endpoints da API
@@ -187,13 +189,11 @@ trabalho_web/
 │       └── service/           # Regras de negócio
 └── front/                     # Aplicação Angular
     └── src/app/
-        ├── home/              # Login e autocadastro
-        ├── cliente/           # Tela inicial do cliente
-        ├── funcionario/       # Gestão de funcionários
-        ├── categoria/         # CRUD de categorias
-        ├── relatorio/         # Relatórios de receita
-        ├── componentes/       # Modais e sidebar
-        └── core/              # Serviços, guards e stores
+        ├── auth/              # Login e autocadastro
+        ├── cliente/           # Tela inicial, nova solicitação e detalhe
+        ├── funcionario/       # Solicitações, categorias, funcionários e relatórios
+        ├── shared/            # Logo e código de solicitação compartilhado
+        └── core/              # Autenticação, guards e utilitários da API
 ```
 
 ## Problemas Comuns
