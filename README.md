@@ -1,26 +1,17 @@
-# Trabalho Final
+# Trabalho Final - TADS SYSTEM — Gerenciamento de Manutenção de Equipamentos
 
-Este repositório contém o código e os materiais referentes ao **Trabalho Final** da disciplina WEB II
+Este repositório contém o código e os materiais referentes ao **Trabalho Final** da disciplina Desenvolvimento Web II — Universidade Federal do Paraná (UFPR).
 
-## Integrantes do Grupo
+## Equipe
 
-- **Arthur Dias Baptista**  
-  GRR20224100
-
-- **Eduardo Seiji Ishida**  
-  GRR20241969
-  
-- **João Alberto François**  
-  GRR20211640
-  
-- **Larissa Ribeiro Borges**  
-  GRR20204495
-  
-- **Murilo Santana Cardoso**  
-  GRR20234187
-
-- **Nathaly Martins da Cunha**  
-  GRR20223387
+| Nome | GRR |
+|------|-----|
+| Arthur Dias Baptista | GRR20224100 |
+| Eduardo Seiji Ishida | GRR20241969 |
+| João Alberto François | GRR20211640 |
+| Larissa Ribeiro Borges | GRR20204495 |
+| Murilo Santana Cardoso | GRR20234187 |
+| Nathaly Martins da Cunha | GRR20223387 |
 
 ## Descrição do Projeto
 
@@ -371,17 +362,6 @@ cd back
 - Prefixos opcionais: `feat:`, `fix:`, `refactor:`, `docs:`.
 - Exemplos: `fix: ajusta tela de login`, `refactor: atualiza layout das telas de funcionarios`.
 - Cada Pull Request deve ser revisado por pelo menos um integrante antes do merge.
-
-## Equipe
-
-| Nome | GRR |
-|------|-----|
-| Arthur Dias Baptista | GRR20224100 |
-| Eduardo Seiji Ishida | GRR20241969 |
-| João Alberto François | GRR20211640 |
-| Larissa Ribeiro Borges | GRR20204495 |
-| Murilo Santana Cardoso | GRR20234187 |
-| Nathaly Martins da Cunha | GRR20223387 |
 
 ## Disciplina
 
