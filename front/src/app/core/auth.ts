@@ -1,10 +1,9 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { TimeoutError, catchError, of, tap, throwError, timeout } from 'rxjs';
+import { tap } from 'rxjs';
 
-import { API_URL, backendForaDoAr } from './api';
-import { USUARIOS_DEMO, buscarUsuarioDemo, cadastrarClienteDemo } from './usuarios.mock';
+import { API_URL } from './api';
 
 export interface LoginResponse {
   token: string;
@@ -61,75 +60,14 @@ export class Auth {
     return this.sessaoSignal() !== null;
   }
 
-  ativarSessaoDemo() {
-    if (this.sessaoSignal()) {
-      return;
-    }
-    const joao = USUARIOS_DEMO.find((usuario) => usuario.email === 'joao@manutencao.com');
-    this.sessaoSignal.set({
-      token: '',
-      perfil: joao?.perfil ?? 'CLIENTE',
-      nome: joao?.nome ?? 'Joao',
-      email: joao?.email ?? 'joao@manutencao.com',
-    });
-  }
-
   login(email: string, senha: string, persistente: boolean) {
     return this.http.post<LoginResponse>(`${API_URL}/auth/login`, { email, senha }).pipe(
-      timeout(2000),
       tap((resposta) => this.salvarSessao(resposta, persistente, email)),
-      catchError((erro) => {
-        if (!this.backendIndisponivel(erro)) {
-          return throwError(() => erro);
-        }
-
-        const demo = buscarUsuarioDemo(email, senha);
-        if (!demo) {
-          return throwError(() => ({ error: 'E-mail ou senha invalidos.' }));
-        }
-
-        const resposta: LoginResponse = {
-          token: '',
-          tipo: 'Bearer',
-          perfil: demo.perfil,
-          nome: demo.nome,
-        };
-        this.salvarSessao(resposta, persistente, email);
-        return of(resposta);
-      }),
     );
   }
 
   cadastrar(payload: CadastroPayload) {
-    return this.http.post<CadastroResponse>(`${API_URL}/clientes/cadastro`, payload).pipe(
-      timeout(2000),
-      catchError((erro) => {
-        if (!this.backendIndisponivel(erro)) {
-          return throwError(() => erro);
-        }
-
-        try {
-          const demo = cadastrarClienteDemo({
-            nome: payload.nome,
-            email: payload.email,
-            cpf: payload.cpf,
-          });
-          const resposta: CadastroResponse = {
-            id: demo.id,
-            nome: payload.nome.trim(),
-            email: payload.email.trim().toLowerCase(),
-            mensagem: `Cadastro realizado. Sua senha de acesso e ${demo.senha}. Use este e-mail e a senha para entrar.`,
-            emailEnviado: false,
-          };
-          return of(resposta);
-        } catch (cadastroErro) {
-          const mensagem = cadastroErro instanceof Error
-            ? cadastroErro.message
-            : 'Nao foi possivel concluir o cadastro.';
-          return throwError(() => ({ error: mensagem }));
-        }
-      }),
-    );
+    return this.http.post<CadastroResponse>(`${API_URL}/clientes/cadastro`, payload);
   }
 
   rotaInicial(): string {
@@ -179,10 +117,6 @@ export class Auth {
     this.sessaoSignal.set(sessao);
   }
 
-  private backendIndisponivel(erro: unknown): boolean {
-    return backendForaDoAr(erro) || erro instanceof TimeoutError;
-  }
-
   private lerSessao(): Sessao | null {
     try {
       const raw = globalThis.localStorage?.getItem(CHAVE_SESSAO)
@@ -190,16 +124,7 @@ export class Auth {
       if (!raw) {
         return null;
       }
-      const sessao = JSON.parse(raw) as Sessao;
-      if (!sessao.email && sessao.nome) {
-        const demo = USUARIOS_DEMO.find((usuario) =>
-          usuario.nome.trim().toLowerCase() === sessao.nome.trim().toLowerCase(),
-        );
-        if (demo) {
-          sessao.email = demo.email;
-        }
-      }
-      return sessao;
+      return JSON.parse(raw) as Sessao;
     } catch {
       return null;
     }

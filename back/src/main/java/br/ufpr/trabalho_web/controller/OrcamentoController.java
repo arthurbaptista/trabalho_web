@@ -4,6 +4,7 @@ import br.ufpr.trabalho_web.dto.OrcamentoRequest;
 import br.ufpr.trabalho_web.model.Funcionario;
 import br.ufpr.trabalho_web.model.Solicitacao;
 import br.ufpr.trabalho_web.service.SolicitacaoService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,7 +26,7 @@ public class OrcamentoController {
     @PostMapping
     public ResponseEntity<Solicitacao> efetuarOrcamento(
             @PathVariable Long id,
-            @RequestBody OrcamentoRequest request,
+            @Valid @RequestBody OrcamentoRequest request,
             @RequestAttribute("usuario") Funcionario funcionario
     ) {
         return ResponseEntity.ok(solicitacaoService.efetuarOrcamento(id, request.getValor(), funcionario));

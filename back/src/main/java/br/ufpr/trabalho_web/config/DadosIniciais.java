@@ -183,15 +183,14 @@ public class DadosIniciais implements CommandLineRunner {
             historico.setSolicitacao(salva);
             historico.setDataHora(momento);
             historico.setEstadoAlcancado(passo);
-            if (passo != EstadoSolicitacao.ABERTA
-                    && passo != EstadoSolicitacao.APROVADA
-                    && passo != EstadoSolicitacao.REJEITADA
-                    && passo != EstadoSolicitacao.PAGA) {
+
+            if (passo == EstadoSolicitacao.ORCADA || passo == EstadoSolicitacao.REDIRECIONADA || passo == EstadoSolicitacao.ARRUMADA || passo == EstadoSolicitacao.FINALIZADA) {
                 historico.setFuncionarioOrigem(origem);
             }
             if (passo == EstadoSolicitacao.REDIRECIONADA) {
                 historico.setFuncionarioDestino(destino);
             }
+
             historicoRepository.save(historico);
             momento = momento.plusHours(6);
         }

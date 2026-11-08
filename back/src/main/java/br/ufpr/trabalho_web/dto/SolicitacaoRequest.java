@@ -1,27 +1,36 @@
 package br.ufpr.trabalho_web.dto;
 
+import br.ufpr.trabalho_web.model.Categoria;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public class SolicitacaoRequest {
 
-    @NotNull(message = "O cliente é obrigatório.")
     private Long clienteId;
 
-    @NotBlank(message = "A descrição do equipamento é obrigatória.")
-    @Size(max = 30, message = "A descrição do equipamento deve ter no máximo 30 caracteres.")
+    @NotBlank(message = "A descricao do equipamento e obrigatoria.")
+    @Size(max = 30, message = "A descricao do equipamento deve ter no maximo 30 caracteres.")
     private String descricaoEquipamento;
 
-    @NotNull(message = "A categoria é obrigatória.")
     private Long categoriaId;
 
-    @NotBlank(message = "A descrição do defeito é obrigatória.")
+    private Categoria categoria;
+
+    @NotBlank(message = "A descricao do defeito e obrigatoria.")
     private String descricaoDefeito;
 
-    // Novos campos adicionados para a etapa de manutenção
     private String descricaoManutencao;
     private String orientacoesCliente;
+
+    public Long getCategoriaIdResolvido() {
+        if (categoriaId != null) {
+            return categoriaId;
+        }
+        if (categoria != null && categoria.getId() != null) {
+            return categoria.getId();
+        }
+        return null;
+    }
 
     public Long getClienteId() {
         return clienteId;
@@ -45,6 +54,14 @@ public class SolicitacaoRequest {
 
     public void setCategoriaId(Long categoriaId) {
         this.categoriaId = categoriaId;
+    }
+
+    public Categoria getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(Categoria categoria) {
+        this.categoria = categoria;
     }
 
     public String getDescricaoDefeito() {

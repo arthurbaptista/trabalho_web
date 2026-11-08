@@ -1,10 +1,15 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, catchError, map, of, switchMap } from 'rxjs';
 
+import { API_URL } from '../core/api';
 import { Auth } from '../core/auth';
-import { SolicitacaoStore } from '../core/solicitacao.store';
-import { agoraIso, HistoricoPasso, historicoPara, rotuloAutor } from './solicitacao.util';
-import type { SolicitacaoFuncionario } from '../solicitacao/solicitacao.models';
+import type { HistoricoPasso } from '../shared/solicitacao/solicitacao.util';
+import {
+  type HistoricoApi,
+  type SolicitacaoApi,
+  paraSolicitacaoCliente,
+} from '../shared/solicitacao/solicitacao.mapper';
 
 export interface SolicitacaoResumo {
   id: number;
@@ -33,96 +38,87 @@ export interface NovaSolicitacaoPayload {
 
 @Injectable({ providedIn: 'root' })
 export class SolicitacaoService {
+  private readonly http = inject(HttpClient);
   private readonly auth = inject(Auth);
-  private readonly store = inject(SolicitacaoStore);
 
   listarDoCliente() {
-    return of(this.store.listarDoCliente(this.nomeCliente(), this.emailCliente()).map((item) => this.paraCliente(item)));
+    return this.http.get<SolicitacaoApi[]>(`${API_URL}/api/solicitacoes/cliente`, this.auth.headers()).pipe(
+      map((lista) => lista.map((item) => paraSolicitacaoCliente(item))),
+    );
   }
 
   detalhar(id: number) {
-    const local = this.store.obter(id);
-    return local
-      ? of(this.paraCliente(local))
-      : throwError(() => ({ error: 'Solicitacao nao encontrada.' }));
+    return this.http.get<SolicitacaoApi>(`${API_URL}/api/solicitacoes/${id}`, this.auth.headers()).pipe(
+      switchMap((item) => this.comHistorico(item)),
+    );
   }
 
   criar(payload: NovaSolicitacaoPayload) {
-    const dataHoraAbertura = agoraIso();
-    const criada = this.store.guardar({
-      id: Date.now(),
-      dataHoraAbertura,
+    return this.http.post<SolicitacaoApi>(`${API_URL}/api/solicitacoes/cliente`, {
       descricaoEquipamento: payload.descricaoEquipamento.slice(0, 30),
+      categoriaId: payload.categoriaId,
       descricaoDefeito: payload.descricaoDefeito,
-      categoria: payload.categoriaNome,
-      estado: 'ABERTA',
-      valorOrcamento: null,
-      cliente: this.store.clienteDaSessao(this.nomeCliente(), this.emailCliente()),
-      funcionarioDestino: null,
-      historico: historicoPara('ABERTA', dataHoraAbertura, this.nomeCliente()),
-    });
-    return of(this.paraCliente(criada));
+    }, this.auth.headers()).pipe(
+      switchMap((item) => this.comHistorico(item)),
+    );
   }
 
   aprovar(id: number) {
-    return this.aplicarEstado(id, 'APROVADA');
+    return this.http.patch<SolicitacaoApi>(
+      `${API_URL}/api/solicitacoes/${id}/aprovar`,
+      {},
+      this.auth.headers(),
+    ).pipe(
+      switchMap((item) => this.comHistorico(item)),
+    );
   }
 
   rejeitar(id: number, motivoRejeicao: string) {
-    return this.aplicarEstado(id, 'REJEITADA', { motivoRejeicao });
+    return this.http.patch<SolicitacaoApi>(
+      `${API_URL}/api/solicitacoes/${id}/rejeitar`,
+      JSON.stringify(motivoRejeicao),
+      this.opcoesJson(),
+    ).pipe(
+      switchMap((item) => this.comHistorico(item)),
+    );
   }
 
   resgatar(id: number) {
-    return this.aplicarEstado(id, 'APROVADA');
+    return this.http.patch<SolicitacaoApi>(
+      `${API_URL}/api/solicitacoes/${id}/resgatar`,
+      {},
+      this.auth.headers(),
+    ).pipe(
+      switchMap((item) => this.comHistorico(item)),
+    );
   }
 
   pagar(id: number) {
-    return this.aplicarEstado(id, 'PAGA');
+    return this.http.patch<SolicitacaoApi>(
+      `${API_URL}/api/solicitacoes/${id}/pagar`,
+      {},
+      this.auth.headers(),
+    ).pipe(
+      switchMap((item) => this.comHistorico(item)),
+    );
   }
 
-  private aplicarEstado(
-    id: number,
-    estado: string,
-    extra: Partial<SolicitacaoFuncionario> = {},
-  ): Observable<SolicitacaoDetalhe> {
-    const atual = this.store.obter(id);
-    if (!atual) {
-      return throwError(() => ({ error: 'Solicitacao nao encontrada.' }));
+  private comHistorico(item: SolicitacaoApi): Observable<SolicitacaoDetalhe> {
+    return this.http.get<HistoricoApi[]>(
+      `${API_URL}/api/solicitacoes/${item.id}/historico`,
+      this.auth.headers(),
+    ).pipe(
+      map((historico) => paraSolicitacaoCliente(item, historico)),
+      catchError(() => of(paraSolicitacaoCliente(item))),
+    );
+  }
+
+  private opcoesJson() {
+    const token = this.auth.sessao()?.token;
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
     }
-
-    return of(this.paraCliente(this.store.guardar({
-      ...atual,
-      ...extra,
-      estado,
-      historico: [
-        ...atual.historico,
-        { estado, dataHora: agoraIso(), autor: rotuloAutor('Cliente', this.nomeCliente()) },
-      ],
-    })));
-  }
-
-  private paraCliente(item: SolicitacaoFuncionario): SolicitacaoDetalhe {
-    return {
-      id: item.id,
-      dataHoraAbertura: item.dataHoraAbertura,
-      descricaoEquipamento: item.descricaoEquipamento,
-      categoria: item.categoria,
-      estado: item.estado,
-      valorOrcamento: item.valorOrcamento,
-      descricaoDefeito: item.descricaoDefeito,
-      motivoRejeicao: item.motivoRejeicao ?? null,
-      descricaoManutencao: item.descricaoManutencao ?? null,
-      orientacoesCliente: item.orientacoesCliente ?? null,
-      nomeCliente: item.cliente.nome,
-      historico: item.historico,
-    };
-  }
-
-  private nomeCliente() {
-    return this.auth.sessao()?.nome ?? '';
-  }
-
-  private emailCliente() {
-    return this.auth.sessao()?.email ?? '';
+    return { headers };
   }
 }
