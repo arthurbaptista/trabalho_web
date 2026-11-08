@@ -76,7 +76,7 @@ describe('RelatorioReceitasCategoriaPage erro', () => {
     const fixture = TestBed.createComponent(RelatorioReceitasCategoriaPage);
     fixture.detectChanges();
     const texto = fixture.nativeElement.textContent as string;
-    expect(texto).toContain('Acesso negado');
+    expect(texto).toContain('Nao foi possivel carregar o relatorio.');
     expect(texto).not.toContain('Nenhuma receita encontrada');
   });
 });

@@ -1,15 +1,11 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { formatarMoeda } from '../../../shared/solicitacao/solicitacao.util';
+import { mensagemHttpErro } from '../../../core/api';
 import { Auth } from '../../../core/auth';
+import { formatarMoeda } from '../../../shared/solicitacao/solicitacao.util';
 import { SidebarFuncionario } from '../../sidebar/sidebar-funcionario';
-import {
-  RelatorioReceita,
-  RelatorioService,
-  baixarArquivo,
-  mensagemRelatorio,
-} from '../relatorio.service';
+import { RelatorioReceita, RelatorioService, baixarArquivo } from '../relatorio.service';
 
 @Component({
   selector: 'app-relatorio-receitas',
@@ -19,7 +15,6 @@ import {
 })
 export class RelatorioReceitasPage {
   private readonly relatorioService = inject(RelatorioService);
-  private consulta = 0;
 
   readonly auth = inject(Auth);
 
@@ -51,25 +46,18 @@ export class RelatorioReceitasPage {
   }
 
   carregar() {
-    const consulta = ++this.consulta;
     this.carregando.set(true);
     this.erro.set('');
 
     this.relatorioService.porPeriodo(this.dataInicio(), this.dataFim()).subscribe({
       next: (dados) => {
-        if (consulta !== this.consulta) {
-          return;
-        }
         this.relatorio.set(dados);
         this.carregando.set(false);
       },
       error: (falha) => {
-        if (consulta !== this.consulta) {
-          return;
-        }
         this.relatorio.set(relatorioVazio());
         this.carregando.set(false);
-        this.erro.set(mensagemRelatorio(falha, 'carregar o relatorio'));
+        this.erro.set(mensagemHttpErro(falha, 'Nao foi possivel carregar o relatorio.'));
       },
     });
   }
@@ -84,7 +72,7 @@ export class RelatorioReceitasPage {
       },
       error: (falha) => {
         this.baixandoPdf.set(false);
-        this.erroPdf.set(mensagemRelatorio(falha, 'gerar o PDF'));
+        this.erroPdf.set(mensagemHttpErro(falha, 'Nao foi possivel gerar o PDF.'));
       },
     });
   }

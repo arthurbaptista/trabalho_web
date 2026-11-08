@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { map } from 'rxjs';
 
-import { API_URL, mensagemHttpErro } from '../../core/api';
+import { API_URL } from '../../core/api';
 import { Auth } from '../../core/auth';
 
 export interface LinhaReceita {
@@ -65,20 +65,6 @@ export class RelatorioService {
   }
 }
 
-export function mensagemRelatorio(erro: unknown, acao: string): string {
-  const status = statusHttp(erro);
-  if (status === 0) {
-    return `Nao foi possivel ${acao}. Verifique se a API esta no ar.`;
-  }
-  if (status === 401) {
-    return 'Sessao invalida ou token expirado. Entre novamente.';
-  }
-  if (status === 403) {
-    return 'Acesso negado. Apenas o funcionario pode ver este relatorio.';
-  }
-  return mensagemHttpErro(erro, `Nao foi possivel ${acao}.`);
-}
-
 export function baixarArquivo(blob: Blob, nome: string) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
@@ -104,10 +90,3 @@ function normalizarRelatorio(relatorio: RelatorioReceita): RelatorioReceita {
   };
 }
 
-function statusHttp(erro: unknown): number | null {
-  if (!erro || typeof erro !== 'object' || !('status' in erro)) {
-    return null;
-  }
-  const status = (erro as { status: unknown }).status;
-  return typeof status === 'number' ? status : null;
-}

@@ -106,11 +106,11 @@ describe('RelatorioReceitasPage estados', () => {
     const fixture = TestBed.createComponent(RelatorioReceitasPage);
     fixture.detectChanges();
     const pagina = fixture.componentInstance;
-    expect(fixture.nativeElement.textContent).toContain('Verifique se a API esta no ar');
+    expect(fixture.nativeElement.textContent).toContain('Nao foi possivel carregar o relatorio.');
     expect(fixture.nativeElement.textContent).not.toContain('Nenhuma receita encontrada');
 
     pagina.gerarPdf();
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('Sessao invalida ou token expirado');
+    expect(fixture.nativeElement.textContent).toContain('Nao foi possivel gerar o PDF.');
   });
 });

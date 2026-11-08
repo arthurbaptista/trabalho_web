@@ -1,14 +1,10 @@
 import { Component, computed, inject, signal } from '@angular/core';
 
-import { formatarMoeda } from '../../../shared/solicitacao/solicitacao.util';
+import { mensagemHttpErro } from '../../../core/api';
 import { Auth } from '../../../core/auth';
+import { formatarMoeda } from '../../../shared/solicitacao/solicitacao.util';
 import { SidebarFuncionario } from '../../sidebar/sidebar-funcionario';
-import {
-  RelatorioReceita,
-  RelatorioService,
-  baixarArquivo,
-  mensagemRelatorio,
-} from '../relatorio.service';
+import { RelatorioReceita, RelatorioService, baixarArquivo } from '../relatorio.service';
 
 @Component({
   selector: 'app-relatorio-receitas-categoria',
@@ -57,7 +53,7 @@ export class RelatorioReceitasCategoriaPage {
       error: (falha) => {
         this.relatorio.set({ linhas: [], quantidade: 0, total: 0 });
         this.carregando.set(false);
-        this.erro.set(mensagemRelatorio(falha, 'carregar o relatorio'));
+        this.erro.set(mensagemHttpErro(falha, 'Nao foi possivel carregar o relatorio.'));
       },
     });
   }
@@ -72,7 +68,7 @@ export class RelatorioReceitasCategoriaPage {
       },
       error: (falha) => {
         this.baixandoPdf.set(false);
-        this.erroPdf.set(mensagemRelatorio(falha, 'gerar o PDF'));
+        this.erroPdf.set(mensagemHttpErro(falha, 'Nao foi possivel gerar o PDF.'));
       },
     });
   }
