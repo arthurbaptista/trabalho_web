@@ -4,7 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { formatarMoeda } from '../../cliente/solicitacao.util';
 import { Auth } from '../../core/auth';
 import { SidebarFuncionario } from '../../componentes/sidebar-funcionario/sidebar-funcionario';
-import { RelatorioService, imprimirRelatorioPdf } from '../relatorio.service';
+import {
+  RelatorioService,
+  baixarArquivo,
+  mensagemRelatorio,
+  type RelatorioReceita,
+} from '../relatorio.service';
 
 @Component({
   selector: 'app-relatorio-receitas',
@@ -14,36 +19,91 @@ import { RelatorioService, imprimirRelatorioPdf } from '../relatorio.service';
 })
 export class RelatorioReceitasPage {
   private readonly relatorioService = inject(RelatorioService);
+  private consulta = 0;
+
   readonly auth = inject(Auth);
 
   dataInicio = signal('');
   dataFim = signal('');
+  relatorio = signal<RelatorioReceita>(relatorioVazio());
+  carregando = signal(true);
+  erro = signal('');
+  erroPdf = signal('');
+  baixandoPdf = signal(false);
 
   nome = computed(() => this.auth.sessao()?.nome ?? '');
   primeiroNome = computed(() => this.nome().split(' ')[0] || 'Funcionário');
   iniciais = computed(() => iniciaisDe(this.nome()));
-
-  relatorio = computed(() => this.relatorioService.porPeriodo(this.dataInicio(), this.dataFim()));
   formatarMoeda = formatarMoeda;
 
-  gerarPdf() {
-    const inicio = this.dataInicio();
-    const fim = this.dataFim();
-    const periodo = !inicio && !fim
-      ? 'Todo o período'
-      : `${inicio ? formatarFiltro(inicio) : 'início'} até ${fim ? formatarFiltro(fim) : 'hoje'}`;
+  constructor() {
+    this.carregar();
+  }
 
-    imprimirRelatorioPdf({
-      titulo: 'Relatório de Receitas',
-      subtitulo: `Agrupado por dia · ${periodo}`,
-      colunas: ['Data', 'Quantidade', 'Receita'],
-      relatorio: this.relatorio(),
+  definirInicio(valor: string) {
+    this.dataInicio.set(valor ?? '');
+    this.carregar();
+  }
+
+  definirFim(valor: string) {
+    this.dataFim.set(valor ?? '');
+    this.carregar();
+  }
+
+  carregar() {
+    const consulta = ++this.consulta;
+    this.carregando.set(true);
+    this.erro.set('');
+
+    this.relatorioService.porPeriodo(this.dataInicio(), this.dataFim()).subscribe({
+      next: (dados) => {
+        if (consulta !== this.consulta) {
+          return;
+        }
+        this.relatorio.set(normalizar(dados));
+        this.carregando.set(false);
+      },
+      error: (falha) => {
+        if (consulta !== this.consulta) {
+          return;
+        }
+        this.relatorio.set(relatorioVazio());
+        this.carregando.set(false);
+        this.erro.set(mensagemRelatorio(falha, 'carregar o relatorio'));
+      },
+    });
+  }
+
+  gerarPdf() {
+    this.erroPdf.set('');
+    this.baixandoPdf.set(true);
+    this.relatorioService.baixarPdfPeriodo(this.dataInicio(), this.dataFim()).subscribe({
+      next: (arquivo) => {
+        this.baixandoPdf.set(false);
+        baixarArquivo(arquivo, 'receitas.pdf');
+      },
+      error: (falha) => {
+        this.baixandoPdf.set(false);
+        this.erroPdf.set(mensagemRelatorio(falha, 'gerar o PDF'));
+      },
     });
   }
 
   sair() {
     this.auth.logout();
   }
+}
+
+function relatorioVazio(): RelatorioReceita {
+  return { linhas: [], quantidade: 0, total: 0 };
+}
+
+function normalizar(dados: RelatorioReceita): RelatorioReceita {
+  return {
+    linhas: dados?.linhas ?? [],
+    quantidade: dados?.quantidade ?? 0,
+    total: Number(dados?.total ?? 0),
+  };
 }
 
 function iniciaisDe(nome: string): string {
@@ -55,9 +115,4 @@ function iniciaisDe(nome: string): string {
     return partes[0].slice(0, 2).toUpperCase();
   }
   return (partes[0][0] + partes[1][0]).toUpperCase();
-}
-
-function formatarFiltro(isoDia: string): string {
-  const [ano, mes, dia] = isoDia.split('-');
-  return `${dia}/${mes}/${ano}`;
 }

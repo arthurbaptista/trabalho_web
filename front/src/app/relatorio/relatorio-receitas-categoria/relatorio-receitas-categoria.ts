@@ -1,9 +1,14 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 
 import { formatarMoeda } from '../../cliente/solicitacao.util';
 import { Auth } from '../../core/auth';
 import { SidebarFuncionario } from '../../componentes/sidebar-funcionario/sidebar-funcionario';
-import { RelatorioService, imprimirRelatorioPdf } from '../relatorio.service';
+import {
+  RelatorioService,
+  baixarArquivo,
+  mensagemRelatorio,
+  type RelatorioReceita,
+} from '../relatorio.service';
 
 @Component({
   selector: 'app-relatorio-receitas-categoria',
@@ -13,7 +18,14 @@ import { RelatorioService, imprimirRelatorioPdf } from '../relatorio.service';
 })
 export class RelatorioReceitasCategoriaPage {
   private readonly relatorioService = inject(RelatorioService);
+
   readonly auth = inject(Auth);
+
+  relatorio = signal<RelatorioReceita>({ linhas: [], quantidade: 0, total: 0 });
+  carregando = signal(true);
+  erro = signal('');
+  erroPdf = signal('');
+  baixandoPdf = signal(false);
 
   nome = computed(() => this.auth.sessao()?.nome ?? '');
   primeiroNome = computed(() => this.nome().split(' ')[0] || 'Funcionário');
@@ -27,16 +39,45 @@ export class RelatorioReceitasCategoriaPage {
     }
     return (partes[0][0] + partes[1][0]).toUpperCase();
   });
-
-  relatorio = computed(() => this.relatorioService.porCategoria());
   formatarMoeda = formatarMoeda;
 
+  constructor() {
+    this.carregar();
+  }
+
+  carregar() {
+    this.carregando.set(true);
+    this.erro.set('');
+
+    this.relatorioService.porCategoria().subscribe({
+      next: (dados) => {
+        this.relatorio.set({
+          linhas: dados?.linhas ?? [],
+          quantidade: dados?.quantidade ?? 0,
+          total: Number(dados?.total ?? 0),
+        });
+        this.carregando.set(false);
+      },
+      error: (falha) => {
+        this.relatorio.set({ linhas: [], quantidade: 0, total: 0 });
+        this.carregando.set(false);
+        this.erro.set(mensagemRelatorio(falha, 'carregar o relatorio'));
+      },
+    });
+  }
+
   gerarPdf() {
-    imprimirRelatorioPdf({
-      titulo: 'Relatório de Receitas por Categoria',
-      subtitulo: 'Receita desde sempre, agrupada por categoria de equipamento',
-      colunas: ['Categoria', 'Quantidade', 'Receita'],
-      relatorio: this.relatorio(),
+    this.erroPdf.set('');
+    this.baixandoPdf.set(true);
+    this.relatorioService.baixarPdfCategoria().subscribe({
+      next: (arquivo) => {
+        this.baixandoPdf.set(false);
+        baixarArquivo(arquivo, 'receitas-categoria.pdf');
+      },
+      error: (falha) => {
+        this.baixandoPdf.set(false);
+        this.erroPdf.set(mensagemRelatorio(falha, 'gerar o PDF'));
+      },
     });
   }
 

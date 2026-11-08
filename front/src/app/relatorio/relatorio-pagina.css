@@ -116,6 +116,21 @@ h1 {
   cursor: pointer;
 }
 
+.btn-pdf:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.aviso {
+  margin: 0 0 1rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.aviso.erro {
+  color: #ffb4b4;
+}
+
 .periodo {
   display: flex;
   flex-wrap: wrap;

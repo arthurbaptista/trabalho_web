@@ -15,22 +15,31 @@
     <div class="relatorio-content">
       <div class="titulo-row">
         <h1>Receitas<span class="dot">.</span></h1>
-        <button type="button" class="btn-pdf" (click)="gerarPdf()">Gerar PDF</button>
+        <button type="button" class="btn-pdf" (click)="gerarPdf()" [disabled]="baixandoPdf()">Gerar PDF</button>
       </div>
 
       <p class="intro">Receita da empresa agrupada por dia. As datas podem ficar vazias para não limitar o período.</p>
 
+      @if (erroPdf()) {
+        <p class="aviso erro" role="alert">{{ erroPdf() }}</p>
+      }
+
       <div class="periodo">
         <label>
           Data inicial
-          <input type="date" name="dataInicio" [ngModel]="dataInicio()" (ngModelChange)="dataInicio.set($event)" />
+          <input type="date" name="dataInicio" [ngModel]="dataInicio()" (ngModelChange)="definirInicio($event)" />
         </label>
         <label>
           Data final
-          <input type="date" name="dataFim" [ngModel]="dataFim()" (ngModelChange)="dataFim.set($event)" />
+          <input type="date" name="dataFim" [ngModel]="dataFim()" (ngModelChange)="definirFim($event)" />
         </label>
       </div>
 
+      @if (carregando()) {
+        <p class="aviso">Carregando...</p>
+      } @else if (erro()) {
+        <p class="aviso erro" role="alert">{{ erro() }}</p>
+      } @else {
       <div class="table-wrap">
         <table>
           <thead>
@@ -62,6 +71,7 @@
           </tfoot>
         </table>
       </div>
+      }
     </div>
   </section>
 </main>

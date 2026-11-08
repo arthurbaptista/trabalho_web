@@ -15,11 +15,20 @@
     <div class="relatorio-content">
       <div class="titulo-row">
         <h1>Receitas por categoria<span class="dot">.</span></h1>
-        <button type="button" class="btn-pdf" (click)="gerarPdf()">Gerar PDF</button>
+        <button type="button" class="btn-pdf" (click)="gerarPdf()" [disabled]="baixandoPdf()">Gerar PDF</button>
       </div>
 
       <p class="intro">Receita da empresa desde sempre, agrupada por categoria de equipamento.</p>
 
+      @if (erroPdf()) {
+        <p class="aviso erro" role="alert">{{ erroPdf() }}</p>
+      }
+
+      @if (carregando()) {
+        <p class="aviso">Carregando...</p>
+      } @else if (erro()) {
+        <p class="aviso erro" role="alert">{{ erro() }}</p>
+      } @else {
       <div class="table-wrap">
         <table>
           <thead>
@@ -51,6 +60,7 @@
           </tfoot>
         </table>
       </div>
+      }
     </div>
   </section>
 </main>

@@ -88,8 +88,46 @@ public class RelatorioService {
                 .toList());
     }
 
+    @Transactional(readOnly = true)
+    public byte[] pdfPorPeriodo(String dataInicio, String dataFim) {
+        RelatorioReceitaDTO relatorio = porPeriodo(dataInicio, dataFim);
+        return RelatorioPdf.gerar(
+                "Relatório de Receitas",
+                subtituloPeriodo(dataInicio, dataFim),
+                "Data",
+                relatorio);
+    }
+
+    @Transactional(readOnly = true)
+    public byte[] pdfPorCategoria() {
+        return RelatorioPdf.gerar(
+                "Relatório de Receitas por Categoria",
+                "desde sempre",
+                "Categoria",
+                porCategoria());
+    }
+
+    // Receita = valorOrcamento no momento em que o historico chega em PAGA.
+    // O filtro de datas usa a data/hora desse passo PAGA.
+    // FINALIZADA nao entra de novo: o historico da solicitacao ja tem PAGA,
+    // e somar os dois estados contaria a mesma receita duas vezes.
     private List<HistoricoSolicitacao> pagamentos() {
         return historicoRepository.findByEstadoAlcancadoOrderByDataHoraAsc(EstadoSolicitacao.PAGA);
+    }
+
+    private String subtituloPeriodo(String dataInicio, String dataFim) {
+        LocalDate inicio = parseData(dataInicio, "data inicial");
+        LocalDate fim = parseData(dataFim, "data final");
+        if (inicio == null && fim == null) {
+            return "desde sempre";
+        }
+        if (inicio != null && fim != null) {
+            return inicio.format(DIA_BR) + " a " + fim.format(DIA_BR);
+        }
+        if (inicio != null) {
+            return "a partir de " + inicio.format(DIA_BR);
+        }
+        return "até " + fim.format(DIA_BR);
     }
 
     private LocalDate parseData(String valor, String campo) {
