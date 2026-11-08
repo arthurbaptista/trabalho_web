@@ -1,10 +1,11 @@
-import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { formatarMoeda } from '../../../shared/solicitacao/solicitacao.util';
+import { mensagemHttpErro } from '../../../core/api';
 import { Auth } from '../../../core/auth';
+import { formatarMoeda } from '../../../shared/solicitacao/solicitacao.util';
 import { SidebarFuncionario } from '../../sidebar/sidebar-funcionario';
-import { RelatorioReceita, RelatorioService, imprimirRelatorioPdf } from '../relatorio.service';
+import { RelatorioReceita, RelatorioService, baixarArquivo } from '../relatorio.service';
 
 @Component({
   selector: 'app-relatorio-receitas',
@@ -14,11 +15,16 @@ import { RelatorioReceita, RelatorioService, imprimirRelatorioPdf } from '../rel
 })
 export class RelatorioReceitasPage {
   private readonly relatorioService = inject(RelatorioService);
+
   readonly auth = inject(Auth);
 
   dataInicio = signal('');
   dataFim = signal('');
-  relatorio = signal<RelatorioReceita>({ linhas: [], quantidade: 0, total: 0 });
+  relatorio = signal<RelatorioReceita>(relatorioVazio());
+  carregando = signal(true);
+  erro = signal('');
+  erroPdf = signal('');
+  baixandoPdf = signal(false);
 
   nome = computed(() => this.auth.sessao()?.nome ?? '');
   primeiroNome = computed(() => this.nome().split(' ')[0] || 'Funcionário');
@@ -26,35 +32,58 @@ export class RelatorioReceitasPage {
   formatarMoeda = formatarMoeda;
 
   constructor() {
-    effect(() => {
-      const inicio = this.dataInicio();
-      const fim = this.dataFim();
-      untracked(() => {
-        this.relatorioService.porPeriodo(inicio, fim).subscribe({
-          next: (dados) => this.relatorio.set(dados),
-        });
-      });
+    this.carregar();
+  }
+
+  definirInicio(valor: string) {
+    this.dataInicio.set(valor ?? '');
+    this.carregar();
+  }
+
+  definirFim(valor: string) {
+    this.dataFim.set(valor ?? '');
+    this.carregar();
+  }
+
+  carregar() {
+    this.carregando.set(true);
+    this.erro.set('');
+
+    this.relatorioService.porPeriodo(this.dataInicio(), this.dataFim()).subscribe({
+      next: (dados) => {
+        this.relatorio.set(dados);
+        this.carregando.set(false);
+      },
+      error: (falha) => {
+        this.relatorio.set(relatorioVazio());
+        this.carregando.set(false);
+        this.erro.set(mensagemHttpErro(falha, 'Nao foi possivel carregar o relatorio.'));
+      },
     });
   }
 
   gerarPdf() {
-    const inicio = this.dataInicio();
-    const fim = this.dataFim();
-    const periodo = !inicio && !fim
-      ? 'Todo o período'
-      : `${inicio ? formatarFiltro(inicio) : 'início'} até ${fim ? formatarFiltro(fim) : 'hoje'}`;
-
-    imprimirRelatorioPdf({
-      titulo: 'Relatório de Receitas',
-      subtitulo: `Agrupado por dia · ${periodo}`,
-      colunas: ['Data', 'Quantidade', 'Receita'],
-      relatorio: this.relatorio(),
+    this.erroPdf.set('');
+    this.baixandoPdf.set(true);
+    this.relatorioService.baixarPdfPeriodo(this.dataInicio(), this.dataFim()).subscribe({
+      next: (arquivo) => {
+        this.baixandoPdf.set(false);
+        baixarArquivo(arquivo, 'receitas.pdf');
+      },
+      error: (falha) => {
+        this.baixandoPdf.set(false);
+        this.erroPdf.set(mensagemHttpErro(falha, 'Nao foi possivel gerar o PDF.'));
+      },
     });
   }
 
   sair() {
     this.auth.logout();
   }
+}
+
+function relatorioVazio(): RelatorioReceita {
+  return { linhas: [], quantidade: 0, total: 0 };
 }
 
 function iniciaisDe(nome: string): string {
@@ -66,9 +95,4 @@ function iniciaisDe(nome: string): string {
     return partes[0].slice(0, 2).toUpperCase();
   }
   return (partes[0][0] + partes[1][0]).toUpperCase();
-}
-
-function formatarFiltro(isoDia: string): string {
-  const [ano, mes, dia] = isoDia.split('-');
-  return `${dia}/${mes}/${ano}`;
 }

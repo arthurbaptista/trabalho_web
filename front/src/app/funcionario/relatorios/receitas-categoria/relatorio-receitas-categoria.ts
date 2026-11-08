@@ -1,9 +1,10 @@
 import { Component, computed, inject, signal } from '@angular/core';
 
-import { formatarMoeda } from '../../../shared/solicitacao/solicitacao.util';
+import { mensagemHttpErro } from '../../../core/api';
 import { Auth } from '../../../core/auth';
+import { formatarMoeda } from '../../../shared/solicitacao/solicitacao.util';
 import { SidebarFuncionario } from '../../sidebar/sidebar-funcionario';
-import { RelatorioReceita, RelatorioService, imprimirRelatorioPdf } from '../relatorio.service';
+import { RelatorioReceita, RelatorioService, baixarArquivo } from '../relatorio.service';
 
 @Component({
   selector: 'app-relatorio-receitas-categoria',
@@ -13,9 +14,14 @@ import { RelatorioReceita, RelatorioService, imprimirRelatorioPdf } from '../rel
 })
 export class RelatorioReceitasCategoriaPage {
   private readonly relatorioService = inject(RelatorioService);
+
   readonly auth = inject(Auth);
 
   relatorio = signal<RelatorioReceita>({ linhas: [], quantidade: 0, total: 0 });
+  carregando = signal(true);
+  erro = signal('');
+  erroPdf = signal('');
+  baixandoPdf = signal(false);
 
   nome = computed(() => this.auth.sessao()?.nome ?? '');
   primeiroNome = computed(() => this.nome().split(' ')[0] || 'Funcionário');
@@ -29,21 +35,41 @@ export class RelatorioReceitasCategoriaPage {
     }
     return (partes[0][0] + partes[1][0]).toUpperCase();
   });
-
   formatarMoeda = formatarMoeda;
 
   constructor() {
+    this.carregar();
+  }
+
+  carregar() {
+    this.carregando.set(true);
+    this.erro.set('');
+
     this.relatorioService.porCategoria().subscribe({
-      next: (dados) => this.relatorio.set(dados),
+      next: (dados) => {
+        this.relatorio.set(dados);
+        this.carregando.set(false);
+      },
+      error: (falha) => {
+        this.relatorio.set({ linhas: [], quantidade: 0, total: 0 });
+        this.carregando.set(false);
+        this.erro.set(mensagemHttpErro(falha, 'Nao foi possivel carregar o relatorio.'));
+      },
     });
   }
 
   gerarPdf() {
-    imprimirRelatorioPdf({
-      titulo: 'Relatório de Receitas por Categoria',
-      subtitulo: 'Receita desde sempre, agrupada por categoria de equipamento',
-      colunas: ['Categoria', 'Quantidade', 'Receita'],
-      relatorio: this.relatorio(),
+    this.erroPdf.set('');
+    this.baixandoPdf.set(true);
+    this.relatorioService.baixarPdfCategoria().subscribe({
+      next: (arquivo) => {
+        this.baixandoPdf.set(false);
+        baixarArquivo(arquivo, 'receitas-categoria.pdf');
+      },
+      error: (falha) => {
+        this.baixandoPdf.set(false);
+        this.erroPdf.set(mensagemHttpErro(falha, 'Nao foi possivel gerar o PDF.'));
+      },
     });
   }
 
