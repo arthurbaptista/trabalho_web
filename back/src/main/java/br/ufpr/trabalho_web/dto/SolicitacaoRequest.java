@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Size;
 
 public class SolicitacaoRequest {
 
+    private Long id;
+
     private Long clienteId;
 
     @NotBlank(message = "A descricao do equipamento e obrigatoria.")
@@ -21,6 +23,7 @@ public class SolicitacaoRequest {
 
     private String descricaoManutencao;
     private String orientacoesCliente;
+    private Long funcionarioDestinoId;
 
     public Long getCategoriaIdResolvido() {
         if (categoriaId != null) {
@@ -30,6 +33,21 @@ public class SolicitacaoRequest {
             return categoria.getId();
         }
         return null;
+    }
+
+    public Long getFuncionarioDestinoIdResolvido() {
+        if (funcionarioDestinoId != null) {
+            return funcionarioDestinoId;
+        }
+        return id;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getClienteId() {
@@ -86,5 +104,13 @@ public class SolicitacaoRequest {
 
     public void setOrientacoesCliente(String orientacoesCliente) {
         this.orientacoesCliente = orientacoesCliente;
+    }
+
+    public Long getFuncionarioDestinoId() {
+        return funcionarioDestinoId;
+    }
+
+    public void setFuncionarioDestinoId(Long funcionarioDestinoId) {
+        this.funcionarioDestinoId = funcionarioDestinoId;
     }
 }

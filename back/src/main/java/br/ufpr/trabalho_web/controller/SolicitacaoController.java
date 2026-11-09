@@ -81,7 +81,7 @@ public class SolicitacaoController {
     @PatchMapping("/{id}/orcar")
     public ResponseEntity<Solicitacao> orcar(
             @PathVariable Long id,
-            @RequestBody BigDecimal valor,
+            @RequestBody(required = false) BigDecimal valor,
             @RequestAttribute("usuario") Funcionario funcionario
     ) {
         return ResponseEntity.ok(solicitacaoService.efetuarOrcamento(id, valor, funcionario));
@@ -98,7 +98,7 @@ public class SolicitacaoController {
     @PatchMapping("/{id}/rejeitar")
     public ResponseEntity<Solicitacao> rejeitar(
             @PathVariable Long id,
-            @RequestBody String motivo,
+            @RequestBody(required = false) String motivo,
             @RequestAttribute("usuario") Cliente cliente
     ) {
         return ResponseEntity.ok(solicitacaoService.rejeitarServico(id, motivo, cliente));
@@ -115,24 +115,22 @@ public class SolicitacaoController {
     @PatchMapping("/{id}/manutencao")
     public ResponseEntity<Solicitacao> manutencao(
             @PathVariable Long id,
-            @RequestBody SolicitacaoRequest request,
+            @RequestBody(required = false) SolicitacaoRequest request,
             @RequestAttribute("usuario") Funcionario funcionario
     ) {
-        return ResponseEntity.ok(solicitacaoService.efetuarManutencao(
-                id,
-                request.getDescricaoManutencao(),
-                request.getOrientacoesCliente(),
-                funcionario
-        ));
+        String descricao = request == null ? null : request.getDescricaoManutencao();
+        String orientacoes = request == null ? null : request.getOrientacoesCliente();
+        return ResponseEntity.ok(solicitacaoService.efetuarManutencao(id, descricao, orientacoes, funcionario));
     }
 
     @PatchMapping("/{id}/redirecionar")
     public ResponseEntity<Solicitacao> redirecionar(
             @PathVariable Long id,
-            @RequestBody Funcionario destino,
+            @RequestBody(required = false) SolicitacaoRequest request,
             @RequestAttribute("usuario") Funcionario origem
     ) {
-        return ResponseEntity.ok(solicitacaoService.redirecionarManutencao(id, origem, destino));
+        Long destinoId = request == null ? null : request.getFuncionarioDestinoIdResolvido();
+        return ResponseEntity.ok(solicitacaoService.redirecionarManutencao(id, origem, destinoId));
     }
 
     @PatchMapping("/{id}/pagar")

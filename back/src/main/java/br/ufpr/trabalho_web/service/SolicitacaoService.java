@@ -161,14 +161,20 @@ public class SolicitacaoService {
 
     @Transactional
     public Solicitacao redirecionarManutencao(Long id, Funcionario origem, Funcionario destinoParam) {
-        if (destinoParam == null || destinoParam.getId() == null) {
+        Long destinoId = destinoParam == null ? null : destinoParam.getId();
+        return redirecionarManutencao(id, origem, destinoId);
+    }
+
+    @Transactional
+    public Solicitacao redirecionarManutencao(Long id, Funcionario origem, Long destinoId) {
+        if (destinoId == null) {
             throw new RegraNegocioException("O funcionario de destino e obrigatorio.");
         }
-        if (origem.getId().equals(destinoParam.getId())) {
+        if (origem != null && origem.getId().equals(destinoId)) {
             throw new RegraNegocioException("Nao e possivel redirecionar para o proprio funcionario.");
         }
 
-        Funcionario destino = funcionarioRepository.findById(destinoParam.getId())
+        Funcionario destino = funcionarioRepository.findById(destinoId)
                 .filter(func -> Boolean.TRUE.equals(func.getStatus()))
                 .orElseThrow(() -> new RegraNegocioException("Funcionario de destino nao encontrado ou inativo."));
 
@@ -341,6 +347,12 @@ public class SolicitacaoService {
             return "";
         }
         String limpo = texto.trim();
+        if (limpo.startsWith("{") && limpo.endsWith("}")) {
+            int idx = limpo.indexOf(':');
+            if (idx > 0) {
+                limpo = limpo.substring(idx + 1, limpo.length() - 1).trim();
+            }
+        }
         if (limpo.length() >= 2 && limpo.startsWith("\"") && limpo.endsWith("\"")) {
             limpo = limpo.substring(1, limpo.length() - 1).trim();
         }
