@@ -55,10 +55,10 @@ public class DadosIniciais implements CommandLineRunner {
     public void run(String... args) {
         Funcionario maria = criarFuncionario("Maria", "maria@manutencao.com", LocalDate.of(1990, 3, 12));
         Funcionario mario = criarFuncionario("Mario", "mario@manutencao.com", LocalDate.of(1988, 7, 25));
-        Cliente joao = criarCliente("Joao", "joao@manutencao.com", "12345678901", "41999990001", "100");
-        Cliente jose = criarCliente("Jose", "jose@manutencao.com", "12345678902", "41999990002", "200");
-        Cliente joana = criarCliente("Joana", "joana@manutencao.com", "12345678903", "41999990003", "300");
-        Cliente joaquina = criarCliente("Joaquina", "joaquina@manutencao.com", "12345678904", "41999990004", "400");
+        Cliente joao = criarCliente("Joao", "joao@manutencao.com", "12345678909", "41999990001", "100");
+        Cliente jose = criarCliente("Jose", "jose@manutencao.com", "11144477735", "41999990002", "200");
+        Cliente joana = criarCliente("Joana", "joana@manutencao.com", "52998224725", "41999990003", "300");
+        Cliente joaquina = criarCliente("Joaquina", "joaquina@manutencao.com", "98765432100", "41999990004", "400");
         criarMassaSolicitacoes(joao, jose, joana, joaquina, maria, mario);
     }
 
@@ -77,6 +77,10 @@ public class DadosIniciais implements CommandLineRunner {
     private Cliente criarCliente(String nome, String email, String cpf, String telefone, String numero) {
         Cliente existente = clienteRepository.findByEmail(email);
         if (existente != null) {
+            if (!cpf.equals(existente.getCpf())) {
+                existente.setCpf(cpf);
+                return clienteRepository.save(existente);
+            }
             return existente;
         }
         Cliente cliente = new Cliente();
@@ -184,7 +188,10 @@ public class DadosIniciais implements CommandLineRunner {
             historico.setDataHora(momento);
             historico.setEstadoAlcancado(passo);
 
-            if (passo == EstadoSolicitacao.ORCADA || passo == EstadoSolicitacao.REDIRECIONADA || passo == EstadoSolicitacao.ARRUMADA || passo == EstadoSolicitacao.FINALIZADA) {
+            if (passo == EstadoSolicitacao.ORCADA
+                    || passo == EstadoSolicitacao.REDIRECIONADA
+                    || passo == EstadoSolicitacao.ARRUMADA
+                    || passo == EstadoSolicitacao.FINALIZADA) {
                 historico.setFuncionarioOrigem(origem);
             }
             if (passo == EstadoSolicitacao.REDIRECIONADA) {
