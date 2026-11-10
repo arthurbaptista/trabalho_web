@@ -81,6 +81,13 @@ Em `front/src/app` as telas ficam separadas por perfil de usuário:
 - `PATCH /api/solicitacoes/{id}/resgatar`: reverte uma rejeição para aprovada.
 - `PATCH /api/solicitacoes/{id}/manutencao`, `/redirecionar`, `/pagar` e `/finalizar`: demais etapas do fluxo.
 - `GET /relatorios/receitas` e `/relatorios/receitas-categoria`: relatórios de receita.
+- `GET /relatorios/receitas/pdf` e `/relatorios/receitas-categoria/pdf`: os mesmos relatórios em PDF (download).
+
+#### Relatórios de receita
+- `GET /relatorios/receitas` aceita os parâmetros opcionais `dataInicio` e `dataFim`; sem eles, considera todo o período.
+- `GET /relatorios/receitas-categoria` não recebe filtro: agrupa a receita de sempre por categoria de equipamento.
+- Os endpoints `/pdf` devolvem `application/pdf` com `Content-Disposition: attachment`, então o navegador baixa o arquivo.
+- No front, as telas `/relatorios/receitas` e `/relatorios/receitas-categoria` consomem esses endpoints por `relatorio.service.ts`.
 
 ### Regras de Negócio Importantes
 - A remoção de funcionários e categorias é lógica (desativação), preservando o histórico.
@@ -102,6 +109,53 @@ Em `front/src/app` as telas ficam separadas por perfil de usuário:
 - Back-end: `./mvnw test` executa os testes unitários e de serviço.
 - Front-end: `ng test` executa os testes com Vitest.
 
+#### Testes do front-end
+Todos os comandos abaixo rodam dentro de `front`:
+
+```bash
+npm test                    # modo interativo (fica observando mudanças)
+npx ng test --watch=false   # roda tudo uma vez e encerra (bom para CI e antes de abrir PR)
+npx ng test --watch=false --include="**/solicitacao.util.spec.ts"   # roda só um arquivo
+```
+
+- Cada tela ou serviço tem seu `*.spec.ts` ao lado do código que testa.
+- Cobertura atual por área:
+  - `auth`: login e autocadastro.
+  - `cliente`: tela inicial, nova solicitação e detalhe da solicitação.
+  - `funcionario`: solicitações (lista e filtros), detalhe, categorias, funcionários e relatórios (telas e serviço).
+  - `shared`: funções utilitárias de solicitação (estados, histórico, formatação de moeda e data).
+- Os testes de componente trocam os serviços por versões falsas (`useValue`), então não dependem do back-end no ar.
+- Antes de abrir um Pull Request, rode `npx ng test --watch=false` e `npx ng build` para garantir que nada quebrou.
+
+#### Testes do back-end
+- Hoje existe apenas `TrabalhoWebApplicationTests`, que confirma que o contexto do Spring sobe (`contextLoads`).
+- As regras de negócio (máquina de estados, remoção lógica, unicidade de e-mail e CPF) ainda não têm teste automatizado no back-end.
+
+
+## Dados Iniciais de Teste
+
+Na primeira execução, `DadosIniciais` e `CategoriaDadosIniciais` (em `back/.../config`) populam o banco para facilitar a demonstração:
+
+| Dado | Quantidade | Detalhes |
+|------|-----------|----------|
+| Funcionários | 2 | Maria e Mario |
+| Clientes | 4 | Joao, Jose, Joana e Joaquina (com CPF, telefone e endereço) |
+| Categorias | 5 | Notebook, Desktop, Impressora, Mouse e Teclado |
+| Solicitações | 20 | 4 por categoria, com datas distintas e histórico de estados |
+
+Distribuição das 20 solicitações por estado:
+
+| Estado | Qtde | Estado | Qtde |
+|--------|------|--------|------|
+| `ABERTA` | 4 | `ARRUMADA` | 2 |
+| `ORCADA` | 3 | `PAGA` | 2 |
+| `APROVADA` | 3 | `FINALIZADA` | 3 |
+| `REJEITADA` | 2 | `REDIRECIONADA` | 1 |
+
+- Todos os estados do fluxo aparecem pelo menos uma vez, então dá para testar cada tela e cada botão sem precisar criar dados à mão.
+- A carga só roda quando a tabela de solicitações está vazia (`solicitacaoRepository.count() > 0` interrompe o processo), então reiniciar a API não duplica nada.
+- Para recarregar os dados do zero, esvazie as tabelas ou recrie o banco `manutencao_db`.
+- A senha de todos os usuários de teste é `1234` (armazenada com hash SHA-256 e SALT, como qualquer outra senha do sistema).
 
 ## Máquina de Estados da Solicitação
 
