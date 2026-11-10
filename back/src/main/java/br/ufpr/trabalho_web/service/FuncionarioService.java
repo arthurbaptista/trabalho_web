@@ -3,11 +3,14 @@ package br.ufpr.trabalho_web.service;
 import br.ufpr.trabalho_web.dto.FuncionarioDTO;
 import br.ufpr.trabalho_web.exception.RegraNegocioException;
 import br.ufpr.trabalho_web.model.Funcionario;
+import br.ufpr.trabalho_web.model.Usuario;
 import br.ufpr.trabalho_web.repository.FuncionarioRepository;
 import br.ufpr.trabalho_web.repository.UsuarioRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -27,13 +30,24 @@ public class FuncionarioService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public FuncionarioDTO cadastrar(FuncionarioDTO dto) {
+    @Transactional
+    public FuncionarioDTO cadastrarFuncionario(FuncionarioDTO dto) {
         String email = normalizarEmail(dto.getEmail());
-        if (usuarioRepository.existsByEmail(email)) {
-            throw new RegraNegocioException("Erro: O e-mail informado ja esta cadastrado.");
-        }
         if (dto.getSenha() == null || dto.getSenha().isBlank()) {
             throw new RegraNegocioException("Erro: A senha e obrigatoria.");
+        }
+        validarDataNascimento(dto.getDataNascimento());
+
+        Usuario existente = usuarioRepository.findByEmail(email);
+        if (existente != null) {
+            if (Boolean.TRUE.equals(existente.getStatus()) || !(existente instanceof Funcionario funcionarioInativo)) {
+                throw new RegraNegocioException("Erro: O e-mail informado ja esta cadastrado.");
+            }
+            funcionarioInativo.setNome(dto.getNome().trim());
+            funcionarioInativo.setDataNascimento(dto.getDataNascimento());
+            funcionarioInativo.setSenha(passwordEncoder.encode(dto.getSenha()));
+            funcionarioInativo.setStatus(true);
+            return converterParaDto(funcionarioRepository.save(funcionarioInativo));
         }
 
         Funcionario funcionario = new Funcionario();
@@ -42,20 +56,26 @@ public class FuncionarioService {
         funcionario.setSenha(passwordEncoder.encode(dto.getSenha()));
         funcionario.setDataNascimento(dto.getDataNascimento());
         funcionario.setStatus(true);
-        return toDto(funcionarioRepository.save(funcionario));
+        return converterParaDto(funcionarioRepository.save(funcionario));
     }
 
-    public List<FuncionarioDTO> listarAtivos() {
-        return funcionarioRepository.findByStatusTrue().stream().map(this::toDto).toList();
+    @Transactional(readOnly = true)
+    public List<FuncionarioDTO> listarFuncionariosAtivos() {
+        return funcionarioRepository.findByStatusTrue().stream()
+                .map(this::converterParaDto)
+                .toList();
     }
 
-    public FuncionarioDTO buscarPorId(Long id) {
-        return toDto(buscarAtivo(id));
+    @Transactional(readOnly = true)
+    public FuncionarioDTO buscarFuncionarioPorId(Long id) {
+        return converterParaDto(buscarFuncionarioAtivoPorId(id));
     }
 
-    public FuncionarioDTO atualizar(Long id, FuncionarioDTO dto) {
-        Funcionario funcionario = buscarAtivo(id);
+    @Transactional
+    public FuncionarioDTO atualizarFuncionario(Long id, FuncionarioDTO dto) {
+        Funcionario funcionario = buscarFuncionarioAtivoPorId(id);
         String email = normalizarEmail(dto.getEmail());
+        validarDataNascimento(dto.getDataNascimento());
 
         if (!email.equals(funcionario.getEmail()) && usuarioRepository.existsByEmail(email)) {
             throw new RegraNegocioException("Erro: O e-mail informado ja esta cadastrado.");
@@ -67,11 +87,12 @@ public class FuncionarioService {
         if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
             funcionario.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
-        return toDto(funcionarioRepository.save(funcionario));
+        return converterParaDto(funcionarioRepository.save(funcionario));
     }
 
-    public void remover(Long id, String emailLogado) {
-        Funcionario funcionario = buscarAtivo(id);
+    @Transactional
+    public void desativarFuncionario(Long id, String emailLogado) {
+        Funcionario funcionario = buscarFuncionarioAtivoPorId(id);
         if (emailLogado != null && emailLogado.equalsIgnoreCase(funcionario.getEmail())) {
             throw new RegraNegocioException("Erro: O funcionario nao pode remover a si mesmo.");
         }
@@ -82,7 +103,13 @@ public class FuncionarioService {
         funcionarioRepository.save(funcionario);
     }
 
-    private Funcionario buscarAtivo(Long id) {
+    private void validarDataNascimento(LocalDate dataNascimento) {
+        if (dataNascimento != null && dataNascimento.isAfter(LocalDate.now())) {
+            throw new RegraNegocioException("Erro: A data de nascimento nao pode ser no futuro.");
+        }
+    }
+
+    private Funcionario buscarFuncionarioAtivoPorId(Long id) {
         Funcionario funcionario = funcionarioRepository.findById(id)
                 .orElseThrow(() -> new RegraNegocioException("Erro: Funcionario nao encontrado."));
         if (!Boolean.TRUE.equals(funcionario.getStatus())) {
@@ -95,7 +122,7 @@ public class FuncionarioService {
         return email == null ? "" : email.trim().toLowerCase();
     }
 
-    private FuncionarioDTO toDto(Funcionario funcionario) {
+    private FuncionarioDTO converterParaDto(Funcionario funcionario) {
         FuncionarioDTO dto = new FuncionarioDTO();
         dto.setId(funcionario.getId());
         dto.setNome(funcionario.getNome());

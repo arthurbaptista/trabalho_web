@@ -19,6 +19,7 @@ public record ClienteCadastroDTO(
         String email,
 
         @NotBlank(message = "O telefone e obrigatorio.")
+        @Pattern(regexp = "\\D*\\d{10,11}\\D*", message = "Informe um telefone com DDD.")
         String telefone,
 
         @NotBlank(message = "O CEP e obrigatorio.")

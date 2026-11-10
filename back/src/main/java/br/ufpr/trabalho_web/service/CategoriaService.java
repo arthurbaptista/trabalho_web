@@ -5,6 +5,7 @@ import br.ufpr.trabalho_web.exception.RegraNegocioException;
 import br.ufpr.trabalho_web.model.Categoria;
 import br.ufpr.trabalho_web.repository.CategoriaRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,7 +19,8 @@ public class CategoriaService {
         this.categoriaRepository = categoriaRepository;
     }
 
-    public Categoria cadastrar(CategoriaRequest request) {
+    @Transactional
+    public Categoria cadastrarCategoria(CategoriaRequest request) {
         String nome = request.nome().trim();
         Optional<Categoria> existente = categoriaRepository.findByNomeIgnoreCase(nome);
 
@@ -38,17 +40,20 @@ public class CategoriaService {
         return categoriaRepository.save(categoria);
     }
 
-    public List<Categoria> listarAtivas() {
+    @Transactional(readOnly = true)
+    public List<Categoria> listarCategoriasAtivas() {
         return categoriaRepository.findByStatusTrue();
     }
 
-    public Categoria buscarPorId(Long id) {
+    @Transactional(readOnly = true)
+    public Categoria buscarCategoriaPorId(Long id) {
         return categoriaRepository.findById(id)
                 .orElseThrow(() -> new RegraNegocioException("Erro: Categoria nao encontrada."));
     }
 
-    public Categoria atualizar(Long id, CategoriaRequest request) {
-        Categoria categoria = buscarPorId(id);
+    @Transactional
+    public Categoria atualizarCategoria(Long id, CategoriaRequest request) {
+        Categoria categoria = buscarCategoriaPorId(id);
         if (!Boolean.TRUE.equals(categoria.getStatus())) {
             throw new RegraNegocioException("Erro: Categoria inativa nao pode ser atualizada.");
         }
@@ -62,8 +67,9 @@ public class CategoriaService {
         return categoriaRepository.save(categoria);
     }
 
-    public void remover(Long id) {
-        Categoria categoria = buscarPorId(id);
+    @Transactional
+    public void desativarCategoria(Long id) {
+        Categoria categoria = buscarCategoriaPorId(id);
         if (!Boolean.TRUE.equals(categoria.getStatus())) {
             throw new RegraNegocioException("Erro: Categoria ja esta desativada.");
         }

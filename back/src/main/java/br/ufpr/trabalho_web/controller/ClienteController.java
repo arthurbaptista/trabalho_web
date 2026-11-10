@@ -22,7 +22,7 @@ public class ClienteController {
     }
 
     @PostMapping("/cadastro")
-    public ResponseEntity<CadastroResponse> cadastrar(@Valid @RequestBody ClienteCadastroDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(clienteService.cadastrar(dto));
+    public ResponseEntity<CadastroResponse> cadastrarCliente(@Valid @RequestBody ClienteCadastroDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(clienteService.cadastrarCliente(dto));
     }
 }

@@ -28,31 +28,31 @@ public class CategoriaController {
     }
 
     @PostMapping
-    public ResponseEntity<Categoria> cadastrar(@Valid @RequestBody CategoriaRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(categoriaService.cadastrar(request));
+    public ResponseEntity<Categoria> cadastrarCategoria(@Valid @RequestBody CategoriaRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(categoriaService.cadastrarCategoria(request));
     }
 
     @GetMapping
-    public ResponseEntity<List<Categoria>> listarAtivas() {
-        return ResponseEntity.ok(categoriaService.listarAtivas());
+    public ResponseEntity<List<Categoria>> listarCategoriasAtivas() {
+        return ResponseEntity.ok(categoriaService.listarCategoriasAtivas());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Categoria> buscarPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(categoriaService.buscarPorId(id));
+    public ResponseEntity<Categoria> buscarCategoriaPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(categoriaService.buscarCategoriaPorId(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Categoria> atualizar(
+    public ResponseEntity<Categoria> atualizarCategoria(
             @PathVariable Long id,
             @Valid @RequestBody CategoriaRequest request
     ) {
-        return ResponseEntity.ok(categoriaService.atualizar(id, request));
+        return ResponseEntity.ok(categoriaService.atualizarCategoria(id, request));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> remover(@PathVariable Long id) {
-        categoriaService.remover(id);
+    public ResponseEntity<Void> desativarCategoria(@PathVariable Long id) {
+        categoriaService.desativarCategoria(id);
         return ResponseEntity.noContent().build();
     }
 }

@@ -28,29 +28,29 @@ public class FuncionarioController {
     }
 
     @PostMapping
-    public ResponseEntity<FuncionarioDTO> cadastrar(@Valid @RequestBody FuncionarioDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(funcionarioService.cadastrar(dto));
+    public ResponseEntity<FuncionarioDTO> cadastrarFuncionario(@Valid @RequestBody FuncionarioDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(funcionarioService.cadastrarFuncionario(dto));
     }
 
     @GetMapping
-    public List<FuncionarioDTO> listar() {
-        return funcionarioService.listarAtivos();
+    public List<FuncionarioDTO> listarFuncionariosAtivos() {
+        return funcionarioService.listarFuncionariosAtivos();
     }
 
     @GetMapping("/{id}")
-    public FuncionarioDTO buscar(@PathVariable Long id) {
-        return funcionarioService.buscarPorId(id);
+    public FuncionarioDTO buscarFuncionarioPorId(@PathVariable Long id) {
+        return funcionarioService.buscarFuncionarioPorId(id);
     }
 
     @PutMapping("/{id}")
-    public FuncionarioDTO atualizar(@PathVariable Long id, @Valid @RequestBody FuncionarioDTO dto) {
-        return funcionarioService.atualizar(id, dto);
+    public FuncionarioDTO atualizarFuncionario(@PathVariable Long id, @Valid @RequestBody FuncionarioDTO dto) {
+        return funcionarioService.atualizarFuncionario(id, dto);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> remover(@PathVariable Long id, Authentication authentication) {
+    public ResponseEntity<Void> desativarFuncionario(@PathVariable Long id, Authentication authentication) {
         String emailLogado = authentication == null ? null : authentication.getName();
-        funcionarioService.remover(id, emailLogado);
+        funcionarioService.desativarFuncionario(id, emailLogado);
         return ResponseEntity.noContent().build();
     }
 }
