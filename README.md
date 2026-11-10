@@ -1,6 +1,20 @@
-# Trabalho Final - TADS SYSTEM — Gerenciamento de Manutenção de Equipamentos
+# TADS SYSTEM
 
-Este repositório contém o código e os materiais referentes ao **Trabalho Final** da disciplina Desenvolvimento Web II — Universidade Federal do Paraná (UFPR).
+**Gerenciamento de Manutenção de Equipamentos**
+
+Trabalho final da disciplina Desenvolvimento Web II — Universidade Federal do Paraná (UFPR).
+
+![Angular](https://img.shields.io/badge/Angular-22-dd0031)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1-6db33f)
+![Java](https://img.shields.io/badge/Java-21-orange)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-banco-336791)
+![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-7952b3)
+
+## Sobre o projeto
+
+O TADS SYSTEM controla as solicitações de manutenção de uma assistência técnica. O cliente se cadastra, abre uma solicitação descrevendo o equipamento e o defeito, e acompanha tudo até o pagamento. O funcionário recebe a solicitação, faz o orçamento, executa a manutenção e finaliza o atendimento.
+
+Existem dois perfis de acesso, **Cliente** e **Funcionário**, cada um com as suas telas. O funcionário também gerencia categorias de equipamento, outros funcionários e consulta os relatórios de receita.
 
 ## Equipe
 
@@ -13,410 +27,151 @@ Este repositório contém o código e os materiais referentes ao **Trabalho Fina
 | Murilo Santana Cardoso | GRR20234187 |
 | Nathaly Martins da Cunha | GRR20223387 |
 
-## Descrição do Projeto
+## Usuários de teste
 
-O **Sistema de Controle de Manutenção de Equipamentos** tem como objetivo gerenciar as solicitações de manutenção de equipamentos, permitindo que clientes registrem manutenções e que funcionários da empresa gerenciem essas solicitações. O sistema possui funcionalidades como autocadastro de clientes, login de usuários, registro de solicitações, aprovação de orçamentos, e gestão do estado das solicitações, com diferentes perfis de acesso (Cliente e Funcionário). O sistema também oferece relatórios financeiros e de categorias de equipamentos.
+A senha de todos é `1234`.
 
-## Instruções de Execução
+| Perfil | Login |
+|--------|-------|
+| Funcionário | maria@manutencao.com |
+| Funcionário | mario@manutencao.com |
+| Cliente | joao@manutencao.com |
+| Cliente | jose@manutencao.com |
+| Cliente | joana@manutencao.com |
+| Cliente | joaquina@manutencao.com |
 
-**Para Logar Como Funcionário** 
-- Login: maria@manutencao.com
-- Senha: 1234
+## Fluxo de uma solicitação
 
-- Login: mario@manutencao.com
-- Senha: 1234
+Toda solicitação nasce como `ABERTA` e caminha por estados até ser `FINALIZADA`. Cliente e funcionário se alternam: cada um só consegue agir quando a solicitação está no estado certo.
 
-**Para Logar Como Cliente** 
-- Login: joao@manutencao.com
-- Senha: 1234
-- Login: jose@manutencao.com
-- Senha: 1234
-- Login: joana@manutencao.com
-- Senha: 1234
-- Login: joaquina@manutencao.com
-- Senha: 1234
+### Passo a passo
 
-## Tecnologias Utilizadas
+1. **Abertura.** O cliente informa o equipamento, a categoria e o defeito. A solicitação fica `ABERTA`.
+2. **Orçamento.** Um funcionário analisa e registra o valor. A solicitação passa para `ORCADA`.
+3. **Decisão do cliente.** O cliente aprova (`APROVADA`) ou rejeita (`REJEITADA`). Para rejeitar, é obrigatório informar o motivo.
+4. **Resgate.** Se o cliente rejeitou e mudou de ideia, ele pode resgatar a solicitação, que volta para `APROVADA`.
+5. **Manutenção.** O funcionário executa o serviço, descreve o que foi feito e deixa orientações ao cliente. A solicitação fica `ARRUMADA`.
+6. **Redirecionamento.** Em vez de fazer a manutenção, o funcionário pode passar a solicitação para outro funcionário (`REDIRECIONADA`). Quem recebe pode fazer a manutenção ou redirecionar outra vez.
+7. **Pagamento.** Com o equipamento arrumado, o cliente paga. A solicitação fica `PAGA`.
+8. **Finalização.** O funcionário encerra o atendimento e a solicitação fica `FINALIZADA`.
 
-- Angular 22.0.0
-- Bootstrap v5.3.8
-- Java 21.0.12
-- Nodejs v22.22.3
+### Resumo das transições
 
-## Arquitetura e Detalhes Técnicos
+| Ação | Quem faz | Estado exigido | Estado resultante |
+|------|----------|----------------|-------------------|
+| Abrir solicitação | Cliente | — | `ABERTA` |
+| Orçar | Funcionário | `ABERTA` | `ORCADA` |
+| Aprovar | Cliente | `ORCADA` | `APROVADA` |
+| Rejeitar | Cliente | `ORCADA` | `REJEITADA` |
+| Resgatar | Cliente | `REJEITADA` | `APROVADA` |
+| Efetuar manutenção | Funcionário | `APROVADA` ou `REDIRECIONADA` | `ARRUMADA` |
+| Redirecionar | Funcionário | `APROVADA` ou `REDIRECIONADA` | `REDIRECIONADA` |
+| Pagar | Cliente | `ARRUMADA` | `PAGA` |
+| Finalizar | Funcionário | `PAGA` | `FINALIZADA` |
 
-### Visão Geral
-O projeto é dividido em duas aplicações independentes na mesma raiz:
-- `front/`: aplicação Angular (standalone components) com Bootstrap.
-- `back/`: API REST em Spring Boot 4.1 (Java 21) com Maven Wrapper.
-- O front consome a API por HTTP e a autenticação é feita via token JWT.
+Cada mudança de estado gera um registro no histórico da solicitação, com data, hora e o funcionário envolvido. Uma ação fora do estado correto é recusada pela API com a mensagem "Ação não permitida para o estado atual da solicitação."
 
-### Estrutura do Back-end
-O pacote base é `br.ufpr.trabalho_web`, organizado em camadas:
-- `controller`: endpoints REST (Auth, Cliente, Funcionário, Categoria, Solicitação, Orçamento e Relatório).
-- `service`: regras de negócio, como transições de estado e validações.
-- `repository`: acesso a dados com Spring Data JPA.
-- `model`: entidades JPA (Usuário, Cliente, Funcionário, Endereço, Categoria, Solicitação e Histórico).
-- `dto`: objetos de entrada e saída da API.
-- `security`: filtro JWT, utilitário de token e encoder de senha SHA-256 com SALT.
-- `exception`: tratamento centralizado de erros (`ApiExceptionHandler`).
-- `config`: configuração do Spring Security e carga dos dados iniciais.
+## Funcionalidades
 
-### Estrutura do Front-end
-Em `front/src/app` as telas ficam separadas por perfil de usuário:
-- `auth`: login e autocadastro (telas públicas).
-- `cliente`: tela inicial, nova solicitação e detalhe da solicitação.
-- `funcionario`: solicitações, detalhe, categorias, funcionários, relatórios e sidebar.
-- `shared`: logo e código de solicitação reaproveitado por cliente e funcionário.
-- `core`: serviço de autenticação, guards (auth, cliente, funcionário) e utilitários da API.
-- As rotas ficam em `app.routes.ts` e a configuração global em `app.config.ts`.
+**Públicas**
+- Login com e-mail e senha.
+- Autocadastro de cliente, com senha gerada pelo sistema e enviada por e-mail.
 
-### Principais Endpoints da API
-- `POST /auth/login`: autentica o usuário e retorna o token e o perfil.
-- `POST /clientes/cadastro`: autocadastro de cliente.
-- `GET/PUT/DELETE /categorias` e `/funcionarios`: CRUDs administrativos.
-- `POST /api/solicitacoes/cliente`: abertura de solicitação pelo cliente.
-- `PATCH /api/solicitacoes/{id}/orcar`: registra o orçamento.
-- `PATCH /api/solicitacoes/{id}/aprovar` e `/rejeitar`: decisão do cliente sobre o orçamento.
-- `PATCH /api/solicitacoes/{id}/resgatar`: reverte uma rejeição para aprovada.
-- `PATCH /api/solicitacoes/{id}/manutencao`, `/redirecionar`, `/pagar` e `/finalizar`: demais etapas do fluxo.
-- `GET /relatorios/receitas` e `/relatorios/receitas-categoria`: relatórios de receita.
-- `GET /relatorios/receitas/pdf` e `/relatorios/receitas-categoria/pdf`: os mesmos relatórios em PDF (download).
+**Cliente**
+- Lista das próprias solicitações.
+- Abertura de nova solicitação.
+- Aprovação, rejeição e resgate de orçamento.
+- Pagamento do serviço.
+- Consulta ao histórico de cada solicitação.
 
-#### Relatórios de receita
-- `GET /relatorios/receitas` aceita os parâmetros opcionais `dataInicio` e `dataFim`; sem eles, considera todo o período.
-- `GET /relatorios/receitas-categoria` não recebe filtro: agrupa a receita de sempre por categoria de equipamento.
-- Os endpoints `/pdf` devolvem `application/pdf` com `Content-Disposition: attachment`, então o navegador baixa o arquivo.
-- No front, as telas `/relatorios/receitas` e `/relatorios/receitas-categoria` consomem esses endpoints por `relatorio.service.ts`.
+**Funcionário**
+- Lista de solicitações com filtros.
+- Orçamento, manutenção, redirecionamento e finalização.
+- Cadastro de categorias de equipamento.
+- Cadastro de funcionários.
+- Relatório de receitas por período e por categoria, com download em PDF.
 
-### Regras de Negócio Importantes
-- A remoção de funcionários e categorias é lógica (desativação), preservando o histórico.
-- Um funcionário não pode remover a si mesmo.
-- O último funcionário ativo do sistema não pode ser removido.
-- Não é permitido cadastrar CPF ou e-mail duplicado (`RecursoDuplicadoException`).
-- Violações de regra retornam erro tratado por `RegraNegocioException`.
-- Toda mudança de estado de uma solicitação gera um registro no histórico.
+## Tecnologias
 
-### Como Executar
-1. Crie o banco PostgreSQL `manutencao_db` e ajuste usuário e senha em `back/src/main/resources/application.properties`.
-2. No diretório `back`, execute `./mvnw spring-boot:run` (a API sobe na porta 8080).
-3. Em outro terminal, entre em `front`, rode `npm install` e depois `ng serve`.
-4. Acesse `http://localhost:4200/login` e use as credenciais de teste listadas acima.
-5. As tabelas são criadas automaticamente (`ddl-auto=update`) e os dados iniciais são carregados na primeira execução.
-6. Para enviar e-mails reais com a senha gerada, descomente e configure as propriedades `spring.mail.*`; sem isso a senha aparece no log do back-end.
+| Camada | Tecnologia |
+|--------|------------|
+| Front-end | Angular 22 (standalone components) e Bootstrap 5.3.8 |
+| Back-end | Spring Boot 4.1, Java 21, Spring Data JPA |
+| Banco de dados | PostgreSQL |
+| Autenticação | JWT, senhas com SHA-256 + SALT |
+| Testes | Vitest (front) e JUnit (back) |
+| Ambiente | Node.js 22 e Maven Wrapper |
 
-### Testes
-- Back-end: `./mvnw test` executa os testes unitários e de serviço.
-- Front-end: `ng test` executa os testes com Vitest.
+## Como executar
 
-#### Testes do front-end
-Todos os comandos abaixo rodam dentro de `front`:
+**Pré-requisitos:** JDK 21, Node.js 22 e PostgreSQL.
 
-```bash
-npm test                    # modo interativo (fica observando mudanças)
-npx ng test --watch=false   # roda tudo uma vez e encerra (bom para CI e antes de abrir PR)
-npx ng test --watch=false --include="**/solicitacao.util.spec.ts"   # roda só um arquivo
-```
+1. Crie o banco `manutencao_db` no PostgreSQL.
+2. Ajuste usuário e senha do banco em `back/src/main/resources/application.properties`.
+3. Suba a API:
 
-- Cada tela ou serviço tem seu `*.spec.ts` ao lado do código que testa.
-- Cobertura atual por área:
-  - `auth`: login e autocadastro.
-  - `cliente`: tela inicial, nova solicitação e detalhe da solicitação.
-  - `funcionario`: solicitações (lista e filtros), detalhe, categorias, funcionários e relatórios (telas e serviço).
-  - `shared`: funções utilitárias de solicitação (estados, histórico, formatação de moeda e data).
-- Os testes de componente trocam os serviços por versões falsas (`useValue`), então não dependem do back-end no ar.
-- Antes de abrir um Pull Request, rode `npx ng test --watch=false` e `npx ng build` para garantir que nada quebrou.
+   ```bash
+   cd back
+   ./mvnw spring-boot:run      # Windows: mvnw.cmd spring-boot:run
+   ```
 
-#### Testes do back-end
-- Hoje existe apenas `TrabalhoWebApplicationTests`, que confirma que o contexto do Spring sobe (`contextLoads`).
-- As regras de negócio (máquina de estados, remoção lógica, unicidade de e-mail e CPF) ainda não têm teste automatizado no back-end.
+4. Em outro terminal, suba o front:
 
+   ```bash
+   cd front
+   npm install
+   npm start                   # ou: npx ng serve
+   ```
 
-## Dados Iniciais de Teste
+5. Acesse `http://localhost:4200/login` e entre com um dos usuários de teste.
 
-Na primeira execução, `DadosIniciais` e `CategoriaDadosIniciais` (em `back/.../config`) populam o banco para facilitar a demonstração:
+A API roda em `http://localhost:8080`. As tabelas são criadas sozinhas na primeira execução, junto com os dados de teste.
+
+## Dados de teste
+
+Na primeira execução o sistema já vem populado:
 
 | Dado | Quantidade | Detalhes |
 |------|-----------|----------|
 | Funcionários | 2 | Maria e Mario |
-| Clientes | 4 | Joao, Jose, Joana e Joaquina (com CPF, telefone e endereço) |
+| Clientes | 4 | Joao, Jose, Joana e Joaquina |
 | Categorias | 5 | Notebook, Desktop, Impressora, Mouse e Teclado |
-| Solicitações | 20 | 4 por categoria, com datas distintas e histórico de estados |
+| Solicitações | 20 | 4 por categoria, espalhadas por todos os estados |
 
-Distribuição das 20 solicitações por estado:
+Como há solicitações em todos os estados do fluxo, dá para testar cada tela e cada botão sem criar nada à mão. Para recarregar os dados do zero, recrie o banco `manutencao_db`.
 
-| Estado | Qtde | Estado | Qtde |
-|--------|------|--------|------|
-| `ABERTA` | 4 | `ARRUMADA` | 2 |
-| `ORCADA` | 3 | `PAGA` | 2 |
-| `APROVADA` | 3 | `FINALIZADA` | 3 |
-| `REJEITADA` | 2 | `REDIRECIONADA` | 1 |
-
-- Todos os estados do fluxo aparecem pelo menos uma vez, então dá para testar cada tela e cada botão sem precisar criar dados à mão.
-- A carga só roda quando a tabela de solicitações está vazia (`solicitacaoRepository.count() > 0` interrompe o processo), então reiniciar a API não duplica nada.
-- Para recarregar os dados do zero, esvazie as tabelas ou recrie o banco `manutencao_db`.
-- A senha de todos os usuários de teste é `1234` (armazenada com hash SHA-256 e SALT, como qualquer outra senha do sistema).
-
-## Máquina de Estados da Solicitação
-
-Todas as transições são validadas em `SolicitacaoService`; uma ação fora do estado correto lança `RegraNegocioException`
-("Ação não permitida para o estado atual da solicitação.").
-
-| Ação | Quem executa | Estado exigido | Estado resultante |
-|------|--------------|----------------|-------------------|
-| Abrir solicitação | Cliente | — | `ABERTA` |
-| Orçar (`/orcar`) | Funcionário | `ABERTA` | `ORCADA` |
-| Aprovar (`/aprovar`) | Cliente | `ORCADA` | `APROVADA` |
-| Rejeitar (`/rejeitar`) | Cliente | `ORCADA` | `REJEITADA` (exige motivo) |
-| Resgatar (`/resgatar`) | Cliente | `REJEITADA` | `APROVADA` |
-| Efetuar manutenção (`/manutencao`) | Funcionário | `APROVADA` ou `REDIRECIONADA` | `ARRUMADA` |
-| Redirecionar (`/redirecionar`) | Funcionário | `APROVADA` ou `REDIRECIONADA` | `REDIRECIONADA` |
-| Pagar (`/pagar`) | Cliente | `ARRUMADA` | `PAGA` |
-| Finalizar (`/finalizar`) | Funcionário | `PAGA` | `FINALIZADA` |
-
-Fluxo principal: `ABERTA → ORCADA → APROVADA → ARRUMADA → PAGA → FINALIZADA`.
-Desvios: `ORCADA → REJEITADA → APROVADA` (resgate) e `APROVADA → REDIRECIONADA → ARRUMADA`.
-
-## Modelo de Dados
-
-- `usuario`: tabela única (`SINGLE_TABLE`) que armazena Cliente e Funcionário, diferenciados pelo perfil.
-- `usuario.email` é único; `cliente.cpf` também é único.
-- `solicitacao`: guarda descrição do equipamento (máx. 30 caracteres), descrição do defeito, estado atual,
-  valor do orçamento, motivo de rejeição, descrição da manutenção e orientações ao cliente.
-- `solicitacao` se relaciona com o cliente dono, a categoria do equipamento e o funcionário responsável.
-- `historico_solicitacao`: uma linha por mudança de estado, com data/hora, estado alcançado, funcionário
-  de origem e, no caso de redirecionamento, funcionário de destino.
-- `categoria` e `funcionario` usam `StatusBase` para controlar o campo de ativo/inativo (remoção lógica).
-- As tabelas são geradas pelo Hibernate (`ddl-auto=update`), então não há scripts SQL de migração.
-
-## Autenticação e Segurança
-
-- O login (`POST /auth/login`) devolve um token JWT e o perfil do usuário.
-- O `JwtAuthenticationFilter` lê o token do cabeçalho `Authorization: Bearer <token>` e disponibiliza o usuário
-  autenticado para os controllers (atributo de requisição `usuario`).
-- No front, os guards `auth`, `cliente` e `funcionario` (em `front/src/app/core`) bloqueiam rotas por perfil.
-- Senhas são salvas com SHA-256 + SALT (`Sha256SaltPasswordEncoder`), nunca em texto puro.
-- O CORS permite apenas a origem `http://localhost:4200`.
-- Atenção: o `SecurityConfig` atual libera todas as rotas (`anyRequest().permitAll()`); a restrição por perfil é
-  feita pelos guards do front e pelas validações dos serviços. Para um ambiente real, as rotas deveriam
-  exigir autenticação e papel (`hasRole`) também no back-end.
-
-## Configuração do Ambiente
-
-| Item | Valor padrão |
-|------|--------------|
-| Porta da API | `8080` |
-| Porta do front | `4200` |
-| Banco de dados | PostgreSQL em `localhost:5432`, banco `manutencao_db` |
-| Usuário do banco | `postgres` (a senha fica em `application.properties`) |
-| Fuso horário | `America/Sao_Paulo` |
-
-- Altere `spring.datasource.username` e `spring.datasource.password` conforme o seu PostgreSQL local.
-- Não publique senhas reais no repositório; use variáveis de ambiente em um cenário de produção.
-- Pré-requisitos: JDK 21, Node.js 22 e PostgreSQL instalados.
-- O Maven Wrapper (`mvnw` / `mvnw.cmd`) dispensa instalar o Maven.
-- O log SQL está ativo (`show-sql=true`), o que ajuda a depurar mas deixa o terminal verboso.
-
-## Estrutura de Pastas
+## Estrutura do projeto
 
 ```text
 trabalho_web/
 ├── back/                      # API Spring Boot
-│   ├── pom.xml
 │   └── src/main/java/br/ufpr/trabalho_web/
-│       ├── config/            # SecurityConfig e dados iniciais
+│       ├── config/            # Segurança e dados iniciais
 │       ├── controller/        # Endpoints REST
 │       ├── dto/               # Requests e responses
 │       ├── exception/         # Tratamento de erros
 │       ├── model/             # Entidades JPA
-│       ├── repository/        # Spring Data JPA
+│       ├── repository/        # Acesso a dados
 │       ├── security/          # JWT e encoder de senha
 │       └── service/           # Regras de negócio
 └── front/                     # Aplicação Angular
     └── src/app/
         ├── auth/              # Login e autocadastro
-        ├── cliente/           # Tela inicial, nova solicitação e detalhe
-        ├── funcionario/       # Solicitações, categorias, funcionários e relatórios
-        ├── shared/            # Logo e código de solicitação compartilhado
-        └── core/              # Autenticação, guards e utilitários da API
+        ├── cliente/           # Telas do cliente
+        ├── funcionario/       # Telas do funcionário
+        ├── shared/            # Componentes compartilhados
+        └── core/              # Autenticação, guards e utilitários
 ```
 
-## Problemas Comuns
-
-- **Erro de conexão com o banco ao subir a API:** confirme que o PostgreSQL está rodando e que o banco
-  `manutencao_db` existe (ele não é criado automaticamente, apenas as tabelas).
-- **Erro de CORS no navegador:** o front precisa rodar em `http://localhost:4200`, a única origem liberada.
-- **Senha do cadastro não chegou por e-mail:** sem `spring.mail.*` configurado, a senha é impressa no log da API.
-- **Dados iniciais duplicados ou ausentes:** eles são carregados na primeira execução; para recarregar,
-  esvazie as tabelas ou recrie o banco.
-- **`ng` não encontrado:** use `npx ng serve` ou `npm start` dentro de `front`.
-
-///////////////////////////////////////////
-
-
-
-
-
-
-# TADS SYSTEM — Gerenciamento de Manutenção de Equipamentos
-
-Sistema web para controle de solicitações de manutenção de equipamentos,
-desenvolvido como trabalho da disciplina de Desenvolvimento Web II (UFPR).
-
-## Sumário
-
-- [Sobre o projeto](#sobre-o-projeto)
-- [Tecnologias](#tecnologias)
-- [Estrutura do repositório](#estrutura-do-repositório)
-- [Pré-requisitos](#pré-requisitos)
-- [Como rodar o frontend](#como-rodar-o-frontend)
-- [Como rodar o backend](#como-rodar-o-backend)
-- [Funcionalidades](#funcionalidades)
-- [Padrão de branches](#padrão-de-branches)
-- [Padrão de commits](#padrão-de-commits)
-- [Equipe](#equipe)
-
-## Sobre o projeto
-
-O TADS SYSTEM permite que clientes abram solicitações de manutenção e que
-funcionários acompanhem, orcem e finalizem essas solicitações. Cada
-solicitação passa por um fluxo de estados (aberta, orçada, aprovada,
-rejeitada, em execução, finalizada, paga), com histórico de alterações.
-
-## Tecnologias
-
-| Camada    | Tecnologia                                  |
-|-----------|---------------------------------------------|
-| Frontend  | Angular (standalone components, sem NgModule) |
-| Backend   | Spring Boot                                 |
-| Banco     | <PostgreSQL / H2 / MySQL>                   |
-| Fonte     | Inter (Google Fonts)                        |
-| Editor    | VS Code                                     |
-
-## Estrutura do repositório
-# TADS SYSTEM — Gerenciamento de Manutenção de Equipamentos
-
-Sistema web para controle de solicitações de manutenção de equipamentos,
-desenvolvido como trabalho da disciplina de Desenvolvimento Web II (UFPR).
-
-## Sumário
-
-- [Sobre o projeto](#sobre-o-projeto)
-- [Tecnologias](#tecnologias)
-- [Estrutura do repositório](#estrutura-do-repositório)
-- [Pré-requisitos](#pré-requisitos)
-- [Como rodar o frontend](#como-rodar-o-frontend)
-- [Como rodar o backend](#como-rodar-o-backend)
-- [Funcionalidades](#funcionalidades)
-- [Padrão de branches](#padrão-de-branches)
-- [Padrão de commits](#padrão-de-commits)
-- [Equipe](#equipe)
-
-## Sobre o projeto
-
-O TADS SYSTEM permite que clientes abram solicitações de manutenção e que
-funcionários acompanhem, orcem e finalizem essas solicitações. Cada
-solicitação passa por um fluxo de estados (aberta, orçada, aprovada,
-rejeitada, em execução, finalizada, paga), com histórico de alterações.
-
-## Tecnologias
-
-| Camada    | Tecnologia                                  |
-|-----------|---------------------------------------------|
-| Frontend  | Angular (standalone components, sem NgModule) |
-| Backend   | Spring Boot                                 |
-| Banco     | <PostgreSQL / H2 / MySQL>                   |
-| Fonte     | Inter (Google Fonts)                        |
-| Editor    | VS Code                                     |
-
-## Estrutura do repositório
-
-```text
-trabalho_web/
-├── back/    # API REST (Spring Boot, Java 21, Maven)
-└── front/   # Aplicação web (Angular, Bootstrap)
-```
-
-## Pré-requisitos
-
-- JDK 21
-- Node.js 22 e npm
-- PostgreSQL com o banco `manutencao_db` criado
-- Git
-
-## Como rodar o frontend
-
-```bash
-cd front
-npm install
-npm start        # ou: npx ng serve
-```
-
-- A aplicação fica disponível em `http://localhost:4200`.
-- A rota inicial redireciona para `/login`.
-- Testes: `npm test` (Vitest).
-
-## Como rodar o backend
-
-```bash
-cd back
-./mvnw spring-boot:run     # Windows: mvnw.cmd spring-boot:run
-```
-
-- A API sobe em `http://localhost:8080`.
-- Ajuste usuário e senha do banco em `back/src/main/resources/application.properties`.
-- Testes: `./mvnw test`.
-
-## Funcionalidades
-
-### Públicas
-- Login com e-mail e senha (`/login`).
-- Autocadastro de cliente (`/cadastro`), com senha gerada pelo sistema e enviada por e-mail.
-
-### Perfil Cliente
-- Tela inicial com a lista das próprias solicitações (`/cliente`).
-- Abertura de solicitação de manutenção informando equipamento, categoria e defeito.
-- Aprovação ou rejeição do orçamento (a rejeição exige motivo).
-- Resgate de uma solicitação rejeitada.
-- Pagamento do serviço após a manutenção.
-- Consulta ao histórico de cada solicitação.
-
-### Perfil Funcionário
-- Lista de solicitações com filtros (`/funcionario`).
-- Orçamento, manutenção, redirecionamento e finalização de solicitações.
-- CRUD de categorias de equipamento (`/categorias`).
-- CRUD de funcionários (`/funcionarios`).
-- Relatório de receitas por período (`/relatorios/receitas`).
-- Relatório de receitas por categoria (`/relatorios/receitas-categoria`).
-
-## Rotas do Front-end
+## Rotas do front-end
 
 | Rota | Acesso | Tela |
 |------|--------|------|
 | `/login` | Público | Login |
 | `/cadastro` | Público | Autocadastro de cliente |
-| `/home` | Autenticado | Redireciona conforme o perfil |
 | `/cliente` | Cliente | Tela inicial do cliente |
 | `/funcionario` | Funcionário | Gestão de solicitações |
 | `/categorias` | Funcionário | Categorias |
 | `/funcionarios` | Funcionário | Funcionários |
 | `/relatorios/receitas` | Funcionário | Relatório de receitas |
 | `/relatorios/receitas-categoria` | Funcionário | Receitas por categoria |
-
-## Padrão de branches
-
-- `main`: versão estável do projeto; recebe alterações somente via Pull Request.
-- `feature/<nome>`: novas funcionalidades (ex.: `feature/categoria-management`).
-- `fix/<nome>`: correções de bugs.
-- `refactor/<nome>`: mudanças de código ou layout sem alterar o comportamento.
-
-## Padrão de commits
-
-- Mensagens curtas, no imperativo e descrevendo o que mudou.
-- Prefixos opcionais: `feat:`, `fix:`, `refactor:`, `docs:`.
-- Exemplos: `fix: ajusta tela de login`, `refactor: atualiza layout das telas de funcionarios`.
-- Cada Pull Request deve ser revisado por pelo menos um integrante antes do merge.
-
-## Disciplina
-
-- Desenvolvimento Web II — Universidade Federal do Paraná (UFPR).
